@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Hero Section -->
+    <div class="row justify-content-center text-center mb-5">
+        <div class="col-lg-8">
+            <div class="mb-4">
+                <i data-feather="shield" class="hero-icon text-primary"></i>
+            </div>
+            <h1 class="display-4 fw-bold mb-3">TARA</h1>
+            <p class="lead mb-4">Threat Assessment and Remediation Analysis</p>
+            <p class="fs-5 text-muted mb-4">
+                Advanced cybersecurity threat analysis platform that processes threat models, 
+                system architectures, and cross-mapping data to generate comprehensive TARA documents 
+                with MITRE ATT&CK framework integration.
+            </p>
+            <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                <a href="{{ url_for('upload_page') }}" class="btn btn-primary btn-lg px-4">
+                    <i data-feather="upload" class="me-2"></i>
+                    Start New Analysis
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3">
+                        <i data-feather="file-text" class="feature-icon text-info"></i>
+                    </div>
+                    <h5 class="card-title">Threat Model Processing</h5>
+                    <p class="card-text text-muted">
+                        Parse and analyze JSON/YAML threat models to extract threats, assets, 
+                        risks, and mitigations with comprehensive data normalization.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3">
+                        <i data-feather="layers" class="feature-icon text-success"></i>
+                    </div>
+                    <h5 class="card-title">Architecture Analysis</h5>
+                    <p class="card-text text-muted">
+                        Analyze system block diagrams to identify components, data flows, 
+                        and security boundaries from SVG and image formats.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3">
+                        <i data-feather="target" class="feature-icon text-warning"></i>
+                    </div>
+                    <h5 class="card-title">MITRE Integration</h5>
+                    <p class="card-text text-muted">
+                        Map threats to MITRE ATT&CK techniques and generate defense strategies 
+                        using MITRE ENGAGE framework integration.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Process Flow -->
+    <div class="row justify-content-center mb-5">
+        <div class="col-lg-10">
+            <h2 class="text-center mb-4">Analysis Process</h2>
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <div class="process-step text-center">
+                        <div class="process-number">1</div>
+                        <h6 class="mt-2">Upload Files</h6>
+                        <small class="text-muted">Threat model, block diagram, cross-mapping data</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="process-step text-center">
+                        <div class="process-number">2</div>
+                        <h6 class="mt-2">Parse & Analyze</h6>
+                        <small class="text-muted">Extract threats, risks, and system components</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="process-step text-center">
+                        <div class="process-number">3</div>
+                        <h6 class="mt-2">MITRE Mapping</h6>
+                        <small class="text-muted">Map to ATT&CK techniques and tactics</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="process-step text-center">
+                        <div class="process-number">4</div>
+                        <h6 class="mt-2">Generate Report</h6>
+                        <small class="text-muted">Comprehensive TARA document with recommendations</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Security Notice -->
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="alert alert-info border-0" role="alert">
+                <div class="d-flex align-items-center">
+                    <i data-feather="shield-check" class="me-3 text-info"></i>
+                    <div>
+                        <h6 class="alert-heading mb-1">Security Notice</h6>
+                        <p class="mb-0">
+                            This application is designed for internal cybersecurity analysis. All uploaded files 
+                            are processed securely and temporarily stored. Reports contain sensitive security 
+                            information and should be handled according to your organization's data classification policies.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
