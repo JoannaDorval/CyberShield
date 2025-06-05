@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .component { fill: #e3f2fd; stroke: #1976d2; stroke-width: 2; }
+      .database { fill: #f3e5f5; stroke: #7b1fa2; stroke-width: 2; }
+      .network { fill: #e8f5e8; stroke: #388e3c; stroke-width: 2; }
+      .security { fill: #fff3e0; stroke: #f57c00; stroke-width: 2; }
+      .text { font-family: Arial, sans-serif; font-size: 12px; text-anchor: middle; }
+      .connection { stroke: #424242; stroke-width: 2; fill: none; }
+    </style>
+  </defs>
+
+  <!-- Title -->
+  <text x="400" y="30" class="text" style="font-size: 18px; font-weight: bold;">Web Application Architecture</text>
+
+  <!-- Internet Cloud -->
+  <ellipse cx="400" cy="80" rx="80" ry="30" class="network"/>
+  <text x="400" y="85" class="text">Internet</text>
+
+  <!-- Load Balancer -->
+  <rect x="350" y="130" width="100" height="40" class="security"/>
+  <text x="400" y="155" class="text">Load Balancer</text>
+
+  <!-- Web Servers -->
+  <rect x="250" y="210" width="80" height="40" class="component"/>
+  <text x="290" y="235" class="text">Web Server 1</text>
+  
+  <rect x="470" y="210" width="80" height="40" class="component"/>
+  <text x="510" y="235" class="text">Web Server 2</text>
+
+  <!-- Application Servers -->
+  <rect x="150" y="290" width="100" height="40" class="component"/>
+  <text x="200" y="315" class="text">App Server 1</text>
+  
+  <rect x="370" y="290" width="100" height="40" class="component"/>
+  <text x="420" y="315" class="text">App Server 2</text>
+  
+  <rect x="590" y="290" width="100" height="40" class="component"/>
+  <text x="640" y="315" class="text">App Server 3</text>
+
+  <!-- API Gateway -->
+  <rect x="350" y="370" width="100" height="40" class="security"/>
+  <text x="400" y="395" class="text">API Gateway</text>
+
+  <!-- Database Cluster -->
+  <rect x="150" y="450" width="100" height="50" class="database"/>
+  <text x="200" y="470" class="text">Primary DB</text>
+  <text x="200" y="485" class="text">(Customer Data)</text>
+  
+  <rect x="300" y="450" width="100" height="50" class="database"/>
+  <text x="350" y="470" class="text">Replica DB</text>
+  <text x="350" y="485" class="text">(Read Only)</text>
+
+  <!-- Authentication Service -->
+  <rect x="450" y="450" width="100" height="50" class="security"/>
+  <text x="500" y="470" class="text">Auth Service</text>
+  <text x="500" y="485" class="text">(Identity Mgmt)</text>
+
+  <!-- Cache Layer -->
+  <rect x="600" y="450" width="100" height="50" class="component"/>
+  <text x="650" y="470" class="text">Redis Cache</text>
+  <text x="650" y="485" class="text">(Session Store)</text>
+
+  <!-- Security Boundary -->
+  <rect x="120" y="270" width="600" height="250" fill="none" stroke="#f44336" stroke-width: 3 stroke-dasharray="5,5"/>
+  <text x="130" y="285" style="font-size: 10px; fill: #f44336;">Internal Network Security Zone</text>
+
+  <!-- Connections -->
+  <!-- Internet to Load Balancer -->
+  <line x1="400" y1="110" x2="400" y2="130" class="connection"/>
+  <polygon points="395,125 400,135 405,125" fill="#424242"/>
+
+  <!-- Load Balancer to Web Servers -->
+  <line x1="380" y1="170" x2="300" y2="210" class="connection"/>
+  <polygon points="305,205 295,215 310,210" fill="#424242"/>
+  
+  <line x1="420" y1="170" x2="500" y2="210" class="connection"/>
+  <polygon points="495,205 505,215 490,210" fill="#424242"/>
+
+  <!-- Web Servers to App Servers -->
+  <line x1="270" y1="250" x2="210" y2="290" class="connection"/>
+  <line x1="290" y1="250" x2="400" y2="290" class="connection"/>
+  <line x1="510" y1="250" x2="430" y2="290" class="connection"/>
+  <line x1="530" y1="250" x2="630" y2="290" class="connection"/>
+
+  <!-- App Servers to API Gateway -->
+  <line x1="220" y1="330" x2="380" y2="370" class="connection"/>
+  <line x1="420" y1="330" x2="400" y2="370" class="connection"/>
+  <line x1="620" y1="330" x2="420" y2="370" class="connection"/>
+
+  <!-- API Gateway to Backend Services -->
+  <line x1="370" y1="410" x2="220" y2="450" class="connection"/>
+  <line x1="390" y1="410" x2="340" y2="450" class="connection"/>
+  <line x1="410" y1="410" x2="480" y2="450" class="connection"/>
+  <line x1="430" y1="410" x2="630" y2="450" class="connection"/>
+
+  <!-- Database Replication -->
+  <line x1="250" y1="475" x2="300" y2="475" class="connection"/>
+  <text x="275" y="470" style="font-size: 10px;">Replication</text>
+
+  <!-- Data Flow Labels -->
+  <text x="320" y="125" style="font-size: 10px; fill: #666;">HTTPS Traffic</text>
+  <text x="480" y="125" style="font-size: 10px; fill: #666;">HTTPS Traffic</text>
+  <text x="300" y="355" style="font-size: 10px; fill: #666;">API Calls</text>
+  <text x="520" y="355" style="font-size: 10px; fill: #666;">API Calls</text>
+
+  <!-- Component Labels for Analysis -->
+  <g id="components">
+    <text x="50" y="50" style="font-size: 10px; fill: #999; font-style: italic;">Components identified:</text>
+    <text x="50" y="65" style="font-size: 9px; fill: #666;">• Load Balancer (Security)</text>
+    <text x="50" y="80" style="font-size: 9px; fill: #666;">• Web Servers (Frontend)</text>
+    <text x="50" y="95" style="font-size: 9px; fill: #666;">• Application Servers (Logic)</text>
+    <text x="50" y="110" style="font-size: 9px; fill: #666;">• API Gateway (Integration)</text>
+    <text x="50" y="125" style="font-size: 9px; fill: #666;">• Database Cluster (Storage)</text>
+    <text x="50" y="140" style="font-size: 9px; fill: #666;">• Authentication Service (Security)</text>
+    <text x="50" y="155" style="font-size: 9px; fill: #666;">• Cache Layer (Performance)</text>
+  </g>
+
+  <!-- Data Flow Indicators -->
+  <g id="dataflows">
+    <text x="50" y="190" style="font-size: 10px; fill: #999; font-style: italic;">Data Flows:</text>
+    <text x="50" y="205" style="font-size: 9px; fill: #666;">• User → Load Balancer → Web Servers</text>
+    <text x="50" y="220" style="font-size: 9px; fill: #666;">• Web → App → API Gateway → Services</text>
+    <text x="50" y="235" style="font-size: 9px; fill: #666;">• Database replication (Primary → Replica)</text>
+    <text x="50" y="250" style="font-size: 9px; fill: #666;">• Session data cached in Redis</text>
+  </g>
+</svg>

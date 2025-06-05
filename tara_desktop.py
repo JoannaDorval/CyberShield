@@ -149,7 +149,7 @@ class TaraDesktopApp:
         """Create results display widgets"""
         # Results frame
         results_frame = ttk.LabelFrame(parent, text="Analysis Results", padding="10")
-        results_frame.grid(row=3, column=0, columnspan=2, sticky=(tk.W, tk.E, tk.N, tk.S), pady=(0, 20))
+        results_frame.grid(row=3, column=0, columnspan=2, sticky="nsew", pady=(0, 20))
         results_frame.columnconfigure(0, weight=1)
         results_frame.rowconfigure(0, weight=1)
         
@@ -161,7 +161,7 @@ class TaraDesktopApp:
             state=tk.DISABLED,
             font=('Consolas', 10)
         )
-        self.results_text.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        self.results_text.grid(row=0, column=0, sticky="nsew")
     
     def create_buttons_section(self, parent):
         """Create action buttons"""
@@ -462,7 +462,7 @@ class TaraDesktopApp:
                 ("PDF files", "*.pdf"),
                 ("All files", "*.*")
             ],
-            initialname=f"TARA_Report_{self.analysis_data['id']}.pdf"
+            initialfile=f"TARA_Report_{self.analysis_data['id']}.pdf"
         )
         
         if not filename:
