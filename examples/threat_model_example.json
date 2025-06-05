@@ -1,0 +1,158 @@
+{
+  "metadata": {
+    "name": "Web Application Threat Model",
+    "version": "1.0",
+    "description": "Threat model for a web-based customer portal application",
+    "created_date": "2024-01-15",
+    "author": "Security Team"
+  },
+  "threats": [
+    {
+      "id": "T001",
+      "name": "SQL Injection Attack",
+      "description": "Malicious SQL code injection through user input fields to access or manipulate database",
+      "category": "Injection",
+      "severity": "High",
+      "likelihood": "Medium",
+      "affected_assets": ["customer_database", "web_application"],
+      "attack_vectors": ["login_form", "search_functionality", "user_profile_update"],
+      "references": ["OWASP-A03", "CWE-89"]
+    },
+    {
+      "id": "T002",
+      "name": "Cross-Site Scripting (XSS)",
+      "description": "Injection of malicious scripts into web pages viewed by other users",
+      "category": "Injection",
+      "severity": "Medium",
+      "likelihood": "High",
+      "affected_assets": ["web_application", "user_sessions"],
+      "attack_vectors": ["user_comments", "profile_fields", "message_board"],
+      "references": ["OWASP-A07", "CWE-79"]
+    },
+    {
+      "id": "T003",
+      "name": "Credential Stuffing Attack",
+      "description": "Automated login attempts using previously breached username/password combinations",
+      "category": "Authentication",
+      "severity": "High",
+      "likelihood": "High",
+      "affected_assets": ["user_accounts", "authentication_system"],
+      "attack_vectors": ["login_endpoint", "password_reset"],
+      "references": ["OWASP-A07"]
+    },
+    {
+      "id": "T004",
+      "name": "Data Exfiltration via API",
+      "description": "Unauthorized access to sensitive customer data through API endpoints",
+      "category": "Data Breach",
+      "severity": "Critical",
+      "likelihood": "Medium",
+      "affected_assets": ["customer_database", "api_endpoints", "sensitive_data"],
+      "attack_vectors": ["rest_api", "graphql_endpoint"],
+      "references": ["OWASP-A01", "OWASP-A05"]
+    },
+    {
+      "id": "T005",
+      "name": "Session Hijacking",
+      "description": "Unauthorized access to user sessions through session token theft",
+      "category": "Session Management",
+      "severity": "High",
+      "likelihood": "Medium",
+      "affected_assets": ["user_sessions", "authentication_tokens"],
+      "attack_vectors": ["network_sniffing", "xss_attacks", "malware"],
+      "references": ["OWASP-A07", "CWE-613"]
+    }
+  ],
+  "assets": [
+    {
+      "id": "A001",
+      "name": "customer_database",
+      "type": "Database",
+      "description": "Primary database containing customer personal information, payment details, and transaction history",
+      "criticality": "Critical",
+      "location": "Internal Data Center",
+      "dependencies": ["database_server", "backup_system"],
+      "security_requirements": {
+        "confidentiality": "High",
+        "integrity": "High",
+        "availability": "High"
+      }
+    },
+    {
+      "id": "A002",
+      "name": "web_application",
+      "type": "Application",
+      "description": "Customer-facing web portal for account management and services",
+      "criticality": "High",
+      "location": "Cloud Infrastructure",
+      "dependencies": ["web_server", "application_server", "customer_database"],
+      "security_requirements": {
+        "confidentiality": "High",
+        "integrity": "High",
+        "availability": "Medium"
+      }
+    },
+    {
+      "id": "A003",
+      "name": "authentication_system",
+      "type": "Service",
+      "description": "Identity and access management system for user authentication",
+      "criticality": "Critical",
+      "location": "Cloud Infrastructure",
+      "dependencies": ["identity_provider", "user_directory"],
+      "security_requirements": {
+        "confidentiality": "Critical",
+        "integrity": "Critical",
+        "availability": "High"
+      }
+    }
+  ],
+  "risks": [
+    {
+      "id": "R001",
+      "name": "Database Compromise",
+      "description": "Risk of complete database compromise through SQL injection attacks",
+      "threat_id": "T001",
+      "asset_id": "A001",
+      "impact": "Critical",
+      "likelihood": "Medium",
+      "risk_score": 8.5,
+      "existing_controls": ["input_validation", "parameterized_queries", "database_firewall"]
+    },
+    {
+      "id": "R002",
+      "name": "Account Takeover",
+      "description": "Risk of user account compromise through credential stuffing",
+      "threat_id": "T003",
+      "asset_id": "A003",
+      "impact": "High",
+      "likelihood": "High",
+      "risk_score": 8.0,
+      "existing_controls": ["rate_limiting", "captcha", "account_lockout"]
+    }
+  ],
+  "mitigations": [
+    {
+      "id": "M001",
+      "name": "Web Application Firewall (WAF)",
+      "description": "Deploy and configure WAF to filter malicious HTTP requests and block common attack patterns",
+      "type": "Technical",
+      "effectiveness": "High",
+      "implementation_cost": "Medium",
+      "addresses_threats": ["T001", "T002"],
+      "addresses_risks": ["R001"],
+      "implementation_notes": "Configure rules for SQL injection and XSS protection"
+    },
+    {
+      "id": "M002",
+      "name": "Multi-Factor Authentication (MFA)",
+      "description": "Implement MFA for all user accounts to prevent unauthorized access",
+      "type": "Technical",
+      "effectiveness": "High",
+      "implementation_cost": "Low",
+      "addresses_threats": ["T003", "T005"],
+      "addresses_risks": ["R002"],
+      "implementation_notes": "Support SMS, email, and authenticator app methods"
+    }
+  ]
+}
