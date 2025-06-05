@@ -1,0 +1,40 @@
+"You are an expert software engineer tasked with creating an internal-use app for cybersecurity threat analysis. The app should take three inputs:
+
+Threat Model (a JSON or YAML file describing assets, risks, and mitigations),
+Block Diagram (a system architecture diagram in a supported file format like SVG or PNG),
+Cross-mapping data (a JSON file with mappings to MITRE ATT&CK and MITRE ENGAGE/EMBED techniques).
+The app should process these inputs, perform the following actions, and generate a TARA (Threat Assessment and Remediation Analysis) document as output:
+
+Functional Requirements:
+Parse the Threat Model and extract relevant threats, assets, risks, and mitigations.
+Parse the Block Diagram to identify system components, data flows, and points of interest.
+Use the Cross-mapping data to match threats and mitigations against MITRE ATT&CK techniques (for adversarial tactics) and MITRE ENGAGE/EMBED (for proactive defense strategies).
+Combine the analysis into a structured TARA document that includes:
+A summary of identified threats and risks.
+Relevant MITRE techniques mapped to the threats.
+Suggested mitigations and defense strategies based on MITRE frameworks.
+A prioritized list of actionable recommendations.
+Technical Requirements:
+Build the app using Python and Flask for the backend.
+Use React or Vue.js for the frontend (if needed).
+Include a file upload feature for the input data (Threat Model, Block Diagram, Cross-mapping data).
+Use libraries like
+pyattck
+for interacting with MITRE ATT&CK data and
+diagram-parser
+for parsing block diagrams.
+Ensure the output TARA document is formatted as a downloadable PDF or DOCX file.
+Security Requirements:
+Ensure all input files are sanitized to prevent injection attacks.
+Restrict the app for internal use only, using authentication and role-based access control.
+Log all operations securely for auditing purposes.
+Additional Details:
+Include comments in the code to make it easy to understand and maintain.
+Provide a brief README explaining how to deploy and use the app.
+Output Expectations:
+Generate the full code for this app, including:
+
+Backend (Flask-based API).
+Frontend (React or Vue.js).
+Example input files (Threat Model, Block Diagram, Cross-mapping data).
+Steps for deployment and usage.
