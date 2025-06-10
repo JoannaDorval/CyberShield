@@ -54,10 +54,7 @@ class TaraDesktopApp:
             'networking': []
         }
         
-        # Create GUI
-        self.create_widgets()
-        
-        # Initialize processors
+        # Initialize processors first (needed for widget creation)
         self.threat_parser = ThreatModelParser()
         self.diagram_parser = BlockDiagramParser()
         self.crossmap_parser = CrossMapParser()
@@ -65,6 +62,9 @@ class TaraDesktopApp:
         self.embed_integrator = MitreEmbedIntegrator()
         self.report_generator = TaraReportGenerator()
         self.excel_generator = EnhancedTaraExcelGenerator()
+        
+        # Create GUI
+        self.create_widgets()
         
         self.logger.info("TARA Desktop Application initialized")
     
