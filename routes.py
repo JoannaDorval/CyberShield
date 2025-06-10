@@ -7,7 +7,9 @@ from app import app, db
 from models import Analysis, AuditLog
 from parsers import ThreatModelParser, BlockDiagramParser, CrossMapParser
 from mitre_integration import MitreIntegrator
+from mitre_embed import MitreEmbedIntegrator
 from pdf_generator import TaraReportGenerator
+from enhanced_excel_generator import EnhancedTaraExcelGenerator
 import logging
 
 # Allowed file extensions

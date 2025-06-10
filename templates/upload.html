@@ -57,9 +57,381 @@
                 </p>
             </div>
 
+            <!-- Configuration Options -->
+            <div class="row mb-5">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i data-feather="settings" class="me-2"></i>
+                                Input Document Type
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="radio" name="input_type" id="input_threat_model" value="threat_model" checked>
+                                <label class="form-check-label" for="input_threat_model">
+                                    <strong>Threat Model Only</strong>
+                                    <br><small class="text-muted">Analyze threat model document only</small>
+                                </label>
+                            </div>
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="radio" name="input_type" id="input_block_diagram" value="block_diagram">
+                                <label class="form-check-label" for="input_block_diagram">
+                                    <strong>Block Diagram Only</strong>
+                                    <br><small class="text-muted">Analyze system architecture diagram only</small>
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="input_type" id="input_both" value="both">
+                                <label class="form-check-label" for="input_both">
+                                    <strong>Both Documents</strong>
+                                    <br><small class="text-muted">Comprehensive analysis with both inputs</small>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i data-feather="target" class="me-2"></i>
+                                Cross-Reference Source
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="radio" name="cross_ref_source" id="ref_mitre_attack" value="mitre_attack" checked>
+                                <label class="form-check-label" for="ref_mitre_attack">
+                                    <strong>MITRE ATT&CK</strong>
+                                    <br><small class="text-muted">Map threats to ATT&CK techniques</small>
+                                </label>
+                            </div>
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="radio" name="cross_ref_source" id="ref_mitre_embed" value="mitre_embed">
+                                <label class="form-check-label" for="ref_mitre_embed">
+                                    <strong>MITRE EMBED</strong>
+                                    <br><small class="text-muted">IoT/embedded device security assessment</small>
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="cross_ref_source" id="ref_both" value="both">
+                                <label class="form-check-label" for="ref_both">
+                                    <strong>Both Frameworks</strong>
+                                    <br><small class="text-muted">Comprehensive MITRE ATT&CK and EMBED</small>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MITRE EMBED Device Properties Form -->
+            <div id="embedPropertiesSection" class="card mb-5" style="display: none;">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i data-feather="cpu" class="me-2"></i>
+                        MITRE EMBED Device Properties
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-4">Select the properties that apply to your device/system:</p>
+                    
+                    <!-- Hardware Properties -->
+                    <div class="mb-4">
+                        <h6 class="text-primary mb-3">Hardware</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="embed_hardware[]" value="PID-11" id="pid11">
+                                    <label class="form-check-label" for="pid11">
+                                        <small><strong>PID-11:</strong> Device includes a microprocessor</small>
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="embed_hardware[]" value="PID-12" id="pid12">
+                                    <label class="form-check-label" for="pid12">
+                                        <small><strong>PID-12:</strong> Device includes Memory/Storage (external to CPU)</small>
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="embed_hardware[]" value="PID-13" id="pid13">
+                                    <label class="form-check-label" for="pid13">
+                                        <small><strong>PID-13:</strong> Device includes firmware/BIOS</small>
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="embed_hardware[]" value="PID-14" id="pid14">
+                                    <label class="form-check-label" for="pid14">
+                                        <small><strong>PID-14:</strong> Device includes hardware security module (HSM)</small>
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="embed_hardware[]" value="PID-15" id="pid15">
+                                    <label class="form-check-label" for="pid15">
+                                        <small><strong>PID-15:</strong> Device includes cryptographic processor</small>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="embed_hardware[]" value="PID-16" id="pid16">
+                                    <label class="form-check-label" for="pid16">
+                                        <small><strong>PID-16:</strong> Device includes hardware random number generator</small>
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="embed_hardware[]" value="PID-17" id="pid17">
+                                    <label class="form-check-label" for="pid17">
+                                        <small><strong>PID-17:</strong> Device includes tamper detection/response mechanisms</small>
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="embed_hardware[]" value="PID-18" id="pid18">
+                                    <label class="form-check-label" for="pid18">
+                                        <small><strong>PID-18:</strong> Device includes secure boot capabilities</small>
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="embed_hardware[]" value="PID-19" id="pid19">
+                                    <label class="form-check-label" for="pid19">
+                                        <small><strong>PID-19:</strong> Device includes physical interfaces (USB, serial, etc.)</small>
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="embed_hardware[]" value="PID-110" id="pid110">
+                                    <label class="form-check-label" for="pid110">
+                                        <small><strong>PID-110:</strong> Device includes wireless communication hardware</small>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- System Software Properties -->
+                    <div class="mb-4">
+                        <h6 class="text-primary mb-3">System Software</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="embed_system_software[]" value="PID-21" id="pid21">
+                                    <label class="form-check-label" for="pid21">
+                                        <small><strong>PID-21:</strong> Device includes a bootloader</small>
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="embed_system_software[]" value="PID-22" id="pid22">
+                                    <label class="form-check-label" for="pid22">
+                                        <small><strong>PID-22:</strong> Device includes debugging capabilities</small>
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="embed_system_software[]" value="PID-23" id="pid23">
+                                    <label class="form-check-label" for="pid23">
+                                        <small><strong>PID-23:</strong> Device includes operating system</small>
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="embed_system_software[]" value="PID-24" id="pid24">
+                                    <label class="form-check-label" for="pid24">
+                                        <small><strong>PID-24:</strong> Device includes device drivers</small>
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="embed_system_software[]" value="PID-25" id="pid25">
+                                    <label class="form-check-label" for="pid25">
+                                        <small><strong>PID-25:</strong> Device includes system services/daemons</small>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="embed_system_software[]" value="PID-26" id="pid26">
+                                    <label class="form-check-label" for="pid26">
+                                        <small><strong>PID-26:</strong> Device includes configuration management</small>
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="embed_system_software[]" value="PID-27" id="pid27">
+                                    <label class="form-check-label" for="pid27">
+                                        <small><strong>PID-27:</strong> Device includes logging and monitoring</small>
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="embed_system_software[]" value="PID-28" id="pid28">
+                                    <label class="form-check-label" for="pid28">
+                                        <small><strong>PID-28:</strong> Device includes update/patch mechanisms</small>
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="embed_system_software[]" value="PID-29" id="pid29">
+                                    <label class="form-check-label" for="pid29">
+                                        <small><strong>PID-29:</strong> Device includes access control mechanisms</small>
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="embed_system_software[]" value="PID-210" id="pid210">
+                                    <label class="form-check-label" for="pid210">
+                                        <small><strong>PID-210:</strong> Device includes cryptographic libraries</small>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Application Software Properties -->
+                    <div class="mb-4">
+                        <h6 class="text-primary mb-3">Application Software</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="embed_application_software[]" value="PID-31" id="pid31">
+                                    <label class="form-check-label" for="pid31">
+                                        <small><strong>PID-31:</strong> Application-level software is present and running</small>
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="embed_application_software[]" value="PID-311" id="pid311">
+                                    <label class="form-check-label" for="pid311">
+                                        <small><strong>PID-311:</strong> Device includes web/HTTP applications</small>
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="embed_application_software[]" value="PID-312" id="pid312">
+                                    <label class="form-check-label" for="pid312">
+                                        <small><strong>PID-312:</strong> Device includes mobile applications</small>
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="embed_application_software[]" value="PID-313" id="pid313">
+                                    <label class="form-check-label" for="pid313">
+                                        <small><strong>PID-313:</strong> Device includes third-party software components</small>
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="embed_application_software[]" value="PID-314" id="pid314">
+                                    <label class="form-check-label" for="pid314">
+                                        <small><strong>PID-314:</strong> Device includes custom/proprietary applications</small>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="embed_application_software[]" value="PID-315" id="pid315">
+                                    <label class="form-check-label" for="pid315">
+                                        <small><strong>PID-315:</strong> Device includes data processing applications</small>
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="embed_application_software[]" value="PID-316" id="pid316">
+                                    <label class="form-check-label" for="pid316">
+                                        <small><strong>PID-316:</strong> Device includes user interface applications</small>
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="embed_application_software[]" value="PID-317" id="pid317">
+                                    <label class="form-check-label" for="pid317">
+                                        <small><strong>PID-317:</strong> Device includes communication protocols</small>
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="embed_application_software[]" value="PID-318" id="pid318">
+                                    <label class="form-check-label" for="pid318">
+                                        <small><strong>PID-318:</strong> Device includes database management</small>
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="embed_application_software[]" value="PID-319" id="pid319">
+                                    <label class="form-check-label" for="pid319">
+                                        <small><strong>PID-319:</strong> Device includes API interfaces</small>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Networking Properties -->
+                    <div class="mb-4">
+                        <h6 class="text-primary mb-3">Networking</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="embed_networking[]" value="PID-41" id="pid41">
+                                    <label class="form-check-label" for="pid41">
+                                        <small><strong>PID-41:</strong> Device exposes remote network services</small>
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="embed_networking[]" value="PID-411" id="pid411">
+                                    <label class="form-check-label" for="pid411">
+                                        <small><strong>PID-411:</strong> Device exposes services with sensitive information access</small>
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="embed_networking[]" value="PID-412" id="pid412">
+                                    <label class="form-check-label" for="pid412">
+                                        <small><strong>PID-412:</strong> Device supports wireless networking</small>
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="embed_networking[]" value="PID-413" id="pid413">
+                                    <label class="form-check-label" for="pid413">
+                                        <small><strong>PID-413:</strong> Device supports wired networking (Ethernet)</small>
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="embed_networking[]" value="PID-414" id="pid414">
+                                    <label class="form-check-label" for="pid414">
+                                        <small><strong>PID-414:</strong> Device includes network security protocols</small>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="embed_networking[]" value="PID-415" id="pid415">
+                                    <label class="form-check-label" for="pid415">
+                                        <small><strong>PID-415:</strong> Device includes network authentication mechanisms</small>
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="embed_networking[]" value="PID-416" id="pid416">
+                                    <label class="form-check-label" for="pid416">
+                                        <small><strong>PID-416:</strong> Device includes network monitoring capabilities</small>
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="embed_networking[]" value="PID-417" id="pid417">
+                                    <label class="form-check-label" for="pid417">
+                                        <small><strong>PID-417:</strong> Device includes firewall or filtering capabilities</small>
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="embed_networking[]" value="PID-418" id="pid418">
+                                    <label class="form-check-label" for="pid418">
+                                        <small><strong>PID-418:</strong> Device supports cloud connectivity</small>
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="embed_networking[]" value="PID-419" id="pid419">
+                                    <label class="form-check-label" for="pid419">
+                                        <small><strong>PID-419:</strong> Device supports peer-to-peer networking</small>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Upload Form -->
             <form id="uploadForm" action="{{ url_for('upload_files') }}" method="post" enctype="multipart/form-data">
-                <div class="row g-4 mb-4">
+                <!-- Hidden inputs for configuration -->
+                <input type="hidden" name="selected_input_type" id="selected_input_type" value="threat_model">
+                <input type="hidden" name="selected_cross_ref_source" id="selected_cross_ref_source" value="mitre_attack">
+                <input type="hidden" name="embed_properties" id="embed_properties" value="">
+                
+                <div class="row g-4 mb-4" id="uploadSections">
                     <!-- Threat Model Upload -->
                     <div class="col-md-4">
                         <div class="card h-100">

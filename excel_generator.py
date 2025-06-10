@@ -41,7 +41,9 @@ class TaraExcelGenerator:
             self.workbook = Workbook()
             
             # Remove default sheet
-            self.workbook.remove(self.workbook.active)
+            default_sheet = self.workbook.active
+            if default_sheet:
+                self.workbook.remove(default_sheet)
             
             # Create all worksheets
             self._create_assets_worksheet(analysis_data)
@@ -117,7 +119,7 @@ class TaraExcelGenerator:
                     ws.append([stakeholder, scenario])
         
         self._adjust_column_widths(ws)
-        self.watersheets['damage_scenarios'] = ws
+        self.worksheets['damage_scenarios'] = ws
     
     def _create_impact_analysis_worksheet(self, analysis_data: Dict[str, Any]):
         """Create Impact Analysis worksheet"""
