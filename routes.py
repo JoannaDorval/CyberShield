@@ -59,26 +59,41 @@ def upload_page():
 
 @app.route('/upload_files', methods=['POST'])
 def upload_files():
-    """Handle file uploads and process analysis"""
+    """Handle enhanced file uploads and process analysis"""
     session_id = session.get('session_id', str(uuid.uuid4()))
     session['session_id'] = session_id
     
     try:
-        # Check if all required files are present
-        if 'threat_model' not in request.files or \
-           'block_diagram' not in request.files or \
-           'crossmap' not in request.files:
-            flash('All three files are required: Threat Model, Block Diagram, and Cross-mapping data', 'error')
-            return redirect(url_for('upload_page'))
+        # Get configuration from form
+        input_type = request.form.get('selected_input_type', 'threat_model')
+        cross_ref_source = request.form.get('selected_cross_ref_source', 'mitre_attack')
+        embed_properties = request.form.get('embed_properties', '{}')
         
-        files = {
-            'threat_model': request.files['threat_model'],
-            'block_diagram': request.files['block_diagram'],
-            'crossmap': request.files['crossmap']
-        }
+        # Parse EMBED properties if provided
+        embed_assessment = None
+        if embed_properties and embed_properties != '{}':
+            try:
+                selected_properties = json.loads(embed_properties)
+                embed_integrator = MitreEmbedIntegrator()
+                embed_assessment = embed_integrator.assess_device_properties(selected_properties)
+            except Exception as e:
+                app.logger.error(f"EMBED assessment error: {e}")
         
-        # Validate files
-        for file_type, file in files.items():
+        # Determine required files based on input type
+        required_files = ['crossmap']  # Always required
+        if input_type == 'threat_model' or input_type == 'both':
+            required_files.append('threat_model')
+        if input_type == 'block_diagram' or input_type == 'both':
+            required_files.append('block_diagram')
+        
+        # Check if required files are present
+        files = {}
+        for file_type in required_files:
+            if file_type not in request.files:
+                flash(f'{file_type.replace("_", " ").title()} file is required for selected analysis type', 'error')
+                return redirect(url_for('upload_page'))
+            
+            file = request.files[file_type]
             if file.filename == '':
                 flash(f'{file_type.replace("_", " ").title()} file is required', 'error')
                 return redirect(url_for('upload_page'))
@@ -86,13 +101,15 @@ def upload_files():
             if not allowed_file(file.filename, file_type):
                 flash(f'Invalid file type for {file_type.replace("_", " ").title()}', 'error')
                 return redirect(url_for('upload_page'))
+            
+            files[file_type] = file
         
-        # Create analysis record
+        # Create analysis record with dynamic filenames
         analysis = Analysis(
             session_id=session_id,
-            threat_model_filename=secure_filename(files['threat_model'].filename),
-            block_diagram_filename=secure_filename(files['block_diagram'].filename),
-            crossmap_filename=secure_filename(files['crossmap'].filename),
+            threat_model_filename=secure_filename(files['threat_model'].filename) if 'threat_model' in files else None,
+            block_diagram_filename=secure_filename(files['block_diagram'].filename) if 'block_diagram' in files else None,
+            crossmap_filename=secure_filename(files['crossmap'].filename) if 'crossmap' in files else None,
             status='processing'
         )
         db.session.add(analysis)
@@ -108,33 +125,53 @@ def upload_files():
         
         log_action('files_uploaded', f'Analysis ID: {analysis.id}')
         
-        # Process the files
+        # Process the files based on input type
         try:
-            # Parse threat model
-            threat_parser = ThreatModelParser()
-            threat_data = threat_parser.parse(saved_files['threat_model'])
+            threat_data = {'threats': [], 'assets': [], 'risks': [], 'mitigations': []}
+            diagram_data = {'components': [], 'connections': [], 'data_flows': []}
+            crossmap_data = {}
             
-            # Parse block diagram
-            diagram_parser = BlockDiagramParser()
-            diagram_data = diagram_parser.parse(saved_files['block_diagram'])
+            # Parse files based on input type selection
+            if 'threat_model' in saved_files:
+                threat_parser = ThreatModelParser()
+                threat_data = threat_parser.parse(saved_files['threat_model'])
             
-            # Parse crossmap data
-            crossmap_parser = CrossMapParser()
-            crossmap_data = crossmap_parser.parse(saved_files['crossmap'])
+            if 'block_diagram' in saved_files:
+                diagram_parser = BlockDiagramParser()
+                diagram_data = diagram_parser.parse(saved_files['block_diagram'])
             
-            # Integrate with MITRE
-            mitre_integrator = MitreIntegrator()
-            mitre_mappings = mitre_integrator.map_threats_to_mitre(
-                threat_data.get('threats', []),
-                crossmap_data
-            )
+            if 'crossmap' in saved_files:
+                crossmap_parser = CrossMapParser()
+                crossmap_data = crossmap_parser.parse(saved_files['crossmap'])
             
-            # Generate recommendations
-            recommendations = mitre_integrator.generate_recommendations(
-                threat_data.get('threats', []),
-                mitre_mappings,
-                threat_data.get('mitigations', [])
-            )
+            # Choose integration approach based on cross-reference source
+            mitre_mappings = {}
+            recommendations = []
+            
+            if cross_ref_source == 'mitre_attack' or cross_ref_source == 'both':
+                mitre_integrator = MitreIntegrator()
+                mitre_mappings = mitre_integrator.map_threats_to_mitre(
+                    threat_data.get('threats', []),
+                    crossmap_data
+                )
+                
+                recommendations.extend(mitre_integrator.generate_recommendations(
+                    threat_data.get('threats', []),
+                    mitre_mappings,
+                    threat_data.get('mitigations', [])
+                ))
+            
+            # Add EMBED recommendations if selected
+            if embed_assessment and (cross_ref_source == 'mitre_embed' or cross_ref_source == 'both'):
+                recommendations.extend(embed_assessment.get('recommended_controls', []))
+            
+            # Store configuration and assessment data
+            analysis_metadata = {
+                'input_type': input_type,
+                'cross_ref_source': cross_ref_source,
+                'embed_assessment': embed_assessment,
+                'diagram_data': diagram_data
+            }
             
             # Update analysis with results
             analysis.threats = threat_data.get('threats', [])
@@ -145,11 +182,15 @@ def upload_files():
             analysis.recommendations = recommendations
             analysis.status = 'completed'
             
+            # Store metadata as JSON in a new column (you may need to add this to the model)
+            if hasattr(analysis, 'metadata'):
+                analysis.metadata = analysis_metadata
+            
             db.session.commit()
             
             log_action('analysis_completed', f'Analysis ID: {analysis.id}')
             
-            flash('Analysis completed successfully!', 'success')
+            flash('Enhanced TARA analysis completed successfully!', 'success')
             return redirect(url_for('results', analysis_id=analysis.id))
             
         except Exception as e:
@@ -220,6 +261,56 @@ def download_report(analysis_id):
         app.logger.error(f"Report generation error: {e}")
         log_action('report_generation_failed', f'Analysis ID: {analysis_id}, Error: {str(e)}')
         flash(f'Failed to generate report: {str(e)}', 'error')
+        return redirect(url_for('results', analysis_id=analysis_id))
+
+@app.route('/download_excel/<int:analysis_id>')
+def download_excel_report(analysis_id):
+    """Generate and download enhanced TARA report as Excel"""
+    analysis = Analysis.query.get_or_404(analysis_id)
+    
+    # Verify session ownership
+    if analysis.session_id != session.get('session_id'):
+        log_action('unauthorized_excel_download_attempt', f'Analysis ID: {analysis_id}')
+        flash('Unauthorized access', 'error')
+        return redirect(url_for('index'))
+    
+    try:
+        # Prepare analysis data for Excel generation
+        analysis_data = {
+            'threats': analysis.threats or [],
+            'assets': analysis.assets or [],
+            'risks': analysis.risks or [],
+            'mitigations': analysis.mitigations or [],
+            'mitre_mappings': analysis.mitre_mappings or {},
+            'recommendations': analysis.recommendations or []
+        }
+        
+        # Get metadata if available (use default values if not)
+        input_type = 'both'
+        cross_ref_source = 'mitre_attack'
+        embed_assessment = None
+        
+        # Generate Excel report
+        excel_generator = EnhancedTaraExcelGenerator()
+        excel_path = excel_generator.generate_excel_report(
+            analysis_data, 
+            input_type, 
+            cross_ref_source,
+            embed_assessment
+        )
+        
+        log_action('excel_download_completed', f'Analysis ID: {analysis_id}')
+        return send_file(
+            excel_path,
+            as_attachment=True,
+            download_name=f'TARA_Excel_Report_{analysis_id}_{analysis.timestamp.strftime("%Y%m%d_%H%M%S")}.xlsx',
+            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        
+    except Exception as e:
+        app.logger.error(f"Excel report generation error: {e}")
+        log_action('excel_download_error', f'Analysis ID: {analysis_id}, Error: {str(e)}')
+        flash(f'Excel report generation failed: {str(e)}', 'error')
         return redirect(url_for('results', analysis_id=analysis_id))
 
 @app.errorhandler(413)
