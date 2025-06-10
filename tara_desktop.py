@@ -21,7 +21,9 @@ import sys
 # Import the existing processing modules
 from parsers import ThreatModelParser, BlockDiagramParser, CrossMapParser
 from mitre_integration import MitreIntegrator
+from mitre_embed import MitreEmbedIntegrator
 from pdf_generator import TaraReportGenerator
+from enhanced_excel_generator import EnhancedTaraExcelGenerator
 
 
 class TaraDesktopApp:
@@ -42,6 +44,16 @@ class TaraDesktopApp:
         self.crossmap_file = tk.StringVar()
         self.analysis_data = None
         
+        # Enhanced configuration variables
+        self.input_type = tk.StringVar(value="both")
+        self.cross_ref_source = tk.StringVar(value="mitre_attack")
+        self.embed_properties = {
+            'hardware': [],
+            'system_software': [],
+            'application_software': [],
+            'networking': []
+        }
+        
         # Create GUI
         self.create_widgets()
         
@@ -50,7 +62,9 @@ class TaraDesktopApp:
         self.diagram_parser = BlockDiagramParser()
         self.crossmap_parser = CrossMapParser()
         self.mitre_integrator = MitreIntegrator()
+        self.embed_integrator = MitreEmbedIntegrator()
         self.report_generator = TaraReportGenerator()
+        self.excel_generator = EnhancedTaraExcelGenerator()
         
         self.logger.info("TARA Desktop Application initialized")
     
@@ -96,8 +110,14 @@ class TaraDesktopApp:
         )
         title_label.grid(row=0, column=0, columnspan=2, pady=(0, 20))
         
+        # Configuration section
+        self.create_configuration_section(main_frame)
+        
         # File upload section
         self.create_file_upload_section(main_frame)
+        
+        # MITRE EMBED properties section
+        self.create_embed_properties_section(main_frame)
         
         # Progress and status section
         self.create_progress_section(main_frame)

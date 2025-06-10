@@ -1,0 +1,186 @@
+{
+  "threat_model": {
+    "name": "IoT Smart Home Security System",
+    "version": "1.0",
+    "description": "Threat model for connected home security system with embedded devices",
+    "scope": "IoT device security assessment including hardware, firmware, and network communications"
+  },
+  "assets": [
+    {
+      "id": "A001",
+      "name": "Main Control Hub",
+      "type": "hardware",
+      "description": "Central processing unit with ARM Cortex processor",
+      "value": "critical",
+      "security_properties": ["confidentiality", "integrity", "availability"]
+    },
+    {
+      "id": "A002",
+      "name": "Sensor Network",
+      "type": "hardware",
+      "description": "Wireless motion, door, and window sensors",
+      "value": "high",
+      "security_properties": ["integrity", "availability"]
+    },
+    {
+      "id": "A003",
+      "name": "Mobile Application",
+      "type": "software",
+      "description": "iOS/Android app for system control",
+      "value": "medium",
+      "security_properties": ["confidentiality", "integrity"]
+    },
+    {
+      "id": "A004",
+      "name": "User Credentials",
+      "type": "data",
+      "description": "Authentication credentials and user profiles",
+      "value": "critical",
+      "security_properties": ["confidentiality", "integrity"]
+    },
+    {
+      "id": "A005",
+      "name": "Cloud Backend",
+      "type": "infrastructure",
+      "description": "Remote monitoring and control services",
+      "value": "high",
+      "security_properties": ["confidentiality", "integrity", "availability"]
+    }
+  ],
+  "threats": [
+    {
+      "id": "T001",
+      "name": "Firmware Tampering",
+      "description": "Unauthorized modification of device firmware through physical access or debug interfaces",
+      "severity": "High",
+      "likelihood": "Medium",
+      "impact": "High",
+      "affected_assets": ["A001"],
+      "attack_vectors": ["Physical access", "Debug port exploitation"],
+      "threat_category": "Tampering"
+    },
+    {
+      "id": "T002",
+      "name": "Wireless Signal Jamming",
+      "description": "Denial of service attack against wireless sensor communications",
+      "severity": "Medium",
+      "likelihood": "High",
+      "impact": "Medium",
+      "affected_assets": ["A002"],
+      "attack_vectors": ["RF interference", "Signal jamming"],
+      "threat_category": "Denial of Service"
+    },
+    {
+      "id": "T003",
+      "name": "Mobile App Data Leakage",
+      "description": "Sensitive data exposure through insecure mobile application storage",
+      "severity": "High",
+      "likelihood": "Medium",
+      "impact": "High",
+      "affected_assets": ["A003", "A004"],
+      "attack_vectors": ["Application vulnerability", "Data storage weakness"],
+      "threat_category": "Information Disclosure"
+    },
+    {
+      "id": "T004",
+      "name": "Cloud API Authentication Bypass",
+      "description": "Unauthorized access to cloud services through authentication weaknesses",
+      "severity": "Critical",
+      "likelihood": "Low",
+      "impact": "Critical",
+      "affected_assets": ["A005", "A004"],
+      "attack_vectors": ["API vulnerability", "Authentication bypass"],
+      "threat_category": "Elevation of Privileges"
+    },
+    {
+      "id": "T005",
+      "name": "Device Identity Spoofing",
+      "description": "Impersonation of legitimate devices in the network",
+      "severity": "High",
+      "likelihood": "Medium",
+      "impact": "High",
+      "affected_assets": ["A001", "A002"],
+      "attack_vectors": ["Certificate forgery", "Device cloning"],
+      "threat_category": "Spoofing"
+    }
+  ],
+  "risks": [
+    {
+      "id": "R001",
+      "threat_id": "T001",
+      "risk_level": "High",
+      "risk_score": 16,
+      "business_impact": "Complete system compromise, unauthorized access to premises"
+    },
+    {
+      "id": "R002",
+      "threat_id": "T002",
+      "risk_level": "Medium",
+      "risk_score": 9,
+      "business_impact": "Temporary loss of security monitoring capabilities"
+    },
+    {
+      "id": "R003",
+      "threat_id": "T003",
+      "risk_level": "High",
+      "risk_score": 16,
+      "business_impact": "Privacy violation, potential identity theft"
+    },
+    {
+      "id": "R004",
+      "threat_id": "T004",
+      "risk_level": "Critical",
+      "risk_score": 25,
+      "business_impact": "Full system takeover, data breach, privacy violations"
+    },
+    {
+      "id": "R005",
+      "threat_id": "T005",
+      "risk_level": "High",
+      "risk_score": 16,
+      "business_impact": "False alerts, unauthorized device control"
+    }
+  ],
+  "mitigations": [
+    {
+      "id": "M001",
+      "name": "Secure Boot Implementation",
+      "description": "Implement secure boot process with cryptographic verification",
+      "threat_ids": ["T001"],
+      "control_type": "preventive",
+      "implementation_status": "planned"
+    },
+    {
+      "id": "M002",
+      "name": "Frequency Hopping Protocol",
+      "description": "Use frequency-hopping spread spectrum for wireless communications",
+      "threat_ids": ["T002"],
+      "control_type": "preventive",
+      "implementation_status": "implemented"
+    },
+    {
+      "id": "M003",
+      "name": "Mobile App Encryption",
+      "description": "Implement end-to-end encryption for mobile application data",
+      "threat_ids": ["T003"],
+      "control_type": "preventive",
+      "implementation_status": "planned"
+    },
+    {
+      "id": "M004",
+      "name": "Multi-Factor Authentication",
+      "description": "Require MFA for cloud service access",
+      "threat_ids": ["T004"],
+      "control_type": "preventive",
+      "implementation_status": "implemented"
+    },
+    {
+      "id": "M005",
+      "name": "Device Certificate Management",
+      "description": "Implement PKI-based device authentication",
+      "threat_ids": ["T005"],
+      "control_type": "preventive",
+      "implementation_status": "planned"
+    }
+  ]
+}

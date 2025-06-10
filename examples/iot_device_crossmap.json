@@ -1,0 +1,233 @@
+{
+  "crossmap_data": {
+    "framework_version": "MITRE ATT&CK v14.1 & EMBED v1.0",
+    "mapping_type": "threat_to_technique",
+    "creation_date": "2025-06-10",
+    "device_context": "IoT Smart Home Security System"
+  },
+  "threat_technique_mappings": {
+    "T001": {
+      "threat_name": "Firmware Tampering",
+      "mitre_attack_techniques": [
+        {
+          "technique_id": "T1542.001",
+          "technique_name": "System Firmware",
+          "tactic": "Persistence",
+          "confidence": "high",
+          "mapping_rationale": "Direct firmware modification for persistence"
+        },
+        {
+          "technique_id": "T1601.001",
+          "technique_name": "Patch System Image",
+          "tactic": "Defense Evasion",
+          "confidence": "medium",
+          "mapping_rationale": "Firmware modification to evade security controls"
+        }
+      ],
+      "mitre_embed_controls": [
+        {
+          "control_id": "EMBED-HW-01",
+          "control_name": "Secure Boot",
+          "category": "Hardware Security",
+          "description": "Cryptographic verification of firmware integrity"
+        },
+        {
+          "control_id": "EMBED-SW-02",
+          "control_name": "Firmware Signing",
+          "category": "System Software",
+          "description": "Digital signatures for firmware authenticity"
+        }
+      ]
+    },
+    "T002": {
+      "threat_name": "Wireless Signal Jamming",
+      "mitre_attack_techniques": [
+        {
+          "technique_id": "T1485",
+          "technique_name": "Data Destruction",
+          "tactic": "Impact",
+          "confidence": "medium",
+          "mapping_rationale": "Signal jamming prevents data transmission"
+        },
+        {
+          "technique_id": "T1498",
+          "technique_name": "Network Denial of Service",
+          "tactic": "Impact",
+          "confidence": "high",
+          "mapping_rationale": "RF jamming creates network service denial"
+        }
+      ],
+      "mitre_embed_controls": [
+        {
+          "control_id": "EMBED-NET-03",
+          "control_name": "Frequency Diversity",
+          "category": "Networking",
+          "description": "Multiple frequency channels for resilience"
+        },
+        {
+          "control_id": "EMBED-NET-04",
+          "control_name": "Mesh Networking",
+          "category": "Networking",
+          "description": "Self-healing network topology"
+        }
+      ]
+    },
+    "T003": {
+      "threat_name": "Mobile App Data Leakage",
+      "mitre_attack_techniques": [
+        {
+          "technique_id": "T1005",
+          "technique_name": "Data from Local System",
+          "tactic": "Collection",
+          "confidence": "high",
+          "mapping_rationale": "Accessing locally stored application data"
+        },
+        {
+          "technique_id": "T1552.001",
+          "technique_name": "Credentials In Files",
+          "tactic": "Credential Access",
+          "confidence": "high",
+          "mapping_rationale": "Extracting credentials from mobile app storage"
+        }
+      ],
+      "mitre_embed_controls": [
+        {
+          "control_id": "EMBED-APP-01",
+          "control_name": "Data Encryption",
+          "category": "Application Software",
+          "description": "Encrypt sensitive data at rest and in transit"
+        },
+        {
+          "control_id": "EMBED-APP-02",
+          "control_name": "Secure Storage",
+          "category": "Application Software",
+          "description": "Use platform secure storage mechanisms"
+        }
+      ]
+    },
+    "T004": {
+      "threat_name": "Cloud API Authentication Bypass",
+      "mitre_attack_techniques": [
+        {
+          "technique_id": "T1078",
+          "technique_name": "Valid Accounts",
+          "tactic": "Initial Access",
+          "confidence": "high",
+          "mapping_rationale": "Using compromised valid credentials"
+        },
+        {
+          "technique_id": "T1548",
+          "technique_name": "Abuse Elevation Control Mechanism",
+          "tactic": "Privilege Escalation",
+          "confidence": "medium",
+          "mapping_rationale": "Bypassing authentication controls"
+        }
+      ],
+      "mitre_embed_controls": [
+        {
+          "control_id": "EMBED-NET-01",
+          "control_name": "Multi-Factor Authentication",
+          "category": "Networking",
+          "description": "Multiple authentication factors for API access"
+        },
+        {
+          "control_id": "EMBED-APP-03",
+          "control_name": "API Security",
+          "category": "Application Software",
+          "description": "Secure API design and implementation"
+        }
+      ]
+    },
+    "T005": {
+      "threat_name": "Device Identity Spoofing",
+      "mitre_attack_techniques": [
+        {
+          "technique_id": "T1556",
+          "technique_name": "Modify Authentication Process",
+          "tactic": "Credential Access",
+          "confidence": "high",
+          "mapping_rationale": "Spoofing device authentication mechanisms"
+        },
+        {
+          "technique_id": "T1557",
+          "technique_name": "Adversary-in-the-Middle",
+          "tactic": "Credential Access",
+          "confidence": "medium",
+          "mapping_rationale": "Intercepting device communications"
+        }
+      ],
+      "mitre_embed_controls": [
+        {
+          "control_id": "EMBED-HW-02",
+          "control_name": "Hardware Security Module",
+          "category": "Hardware Security",
+          "description": "Tamper-resistant storage for device credentials"
+        },
+        {
+          "control_id": "EMBED-NET-02",
+          "control_name": "Certificate Management",
+          "category": "Networking",
+          "description": "PKI-based device authentication"
+        }
+      ]
+    }
+  },
+  "framework_mappings": {
+    "mitre_attack": {
+      "tactics_covered": [
+        "Initial Access",
+        "Persistence", 
+        "Privilege Escalation",
+        "Defense Evasion",
+        "Credential Access",
+        "Collection",
+        "Impact"
+      ],
+      "techniques_mapped": 8,
+      "coverage_percentage": 85
+    },
+    "mitre_embed": {
+      "categories_covered": [
+        "Hardware Security",
+        "System Software",
+        "Application Software", 
+        "Networking"
+      ],
+      "controls_mapped": 10,
+      "device_properties_addressed": [
+        "PID-11", "PID-12", "PID-18", "PID-21", "PID-22",
+        "PID-311", "PID-319", "PID-41", "PID-412", "PID-414"
+      ]
+    }
+  },
+  "recommendations": [
+    {
+      "priority": "Critical",
+      "recommendation": "Implement hardware-based secure boot with TPM or HSM",
+      "threats_addressed": ["T001", "T005"],
+      "implementation_effort": "High",
+      "cost_impact": "Medium"
+    },
+    {
+      "priority": "High", 
+      "recommendation": "Deploy multi-factor authentication for all cloud services",
+      "threats_addressed": ["T004"],
+      "implementation_effort": "Medium",
+      "cost_impact": "Low"
+    },
+    {
+      "priority": "High",
+      "recommendation": "Implement end-to-end encryption for mobile application",
+      "threats_addressed": ["T003"],
+      "implementation_effort": "Medium", 
+      "cost_impact": "Low"
+    },
+    {
+      "priority": "Medium",
+      "recommendation": "Deploy frequency-hopping and mesh networking protocols",
+      "threats_addressed": ["T002"],
+      "implementation_effort": "High",
+      "cost_impact": "Medium"
+    }
+  ]
+}

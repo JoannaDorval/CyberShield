@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .component { fill: #e3f2fd; stroke: #1976d2; stroke-width: 2; }
+      .security { fill: #fff3e0; stroke: #f57c00; stroke-width: 2; }
+      .database { fill: #e8f5e8; stroke: #388e3c; stroke-width: 2; }
+      .network { fill: #fce4ec; stroke: #c2185b; stroke-width: 2; }
+      .text { font-family: Arial, sans-serif; font-size: 12px; text-anchor: middle; dominant-baseline: central; }
+      .connection { stroke: #424242; stroke-width: 2; fill: none; }
+      .wireless { stroke: #9c27b0; stroke-width: 2; stroke-dasharray: 5,5; fill: none; }
+      .secure { stroke: #4caf50; stroke-width: 3; fill: none; }
+    </style>
+  </defs>
+
+  <!-- Title -->
+  <text x="400" y="30" class="text" style="font-size: 18px; font-weight: bold;">IoT Smart Home Security System Architecture</text>
+
+  <!-- Internet Cloud -->
+  <ellipse cx="400" cy="80" rx="80" ry="30" class="network"/>
+  <text x="400" y="80" class="text">Internet</text>
+
+  <!-- Main Control Hub -->
+  <rect x="350" y="150" width="100" height="60" class="security"/>
+  <text x="400" y="175" class="text">Main Control Hub</text>
+  <text x="400" y="190" class="text">(ARM Cortex-A)</text>
+
+  <!-- HSM/TPM Module -->
+  <rect x="480" y="160" width="80" height="40" class="security"/>
+  <text x="520" y="180" class="text">HSM/TPM</text>
+
+  <!-- Sensor Network -->
+  <rect x="150" y="280" width="100" height="50" class="component"/>
+  <text x="200" y="300" class="text">Motion Sensors</text>
+  <text x="200" y="315" class="text">(Wireless)</text>
+
+  <rect x="300" y="280" width="100" height="50" class="component"/>
+  <text x="350" y="300" class="text">Door/Window</text>
+  <text x="350" y="315" class="text">Sensors</text>
+
+  <rect x="450" y="280" width="100" height="50" class="component"/>
+  <text x="500" y="300" class="text">Camera System</text>
+  <text x="500" y="315" class="text">(IP Cameras)</text>
+
+  <rect x="600" y="280" width="100" height="50" class="component"/>
+  <text x="650" y="300" class="text">Smart Locks</text>
+  <text x="650" y="315" class="text">(Z-Wave)</text>
+
+  <!-- Mobile Devices -->
+  <rect x="100" y="420" width="80" height="50" class="component"/>
+  <text x="140" y="440" class="text">iOS App</text>
+  <text x="140" y="455" class="text">(iPhone)</text>
+
+  <rect x="200" y="420" width="80" height="50" class="component"/>
+  <text x="240" y="440" class="text">Android App</text>
+  <text x="240" y="455" class="text">(Phone)</text>
+
+  <!-- Local Network Infrastructure -->
+  <rect x="350" y="380" width="100" height="40" class="network"/>
+  <text x="400" y="400" class="text">WiFi Router</text>
+
+  <!-- Cloud Services -->
+  <rect x="550" y="420" width="120" height="50" class="database"/>
+  <text x="610" y="440" class="text">Cloud Backend</text>
+  <text x="610" y="455" class="text">(AWS/Azure)</text>
+
+  <!-- Security Boundary -->
+  <rect x="120" y="240" width="600" height="200" fill="none" stroke="#f44336" stroke-width="3" stroke-dasharray="10,5"/>
+  <text x="130" y="255" style="font-size: 10px; fill: #f44336;">Home Network Security Perimeter</text>
+
+  <!-- Connections -->
+  
+  <!-- Internet to Hub -->
+  <line x1="400" y1="110" x2="400" y2="150" class="secure"/>
+  <polygon points="395,145 400,155 405,145" fill="#4caf50"/>
+  
+  <!-- Hub to HSM -->
+  <line x1="450" y1="180" x2="480" y2="180" class="secure"/>
+  <polygon points="475,175 485,180 475,185" fill="#4caf50"/>
+
+  <!-- Hub to Sensors (Wireless) -->
+  <line x1="380" y1="210" x2="220" y2="280" class="wireless"/>
+  <polygon points="225,275 215,285 230,280" fill="#9c27b0"/>
+  
+  <line x1="400" y1="210" x2="350" y2="280" class="wireless"/>
+  <polygon points="345,275 355,285 340,280" fill="#9c27b0"/>
+  
+  <line x1="420" y1="210" x2="480" y2="280" class="connection"/>
+  <polygon points="475,275 485,285 470,280" fill="#424242"/>
+  
+  <line x1="430" y1="210" x2="630" y2="280" class="wireless"/>
+  <polygon points="625,275 635,285 620,280" fill="#9c27b0"/>
+
+  <!-- Hub to Router -->
+  <line x1="400" y1="210" x2="400" y2="380" class="connection"/>
+  <polygon points="395,375 400,385 405,375" fill="#424242"/>
+
+  <!-- Mobile Apps to Router (WiFi) -->
+  <line x1="180" y1="445" x2="350" y2="410" class="wireless"/>
+  <polygon points="345,415 355,405 350,420" fill="#9c27b0"/>
+  
+  <line x1="280" y1="445" x2="350" y2="420" class="wireless"/>
+  <polygon points="345,425 355,415 350,430" fill="#9c27b0"/>
+
+  <!-- Router to Cloud -->
+  <line x1="450" y1="400" x2="550" y2="445" class="secure"/>
+  <polygon points="545,440 555,450 540,445" fill="#4caf50"/>
+
+  <!-- Cloud to Internet -->
+  <line x1="610" y1="420" x2="460" y2="100" class="secure"/>
+  <polygon points="465,105 455,95 470,100" fill="#4caf50"/>
+
+  <!-- Debug Interface (Security Risk) -->
+  <rect x="300" y="130" width="40" height="15" fill="#ff5722" stroke="#d32f2f"/>
+  <text x="320" y="138" style="font-size: 8px; fill: white;">JTAG</text>
+  
+  <!-- Physical Access Point -->
+  <circle cx="320" cy="180" r="8" fill="#ff9800"/>
+  <text x="305" y="195" style="font-size: 8px;">USB</text>
+
+  <!-- Legend -->
+  <g transform="translate(50, 520)">
+    <text x="0" y="0" style="font-size: 12px; font-weight: bold;">Legend:</text>
+    <line x1="0" y1="15" x2="20" y2="15" class="secure"/>
+    <text x="25" y="18" style="font-size: 10px;">Secure Connection (TLS/HTTPS)</text>
+    <line x1="0" y1="30" x2="20" y2="30" class="wireless"/>
+    <text x="25" y="33" style="font-size: 10px;">Wireless Connection</text>
+    <line x1="0" y1="45" x2="20" y2="45" class="connection"/>
+    <text x="25" y="48" style="font-size: 10px;">Wired Connection</text>
+    <rect x="200" y="10" width="15" height="10" fill="#ff5722"/>
+    <text x="220" y="18" style="font-size: 10px;">Security Risk Interface</text>
+  </g>
+
+  <!-- Attack Vectors Annotations -->
+  <g transform="translate(680, 150)">
+    <text x="0" y="0" style="font-size: 11px; font-weight: bold; fill: #d32f2f;">Potential Attack Vectors:</text>
+    <text x="0" y="15" style="font-size: 9px;">• JTAG Debug Port Access</text>
+    <text x="0" y="28" style="font-size: 9px;">• RF Signal Jamming</text>
+    <text x="0" y="41" style="font-size: 9px;">• Mobile App Vulnerabilities</text>
+    <text x="0" y="54" style="font-size: 9px;">• Cloud API Exploitation</text>
+    <text x="0" y="67" style="font-size: 9px;">• Physical Device Access</text>
+  </g>
+
+</svg>
