@@ -128,11 +128,101 @@ class TaraDesktopApp:
         # Buttons section
         self.create_buttons_section(main_frame)
     
+    def create_configuration_section(self, parent):
+        """Create configuration options section"""
+        config_frame = ttk.LabelFrame(parent, text="Analysis Configuration", padding="10")
+        config_frame.grid(row=1, column=0, columnspan=2, sticky="ew", pady=(0, 20))
+        config_frame.columnconfigure(1, weight=1)
+        
+        # Input type selection
+        ttk.Label(config_frame, text="Input Document Type:", font=('Arial', 10, 'bold')).grid(row=0, column=0, sticky=tk.W, pady=(0, 5))
+        
+        input_frame = ttk.Frame(config_frame)
+        input_frame.grid(row=1, column=0, columnspan=2, sticky="w", pady=(0, 15))
+        
+        ttk.Radiobutton(input_frame, text="Threat Model Only", variable=self.input_type, value="threat_model").grid(row=0, column=0, sticky=tk.W, padx=(0, 20))
+        ttk.Radiobutton(input_frame, text="Block Diagram Only", variable=self.input_type, value="block_diagram").grid(row=0, column=1, sticky=tk.W, padx=(0, 20))
+        ttk.Radiobutton(input_frame, text="Both Documents", variable=self.input_type, value="both").grid(row=0, column=2, sticky=tk.W)
+        
+        # Cross-reference source selection
+        ttk.Label(config_frame, text="Cross-Reference Framework:", font=('Arial', 10, 'bold')).grid(row=2, column=0, sticky=tk.W, pady=(10, 5))
+        
+        ref_frame = ttk.Frame(config_frame)
+        ref_frame.grid(row=3, column=0, columnspan=2, sticky="w", pady=(0, 10))
+        
+        ttk.Radiobutton(ref_frame, text="MITRE ATT&CK", variable=self.cross_ref_source, value="mitre_attack", command=self.on_cross_ref_change).grid(row=0, column=0, sticky=tk.W, padx=(0, 20))
+        ttk.Radiobutton(ref_frame, text="MITRE EMBED", variable=self.cross_ref_source, value="mitre_embed", command=self.on_cross_ref_change).grid(row=0, column=1, sticky=tk.W, padx=(0, 20))
+        ttk.Radiobutton(ref_frame, text="Both Frameworks", variable=self.cross_ref_source, value="both", command=self.on_cross_ref_change).grid(row=0, column=2, sticky=tk.W)
+    
+    def create_embed_properties_section(self, parent):
+        """Create MITRE EMBED device properties section"""
+        self.embed_frame = ttk.LabelFrame(parent, text="MITRE EMBED Device Properties", padding="10")
+        self.embed_frame.grid(row=3, column=0, columnspan=2, sticky="ew", pady=(0, 20))
+        self.embed_frame.columnconfigure(0, weight=1)
+        
+        # Initially hidden
+        self.embed_frame.grid_remove()
+        
+        # Create notebook for categories
+        self.embed_notebook = ttk.Notebook(self.embed_frame)
+        self.embed_notebook.grid(row=0, column=0, sticky="ew", pady=(0, 10))
+        
+        # Get device properties from MITRE EMBED integrator
+        device_props = self.embed_integrator.get_device_properties_form()
+        
+        # Create tabs for each category
+        self.embed_checkboxes = {}
+        for category, properties in device_props.items():
+            tab_frame = ttk.Frame(self.embed_notebook)
+            self.embed_notebook.add(tab_frame, text=category.replace('_', ' ').title())
+            
+            # Create scrollable frame
+            canvas = tk.Canvas(tab_frame, height=200)
+            scrollbar = ttk.Scrollbar(tab_frame, orient="vertical", command=canvas.yview)
+            scrollable_frame = ttk.Frame(canvas)
+            
+            scrollable_frame.bind(
+                "<Configure>",
+                lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+            )
+            
+            canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+            canvas.configure(yscrollcommand=scrollbar.set)
+            
+            canvas.grid(row=0, column=0, sticky="nsew")
+            scrollbar.grid(row=0, column=1, sticky="ns")
+            
+            tab_frame.columnconfigure(0, weight=1)
+            tab_frame.rowconfigure(0, weight=1)
+            
+            # Add checkboxes for properties
+            self.embed_checkboxes[category] = {}
+            row = 0
+            for prop_id, description in properties.items():
+                var = tk.BooleanVar()
+                checkbox = ttk.Checkbutton(
+                    scrollable_frame, 
+                    text=f"{prop_id}: {description}",
+                    variable=var,
+                    wraplength=400
+                )
+                checkbox.grid(row=row, column=0, sticky="w", pady=2, padx=5)
+                self.embed_checkboxes[category][prop_id] = var
+                row += 1
+    
+    def on_cross_ref_change(self):
+        """Handle cross-reference source change"""
+        source = self.cross_ref_source.get()
+        if source in ['mitre_embed', 'both']:
+            self.embed_frame.grid()
+        else:
+            self.embed_frame.grid_remove()
+    
     def create_file_upload_section(self, parent):
         """Create file upload widgets"""
         # File upload frame
         upload_frame = ttk.LabelFrame(parent, text="File Upload", padding="10")
-        upload_frame.grid(row=1, column=0, columnspan=2, sticky="ew", pady=(0, 20))
+        upload_frame.grid(row=2, column=0, columnspan=2, sticky="ew", pady=(0, 20))
         upload_frame.columnconfigure(1, weight=1)
         
         # Threat Model file
@@ -154,7 +244,7 @@ class TaraDesktopApp:
         """Create progress and status widgets"""
         # Progress frame
         progress_frame = ttk.LabelFrame(parent, text="Status", padding="10")
-        progress_frame.grid(row=2, column=0, columnspan=2, sticky="ew", pady=(0, 20))
+        progress_frame.grid(row=4, column=0, columnspan=2, sticky="ew", pady=(0, 20))
         progress_frame.columnconfigure(0, weight=1)
         
         # Progress bar
@@ -169,7 +259,7 @@ class TaraDesktopApp:
         """Create results display widgets"""
         # Results frame
         results_frame = ttk.LabelFrame(parent, text="Analysis Results", padding="10")
-        results_frame.grid(row=3, column=0, columnspan=2, sticky="nsew", pady=(0, 20))
+        results_frame.grid(row=5, column=0, columnspan=2, sticky="nsew", pady=(0, 20))
         results_frame.columnconfigure(0, weight=1)
         results_frame.rowconfigure(0, weight=1)
         
@@ -187,7 +277,7 @@ class TaraDesktopApp:
         """Create action buttons"""
         # Buttons frame
         buttons_frame = ttk.Frame(parent)
-        buttons_frame.grid(row=4, column=0, columnspan=2, pady=(0, 10))
+        buttons_frame.grid(row=6, column=0, columnspan=2, pady=(0, 10))
         
         # Analyze button
         self.analyze_button = ttk.Button(
@@ -198,14 +288,23 @@ class TaraDesktopApp:
         )
         self.analyze_button.pack(side=tk.LEFT, padx=(0, 10))
         
-        # Save report button
-        self.save_button = ttk.Button(
+        # Save PDF report button
+        self.save_pdf_button = ttk.Button(
             buttons_frame, 
-            text="Save Report as PDF", 
-            command=self.save_report,
+            text="Save PDF Report", 
+            command=self.save_pdf_report,
             state=tk.DISABLED
         )
-        self.save_button.pack(side=tk.LEFT, padx=(0, 10))
+        self.save_pdf_button.pack(side=tk.LEFT, padx=(0, 10))
+        
+        # Save Excel report button
+        self.save_excel_button = ttk.Button(
+            buttons_frame, 
+            text="Save Excel Report", 
+            command=self.save_excel_report,
+            state=tk.DISABLED
+        )
+        self.save_excel_button.pack(side=tk.LEFT, padx=(0, 10))
         
         # Clear button
         self.clear_button = ttk.Button(
@@ -259,26 +358,29 @@ class TaraDesktopApp:
             self.log_message(f"Cross-mapping data file selected: {Path(filename).name}")
     
     def validate_files(self):
-        """Validate that all required files are selected and exist"""
+        """Validate that required files are selected based on input type"""
         errors = []
+        input_type = self.input_type.get()
         
-        # Check threat model file
-        if not self.threat_model_file.get():
-            errors.append("Threat model file is required")
-        elif not os.path.exists(self.threat_model_file.get()):
-            errors.append("Threat model file does not exist")
-        elif not self.threat_model_file.get().lower().endswith(('.json', '.yaml', '.yml')):
-            errors.append("Threat model file must be JSON or YAML format")
+        # Check threat model file if required
+        if input_type in ['threat_model', 'both']:
+            if not self.threat_model_file.get():
+                errors.append("Threat model file is required for selected analysis type")
+            elif not os.path.exists(self.threat_model_file.get()):
+                errors.append("Threat model file does not exist")
+            elif not self.threat_model_file.get().lower().endswith(('.json', '.yaml', '.yml')):
+                errors.append("Threat model file must be JSON or YAML format")
         
-        # Check block diagram file
-        if not self.block_diagram_file.get():
-            errors.append("Block diagram file is required")
-        elif not os.path.exists(self.block_diagram_file.get()):
-            errors.append("Block diagram file does not exist")
-        elif not self.block_diagram_file.get().lower().endswith(('.svg', '.png', '.jpg', '.jpeg')):
-            errors.append("Block diagram file must be SVG, PNG, or JPEG format")
+        # Check block diagram file if required
+        if input_type in ['block_diagram', 'both']:
+            if not self.block_diagram_file.get():
+                errors.append("Block diagram file is required for selected analysis type")
+            elif not os.path.exists(self.block_diagram_file.get()):
+                errors.append("Block diagram file does not exist")
+            elif not self.block_diagram_file.get().lower().endswith(('.svg', '.png', '.jpg', '.jpeg')):
+                errors.append("Block diagram file must be SVG, PNG, or JPEG format")
         
-        # Check cross-mapping file
+        # Cross-mapping file is always required
         if not self.crossmap_file.get():
             errors.append("Cross-mapping data file is required")
         elif not os.path.exists(self.crossmap_file.get()):
@@ -298,7 +400,8 @@ class TaraDesktopApp:
         
         # Disable buttons and start progress
         self.analyze_button.config(state=tk.DISABLED)
-        self.save_button.config(state=tk.DISABLED)
+        self.save_pdf_button.config(state=tk.DISABLED)
+        self.save_excel_button.config(state=tk.DISABLED)
         self.progress_bar.start()
         
         # Clear previous results
