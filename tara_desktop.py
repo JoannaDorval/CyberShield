@@ -571,7 +571,7 @@ class TaraDesktopApp:
         # Scroll to top
         self.results_text.see(1.0)
     
-    def save_report(self):
+    def save_pdf_report(self):
         """Save the TARA report as PDF"""
         if not self.analysis_data:
             messagebox.showerror("Error", "No analysis data available to save")
@@ -624,6 +624,68 @@ class TaraDesktopApp:
             self.update_status("Failed to save report!")
             messagebox.showerror("Save Error", error_msg)
     
+    def save_excel_report(self):
+        """Save the TARA report as Excel"""
+        if not self.analysis_data:
+            messagebox.showerror("Error", "No analysis data available to save")
+            return
+        
+        # Get save location
+        filename = filedialog.asksaveasfilename(
+            title="Save TARA Excel Report",
+            defaultextension=".xlsx",
+            filetypes=[
+                ("Excel files", "*.xlsx"),
+                ("All files", "*.*")
+            ],
+            initialfile=f"TARA_Excel_Report_{self.analysis_data['id']}.xlsx"
+        )
+        
+        if not filename:
+            return
+        
+        try:
+            self.update_status("Generating Excel report...")
+            self.log_message("Generating Excel report...")
+            
+            # Collect EMBED properties if selected
+            embed_assessment = None
+            if self.cross_ref_source.get() in ['mitre_embed', 'both']:
+                selected_properties = {}
+                for category, checkboxes in self.embed_checkboxes.items():
+                    selected_properties[category] = [
+                        prop_id for prop_id, var in checkboxes.items() if var.get()
+                    ]
+                
+                if any(selected_properties.values()):
+                    embed_assessment = self.embed_integrator.assess_device_properties(selected_properties)
+            
+            # Generate Excel report
+            excel_path = self.excel_generator.generate_excel_report(
+                self.analysis_data,
+                self.input_type.get(),
+                self.cross_ref_source.get(),
+                embed_assessment
+            )
+            
+            # Copy to desired location
+            import shutil
+            shutil.copy2(excel_path, filename)
+            
+            # Clean up temporary file
+            if os.path.exists(excel_path):
+                os.remove(excel_path)
+            
+            self.update_status("Excel report saved successfully!")
+            self.log_message(f"Excel report saved to: {filename}")
+            messagebox.showinfo("Success", f"TARA Excel report saved successfully to:\n{filename}")
+            
+        except Exception as e:
+            error_msg = f"Failed to save Excel report: {str(e)}"
+            self.logger.error(error_msg, exc_info=True)
+            self.update_status("Failed to save Excel report!")
+            messagebox.showerror("Save Error", error_msg)
+    
     def clear_all(self):
         """Clear all inputs and results"""
         self.threat_model_file.set("")
@@ -635,7 +697,8 @@ class TaraDesktopApp:
         self.results_text.delete(1.0, tk.END)
         self.results_text.config(state=tk.DISABLED)
         
-        self.save_button.config(state=tk.DISABLED)
+        self.save_pdf_button.config(state=tk.DISABLED)
+        self.save_excel_button.config(state=tk.DISABLED)
         self.update_status("Ready to process files...")
         self.log_message("All fields cleared")
     
