@@ -203,8 +203,7 @@ class TaraDesktopApp:
                 checkbox = ttk.Checkbutton(
                     scrollable_frame, 
                     text=f"{prop_id}: {description}",
-                    variable=var,
-                    wraplength=400
+                    variable=var
                 )
                 checkbox.grid(row=row, column=0, sticky="w", pady=2, padx=5)
                 self.embed_checkboxes[category][prop_id] = var
