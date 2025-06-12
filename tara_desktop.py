@@ -696,61 +696,132 @@ class TaraDesktopApp:
         """Integrate analysis with MITRE frameworks"""
         cross_ref_source = self.cross_ref_source.get()
         
-        if cross_ref_source in ['mitre_attack', 'both']:
-            self.update_status("Mapping to MITRE ATT&CK...")
-            self.log_message("Integrating with MITRE ATT&CK framework...")
-            
-            # Load cross-mapping data if available, otherwise use empty dict
-            crossmap_data = {}
-            crossmap_file = self.crossmap_file.get()
-            if crossmap_file and os.path.exists(crossmap_file):
-                try:
-                    crossmap_data = self.crossmap_parser.parse(crossmap_file)
-                    self.log_message("Using custom cross-mapping data")
-                except Exception as e:
-                    self.log_message(f"Warning: Failed to load cross-mapping data, using built-in mappings: {e}")
-            else:
-                self.log_message("Using built-in MITRE ATT&CK mappings")
-            
-            # Perform MITRE integration
-            mitre_mappings = self.mitre_integrator.map_threats_to_mitre(
-                analysis_data.get('threats', []),
-                crossmap_data
-            )
-            analysis_data['mitre_mappings'] = mitre_mappings
-            
-            # Generate recommendations
-            recommendations = self.mitre_integrator.generate_recommendations(
-                analysis_data.get('threats', []),
-                mitre_mappings,
-                analysis_data.get('mitigations', [])
-            )
-            analysis_data['recommendations'] = recommendations
-            
-            self.log_message(f"Mapped {len(mitre_mappings.get('technique_mappings', []))} MITRE techniques")
+
         
-        if cross_ref_source in ['mitre_embed', 'both']:
-            self.update_status("Processing MITRE EMBED assessment...")
-            
-            # Collect EMBED properties if not already done
-            if 'embed_assessment' not in analysis_data:
-                selected_properties = {}
-                for category, checkboxes in self.embed_checkboxes.items():
-                    selected_properties[category] = [
-                        prop_id for prop_id, var in checkboxes.items() if var.get()
-                    ]
-                
-                if any(selected_properties.values()):
-                    embed_assessment = self.embed_integrator.assess_device_properties(selected_properties)
-                    analysis_data['embed_assessment'] = embed_assessment
-                    
-                    # Add EMBED controls to mitigations
-                    embed_controls = embed_assessment.get('recommended_controls', [])
-                    analysis_data['mitigations'].extend(embed_controls)
-                    
-                    self.log_message(f"Added {len(embed_controls)} MITRE EMBED controls")
+        # Always perform MITRE EMBED assessment for all assets
+        self.update_status("Processing MITRE EMBED assessment...")
+        
+        # Auto-assess all assets against EMBED properties
+        embed_assessment = self._auto_assess_assets_with_embed(analysis_data.get('assets', []))
+        analysis_data['embed_assessment'] = embed_assessment
+        
+        # Add EMBED-derived threats to existing threats
+        embed_threats = embed_assessment.get('threat_vectors', [])
+        existing_threats = analysis_data.get('threats', [])
+        analysis_data['threats'] = existing_threats + embed_threats
+        
+        # Add EMBED controls to mitigations
+        embed_controls = embed_assessment.get('controls', [])
+        existing_mitigations = analysis_data.get('mitigations', [])
+        analysis_data['mitigations'] = existing_mitigations + embed_controls
+        
+        self.log_message(f"Auto-assessed {len(analysis_data.get('assets', []))} assets against MITRE EMBED")
+        self.log_message(f"Added {len(embed_threats)} EMBED threat vectors and {len(embed_controls)} controls")
+        
+        # Always perform MITRE ATT&CK integration with all threats (original + EMBED-derived)
+        self.update_status("Mapping to MITRE ATT&CK...")
+        self.log_message("Integrating with MITRE ATT&CK framework...")
+        
+        # Load cross-mapping data if available, otherwise use empty dict
+        crossmap_data = {}
+        crossmap_file = self.crossmap_file.get()
+        if crossmap_file and os.path.exists(crossmap_file):
+            try:
+                crossmap_data = self.crossmap_parser.parse(crossmap_file)
+                self.log_message("Using custom cross-mapping data")
+            except Exception as e:
+                self.log_message(f"Warning: Failed to load cross-mapping data, using built-in mappings: {e}")
+        else:
+            self.log_message("Using built-in MITRE ATT&CK mappings")
+        
+        # Perform MITRE integration with all threats
+        all_threats = analysis_data.get('threats', [])
+        mitre_mappings = self.mitre_integrator.map_threats_to_mitre(all_threats, crossmap_data)
+        analysis_data['mitre_mappings'] = mitre_mappings
+        
+        # Generate recommendations based on all threats and mitigations
+        recommendations = self.mitre_integrator.generate_recommendations(
+            all_threats,
+            mitre_mappings,
+            analysis_data.get('mitigations', [])
+        )
+        analysis_data['recommendations'] = recommendations
+        
+        self.log_message(f"Mapped {len(mitre_mappings.get('technique_mappings', []))} MITRE ATT&CK techniques")
         
         return analysis_data
+    
+    def _auto_assess_assets_with_embed(self, assets: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """Automatically assess assets against MITRE EMBED device properties"""
+        # Determine device properties based on asset types and characteristics
+        inferred_properties = {
+            'hardware': [],
+            'system_software': [],
+            'application_software': [],
+            'networking': []
+        }
+        
+        for asset in assets:
+            asset_type = asset.get('type', '').lower()
+            asset_name = asset.get('name', '').lower()
+            asset_desc = asset.get('description', '').lower()
+            
+            # Infer hardware properties
+            if any(term in asset_type or term in asset_name or term in asset_desc 
+                   for term in ['server', 'device', 'sensor', 'iot', 'embedded', 'hardware']):
+                inferred_properties['hardware'].extend([
+                    'PID-11',  # Microprocessor
+                    'PID-12',  # Memory/Storage
+                    'PID-13'   # Firmware/BIOS
+                ])
+                
+            # Infer system software properties
+            if any(term in asset_type or term in asset_name or term in asset_desc 
+                   for term in ['server', 'system', 'database', 'operating', 'os']):
+                inferred_properties['system_software'].extend([
+                    'PID-21',  # Bootloader
+                    'PID-23',  # Operating system
+                    'PID-24',  # Device drivers
+                    'PID-25',  # System services
+                    'PID-28'   # Update mechanisms
+                ])
+                
+            # Infer application software properties
+            if any(term in asset_type or term in asset_name or term in asset_desc 
+                   for term in ['application', 'app', 'web', 'api', 'service', 'software']):
+                inferred_properties['application_software'].extend([
+                    'PID-31',   # Application software
+                    'PID-311',  # Web/HTTP applications
+                    'PID-317',  # Communication protocols
+                    'PID-319'   # API interfaces
+                ])
+                
+            # Infer networking properties
+            if any(term in asset_type or term in asset_name or term in asset_desc 
+                   for term in ['network', 'gateway', 'router', 'firewall', 'load balancer', 'api']):
+                inferred_properties['networking'].extend([
+                    'PID-41',   # Remote network services
+                    'PID-411',  # Services with sensitive data
+                    'PID-413',  # Wired networking
+                    'PID-414'   # Network security protocols
+                ])
+        
+        # Remove duplicates
+        for category in inferred_properties:
+            inferred_properties[category] = list(set(inferred_properties[category]))
+        
+        # Perform EMBED assessment with inferred properties
+        if any(inferred_properties.values()):
+            return self.embed_integrator.assess_device_properties(inferred_properties)
+        else:
+            # Default assessment for generic assets
+            default_properties = {
+                'hardware': ['PID-11', 'PID-12'],
+                'system_software': ['PID-23', 'PID-25'],
+                'application_software': ['PID-31'],
+                'networking': ['PID-41']
+            }
+            return self.embed_integrator.assess_device_properties(default_properties)
     
     def _finalize_analysis(self, analysis_data: Dict[str, Any]):
         """Finalize analysis and prepare results"""
