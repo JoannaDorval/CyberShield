@@ -6,7 +6,7 @@ from PIL import Image
 import xml.etree.ElementTree as ET
 import pandas as pd
 import zipfile
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Optional
 
 class ThreatModelParser:
     """Parser for threat model files (JSON/YAML)"""
@@ -314,7 +314,7 @@ class BlockDiagramParser:
         try:
             with Image.open(filepath) as img:
                 width, height = img.size
-                format_type = img.format.lower()
+                format_type = img.format.lower() if img.format else 'unknown'
                 
                 # Basic image analysis
                 return {
@@ -459,7 +459,7 @@ class AssetListParser:
             self.logger.error(f"Failed to parse asset list: {e}")
             raise
     
-    def _extract_asset_from_row(self, row) -> Dict[str, Any]:
+    def _extract_asset_from_row(self, row) -> Optional[Dict[str, Any]]:
         """Extract asset information from Excel row"""
         # Common column mappings
         column_mappings = {

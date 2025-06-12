@@ -22,7 +22,12 @@ class EnhancedTaraExcelGenerator:
         try:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             filename = f"TARA_Excel_Report_{timestamp}.xlsx"
-            filepath = os.path.join('uploads', filename)
+            
+            # Create uploads directory if it doesn't exist
+            output_dir = 'uploads'
+            os.makedirs(output_dir, exist_ok=True)
+            
+            filepath = os.path.join(output_dir, filename)
             
             # Create writer object
             with pd.ExcelWriter(filepath, engine='openpyxl') as writer:
