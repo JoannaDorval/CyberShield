@@ -31,17 +31,8 @@ class EnhancedTaraExcelGenerator:
             
             # Create writer object
             with pd.ExcelWriter(filepath, engine='openpyxl') as writer:
-                # Create all worksheets
-                self._create_executive_summary(writer, analysis_data, input_type, cross_ref_source)
-                self._create_assets_sheet(writer, analysis_data)
-                self._create_damage_scenarios_sheet(writer, analysis_data)
-                self._create_impact_analysis_sheet(writer, analysis_data)
-                self._create_cybersecurity_controls_sheet(writer, analysis_data, embed_assessment)
-                self._create_threat_scenarios_sheet(writer, analysis_data)
-                self._create_attack_paths_sheet(writer, analysis_data)
-                self._create_attack_feasibility_sheet(writer, analysis_data)
-                self._create_risk_evaluation_sheet(writer, analysis_data)
-                self._create_cybersecurity_goals_sheet(writer, analysis_data)
+                # Create single consolidated worksheet
+                self._create_consolidated_sheet(writer, analysis_data, input_type, cross_ref_source, embed_assessment)
             
             self.logger.info(f"Excel report generated: {filepath}")
             return filepath
@@ -49,6 +40,248 @@ class EnhancedTaraExcelGenerator:
         except Exception as e:
             self.logger.error(f"Failed to generate Excel report: {e}")
             raise
+    
+    def _create_consolidated_sheet(self, writer, analysis_data: Dict, input_type: str, cross_ref_source: str, embed_assessment: Optional[Dict]):
+        """Create single consolidated worksheet with all sections arranged horizontally"""
+        from openpyxl.styles import PatternFill, Font, Alignment, Border, Side
+        
+        # Create the main worksheet
+        ws = writer.book.create_sheet('TARA Analysis Report')
+        writer.book.active = ws
+        
+        # Define color schemes for each section
+        colors = {
+            'assets': 'E7E6E6',
+            'damage_scenario': 'E2EFDA', 
+            'impact_analysis': 'FFF2CC',
+            'cybersecurity_controls': 'F2F2F2',
+            'threat_scenarios': 'DEEAF6',
+            'attack_path': 'FCE4D6',
+            'attack_feasibility': 'EDEDED',
+            'cybersecurity_goals': 'E1D5E7'
+        }
+        
+        # Define section headers and their columns
+        sections = {
+            'Assets': ['Asset ID', 'Asset Name', 'Security Property Loss'],
+            'Damage Scenario': ['Stakeholder', 'Damage Scenario Description'],
+            'Impact Analysis': ['Impact Category', 'Impact Level', 'Impact Description'],
+            'Cybersecurity Controls': ['Control ID', 'Control Name', 'Control Description'],
+            'Threat Scenarios': ['Threat ID', 'Threat Name', 'STRIDE Category'],
+            'Attack Path': ['Attack Vector', 'Attack Steps', 'Prerequisites'],
+            'Attack Feasibility Assessment': ['Feasibility Factor', 'Rating', 'Justification'],
+            'Cybersecurity Goals and Claims': ['Goal ID', 'Security Goal', 'Claim Statement']
+        }
+        
+        # Start position
+        current_col = 1
+        
+        # Create each section
+        for section_name, columns in sections.items():
+            color_key = section_name.lower().replace(' ', '_').replace('_and_', '_')
+            if color_key not in colors:
+                color_key = 'assets'  # Default color
+            
+            fill_color = colors[color_key]
+            
+            # Create section header
+            self._create_section_header(ws, section_name, current_col, len(columns), fill_color)
+            
+            # Create column headers
+            for i, col_name in enumerate(columns):
+                cell = ws.cell(row=2, column=current_col + i)
+                cell.value = col_name
+                cell.fill = PatternFill(start_color=fill_color, end_color=fill_color, fill_type='solid')
+                cell.font = Font(bold=True, size=10)
+                cell.alignment = Alignment(horizontal='center', vertical='center')
+                cell.border = Border(
+                    left=Side(style='thin'),
+                    right=Side(style='thin'),
+                    top=Side(style='thin'),
+                    bottom=Side(style='thin')
+                )
+            
+            # Fill section data
+            self._fill_section_data(ws, section_name, analysis_data, current_col, fill_color, embed_assessment)
+            
+            # Move to next section
+            current_col += len(columns) + 1  # Add gap between sections
+        
+        # Auto-fit column widths
+        for column in ws.columns:
+            max_length = 0
+            column_letter = column[0].column_letter
+            for cell in column:
+                try:
+                    if len(str(cell.value)) > max_length:
+                        max_length = len(str(cell.value))
+                except:
+                    pass
+            adjusted_width = min(max_length + 2, 50)
+            ws.column_dimensions[column_letter].width = adjusted_width
+    
+    def _create_section_header(self, ws, section_name, start_col, num_cols, fill_color):
+        """Create merged header for section"""
+        from openpyxl.styles import PatternFill, Font, Alignment, Border, Side
+        
+        # Merge cells for header
+        if num_cols > 1:
+            ws.merge_cells(start_row=1, start_column=start_col, end_row=1, end_column=start_col + num_cols - 1)
+        
+        # Style the header
+        header_cell = ws.cell(row=1, column=start_col)
+        header_cell.value = section_name
+        header_cell.fill = PatternFill(start_color=fill_color, end_color=fill_color, fill_type='solid')
+        header_cell.font = Font(bold=True, size=12)
+        header_cell.alignment = Alignment(horizontal='center', vertical='center')
+        header_cell.border = Border(
+            left=Side(style='thick'),
+            right=Side(style='thick'),
+            top=Side(style='thick'),
+            bottom=Side(style='thick')
+        )
+    
+    def _fill_section_data(self, ws, section_name, analysis_data, start_col, fill_color, embed_assessment):
+        """Fill data for each section"""
+        from openpyxl.styles import PatternFill, Alignment, Border, Side
+        
+        fill = PatternFill(start_color=fill_color, end_color=fill_color, fill_type='solid')
+        border = Border(
+            left=Side(style='thin'),
+            right=Side(style='thin'),
+            top=Side(style='thin'),
+            bottom=Side(style='thin')
+        )
+        
+        row = 3  # Start data from row 3
+        
+        if section_name == 'Assets':
+            assets = analysis_data.get('assets', [])
+            for i, asset in enumerate(assets):
+                ws.cell(row=row + i, column=start_col).value = f"A{i+1:03d}"
+                ws.cell(row=row + i, column=start_col + 1).value = asset.get('name', 'Unknown')
+                ws.cell(row=row + i, column=start_col + 2).value = asset.get('criticality', 'Medium')
+                
+                for col in range(3):
+                    cell = ws.cell(row=row + i, column=start_col + col)
+                    cell.fill = fill
+                    cell.border = border
+                    cell.alignment = Alignment(vertical='center')
+        
+        elif section_name == 'Damage Scenario':
+            threats = analysis_data.get('threats', [])
+            stakeholders = ['Users', 'Organization', 'Partners', 'Regulators']
+            
+            scenario_row = row
+            for threat in threats[:10]:  # Limit to first 10 threats
+                for stakeholder in stakeholders:
+                    if scenario_row - row < 20:  # Limit total scenarios
+                        ws.cell(row=scenario_row, column=start_col).value = stakeholder
+                        scenario_desc = self._generate_damage_scenario(threat, stakeholder)
+                        ws.cell(row=scenario_row, column=start_col + 1).value = scenario_desc
+                        
+                        for col in range(2):
+                            cell = ws.cell(row=scenario_row, column=start_col + col)
+                            cell.fill = fill
+                            cell.border = border
+                            cell.alignment = Alignment(vertical='center', wrap_text=True)
+                        
+                        scenario_row += 1
+        
+        elif section_name == 'Impact Analysis':
+            threats = analysis_data.get('threats', [])
+            for i, threat in enumerate(threats[:15]):  # Limit to 15 threats
+                impact = self._calculate_impact_analysis(threat)
+                ws.cell(row=row + i, column=start_col).value = impact.get('category', 'Operational')
+                ws.cell(row=row + i, column=start_col + 1).value = impact.get('level', 'Medium')
+                ws.cell(row=row + i, column=start_col + 2).value = impact.get('description', 'Standard impact assessment')
+                
+                for col in range(3):
+                    cell = ws.cell(row=row + i, column=start_col + col)
+                    cell.fill = fill
+                    cell.border = border
+                    cell.alignment = Alignment(vertical='center', wrap_text=True)
+        
+        elif section_name == 'Cybersecurity Controls':
+            controls = analysis_data.get('mitigations', [])
+            if embed_assessment:
+                controls.extend(embed_assessment.get('controls', []))
+            
+            for i, control in enumerate(controls[:20]):  # Limit to 20 controls
+                ws.cell(row=row + i, column=start_col).value = f"C{i+1:03d}"
+                ws.cell(row=row + i, column=start_col + 1).value = control.get('name', control.get('title', 'Security Control'))
+                ws.cell(row=row + i, column=start_col + 2).value = control.get('description', 'Standard security control')
+                
+                for col in range(3):
+                    cell = ws.cell(row=row + i, column=start_col + col)
+                    cell.fill = fill
+                    cell.border = border
+                    cell.alignment = Alignment(vertical='center', wrap_text=True)
+        
+        elif section_name == 'Threat Scenarios':
+            threats = analysis_data.get('threats', [])
+            for i, threat in enumerate(threats[:15]):
+                stride = self._analyze_stride_threat(threat)
+                ws.cell(row=row + i, column=start_col).value = f"T{i+1:03d}"
+                ws.cell(row=row + i, column=start_col + 1).value = threat.get('name', threat.get('title', 'Security Threat'))
+                ws.cell(row=row + i, column=start_col + 2).value = stride.get('primary_category', 'Information Disclosure')
+                
+                for col in range(3):
+                    cell = ws.cell(row=row + i, column=start_col + col)
+                    cell.fill = fill
+                    cell.border = border
+                    cell.alignment = Alignment(vertical='center', wrap_text=True)
+        
+        elif section_name == 'Attack Path':
+            threats = analysis_data.get('threats', [])
+            for i, threat in enumerate(threats[:12]):
+                attack_path = self._generate_attack_path(threat)
+                ws.cell(row=row + i, column=start_col).value = attack_path.get('vector', 'Network')
+                ws.cell(row=row + i, column=start_col + 1).value = attack_path.get('steps', 'Multi-step attack sequence')
+                ws.cell(row=row + i, column=start_col + 2).value = attack_path.get('prerequisites', 'Network access required')
+                
+                for col in range(3):
+                    cell = ws.cell(row=row + i, column=start_col + col)
+                    cell.fill = fill
+                    cell.border = border
+                    cell.alignment = Alignment(vertical='center', wrap_text=True)
+        
+        elif section_name == 'Attack Feasibility Assessment':
+            threats = analysis_data.get('threats', [])
+            feasibility_factors = ['Technical Skill', 'Resources Required', 'Detection Likelihood']
+            
+            factor_row = row
+            for threat in threats[:8]:  # Limit threats
+                for factor in feasibility_factors:
+                    if factor_row - row < 24:  # Limit total assessments
+                        feasibility = self._assess_attack_feasibility(threat)
+                        ws.cell(row=factor_row, column=start_col).value = factor
+                        ws.cell(row=factor_row, column=start_col + 1).value = feasibility.get('rating', 'Medium')
+                        ws.cell(row=factor_row, column=start_col + 2).value = feasibility.get('justification', 'Standard assessment')
+                        
+                        for col in range(3):
+                            cell = ws.cell(row=factor_row, column=start_col + col)
+                            cell.fill = fill
+                            cell.border = border
+                            cell.alignment = Alignment(vertical='center', wrap_text=True)
+                        
+                        factor_row += 1
+        
+        elif section_name == 'Cybersecurity Goals and Claims':
+            threats = analysis_data.get('threats', [])
+            mitigations = analysis_data.get('mitigations', [])
+            
+            for i, threat in enumerate(threats[:12]):
+                goal = self._generate_cybersecurity_goal(threat, mitigations)
+                ws.cell(row=row + i, column=start_col).value = f"G{i+1:03d}"
+                ws.cell(row=row + i, column=start_col + 1).value = goal.get('goal', 'Ensure system security')
+                ws.cell(row=row + i, column=start_col + 2).value = goal.get('claim', 'Security controls effectively mitigate threats')
+                
+                for col in range(3):
+                    cell = ws.cell(row=row + i, column=start_col + col)
+                    cell.fill = fill
+                    cell.border = border
+                    cell.alignment = Alignment(vertical='center', wrap_text=True)
     
     def _create_executive_summary(self, writer, analysis_data: Dict, input_type: str, cross_ref_source: str):
         """Create executive summary worksheet"""
