@@ -63,6 +63,7 @@ class TaraDesktopApp:
         self.threat_parser = ThreatModelParser()
         self.diagram_parser = BlockDiagramParser()
         self.crossmap_parser = CrossMapParser()
+        self.asset_parser = AssetListParser()
         self.mitre_integrator = MitreIntegrator()
         self.embed_integrator = MitreEmbedIntegrator()
         self.report_generator = TaraReportGenerator()
@@ -518,39 +519,306 @@ class TaraDesktopApp:
         analysis_thread.start()
     
     def perform_analysis(self):
-        """Perform the threat analysis (runs in separate thread)"""
+        """Perform enhanced threat analysis with support for multiple input types"""
         try:
-            self.update_status("Starting analysis...")
-            self.log_message("=== Starting TARA Analysis ===")
+            self.update_status("Starting enhanced TARA analysis...")
+            self.log_message("=== Starting Enhanced TARA Analysis ===")
             
-            # Parse threat model
-            self.update_status("Parsing threat model...")
-            self.log_message("Parsing threat model...")
-            threat_data = self.threat_parser.parse(self.threat_model_file.get())
-            threats_count = len(threat_data.get('threats', []))
-            assets_count = len(threat_data.get('assets', []))
-            self.log_message(f"Found {threats_count} threats and {assets_count} assets")
+            # Determine workflow mode and input type
+            workflow_mode = self.workflow_mode.get()
+            input_type = self.input_type.get()
             
-            # Parse block diagram
-            self.update_status("Analyzing block diagram...")
+            if workflow_mode == "questionnaire":
+                # MITRE EMBED Questionnaire Mode
+                analysis_data = self._process_questionnaire_mode()
+            else:
+                # File Input Mode
+                analysis_data = self._process_file_input_mode(input_type)
+            
+            # Integrate with MITRE frameworks
+            analysis_data = self._integrate_mitre_frameworks(analysis_data)
+            
+            # Generate comprehensive analysis
+            self._finalize_analysis(analysis_data)
+            
+        except Exception as e:
+            error_msg = f"Analysis failed: {str(e)}"
+            self.logger.error(error_msg, exc_info=True)
+            self.update_status("Analysis failed!")
+            self.log_message(f"ERROR: {error_msg}")
+            messagebox.showerror("Analysis Error", error_msg)
+        finally:
+            # Re-enable buttons and stop progress
+            self.root.after(0, self._analysis_complete)
+    
+    def _process_questionnaire_mode(self) -> Dict[str, Any]:
+        """Process MITRE EMBED questionnaire responses"""
+        self.update_status("Processing MITRE EMBED questionnaire...")
+        self.log_message("Processing device properties from questionnaire...")
+        
+        # Collect selected properties
+        selected_properties = {}
+        for category, checkboxes in self.embed_checkboxes.items():
+            selected_properties[category] = [
+                prop_id for prop_id, var in checkboxes.items() if var.get()
+            ]
+        
+        # Generate assessment from properties
+        embed_assessment = self.embed_integrator.assess_device_properties(selected_properties)
+        
+        # Extract generated threats and assets
+        threats = embed_assessment.get('threat_vectors', [])
+        assets = self._generate_assets_from_properties(selected_properties)
+        
+        analysis_data = {
+            'threats': threats,
+            'assets': assets,
+            'data_flows': [],
+            'risks': [],
+            'mitigations': embed_assessment.get('recommended_controls', []),
+            'embed_assessment': embed_assessment,
+            'metadata': {
+                'source': 'questionnaire',
+                'input_type': 'mitre_embed_questionnaire',
+                'properties_count': sum(len(props) for props in selected_properties.values())
+            }
+        }
+        
+        self.log_message(f"Generated {len(threats)} threats from {analysis_data['metadata']['properties_count']} device properties")
+        return analysis_data
+    
+    def _process_file_input_mode(self, input_type: str) -> Dict[str, Any]:
+        """Process file-based input analysis"""
+        self.update_status(f"Processing {input_type} input...")
+        
+        analysis_data = {
+            'threats': [],
+            'assets': [],
+            'data_flows': [],
+            'risks': [],
+            'mitigations': [],
+            'metadata': {'source': 'file_input', 'input_type': input_type}
+        }
+        
+        if input_type == "threat_model":
+            self.log_message("Parsing threat model file...")
+            threat_file = self.threat_model_file.get()
+            if threat_file:
+                threat_data = self.threat_parser.parse(threat_file)
+                analysis_data.update(threat_data)
+                self.log_message(f"Loaded {len(threat_data.get('threats', []))} threats, {len(threat_data.get('assets', []))} assets")
+        
+        elif input_type == "asset_list":
+            self.log_message("Parsing Excel asset list...")
+            asset_file = self.asset_list_file.get()
+            if asset_file:
+                asset_data = self.asset_parser.parse(asset_file)
+                analysis_data.update(asset_data)
+                self.log_message(f"Loaded {len(asset_data.get('assets', []))} assets, generated {len(asset_data.get('threats', []))} threats")
+        
+        elif input_type == "block_diagram":
             self.log_message("Analyzing block diagram...")
-            diagram_data = self.diagram_parser.parse(self.block_diagram_file.get())
-            components_count = len(diagram_data.get('components', []))
-            self.log_message(f"Identified {components_count} components in diagram")
+            diagram_file = self.block_diagram_file.get()
+            if diagram_file:
+                diagram_data = self.diagram_parser.parse(diagram_file)
+                analysis_data['data_flows'] = diagram_data.get('data_flows', [])
+                analysis_data['assets'].extend(diagram_data.get('components', []))
+                self.log_message(f"Identified {len(diagram_data.get('components', []))} components")
+        
+        elif input_type == "multiple":
+            self.log_message("Processing multiple input files...")
             
-            # Parse cross-mapping data
-            self.update_status("Loading cross-mapping data...")
-            self.log_message("Loading cross-mapping data...")
-            crossmap_data = self.crossmap_parser.parse(self.crossmap_file.get())
+            # Process threat model if provided
+            threat_file = self.threat_model_file.get()
+            if threat_file:
+                threat_data = self.threat_parser.parse(threat_file)
+                analysis_data['threats'].extend(threat_data.get('threats', []))
+                analysis_data['assets'].extend(threat_data.get('assets', []))
+                analysis_data['mitigations'].extend(threat_data.get('mitigations', []))
+            
+            # Process asset list if provided
+            asset_file = self.asset_list_file.get()
+            if asset_file:
+                asset_data = self.asset_parser.parse(asset_file)
+                analysis_data['assets'].extend(asset_data.get('assets', []))
+                analysis_data['threats'].extend(asset_data.get('threats', []))
+                analysis_data['data_flows'].extend(asset_data.get('data_flows', []))
+            
+            # Process block diagram if provided
+            diagram_file = self.block_diagram_file.get()
+            if diagram_file:
+                diagram_data = self.diagram_parser.parse(diagram_file)
+                analysis_data['data_flows'].extend(diagram_data.get('data_flows', []))
+                analysis_data['assets'].extend(diagram_data.get('components', []))
+            
+            self.log_message(f"Combined analysis: {len(analysis_data['threats'])} threats, {len(analysis_data['assets'])} assets")
+        
+        return analysis_data
+    
+    def _integrate_mitre_frameworks(self, analysis_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Integrate analysis with MITRE frameworks"""
+        cross_ref_source = self.cross_ref_source.get()
+        
+        if cross_ref_source in ['mitre_attack', 'both']:
+            self.update_status("Mapping to MITRE ATT&CK...")
+            self.log_message("Integrating with MITRE ATT&CK framework...")
+            
+            # Load cross-mapping data if available
+            crossmap_data = {}
+            crossmap_file = self.crossmap_file.get()
+            if crossmap_file:
+                crossmap_data = self.crossmap_parser.parse(crossmap_file)
             
             # Perform MITRE integration
-            self.update_status("Mapping threats to MITRE ATT&CK...")
-            self.log_message("Mapping threats to MITRE ATT&CK framework...")
             mitre_mappings = self.mitre_integrator.map_threats_to_mitre(
-                threat_data.get('threats', []),
+                analysis_data.get('threats', []),
                 crossmap_data
             )
-            mappings_count = len(mitre_mappings.get('technique_mappings', []))
+            analysis_data['mitre_mappings'] = mitre_mappings
+            
+            # Generate recommendations
+            recommendations = self.mitre_integrator.generate_recommendations(
+                analysis_data.get('threats', []),
+                mitre_mappings,
+                analysis_data.get('mitigations', [])
+            )
+            analysis_data['recommendations'] = recommendations
+            
+            self.log_message(f"Mapped {len(mitre_mappings.get('technique_mappings', []))} MITRE techniques")
+        
+        if cross_ref_source in ['mitre_embed', 'both']:
+            self.update_status("Processing MITRE EMBED assessment...")
+            
+            # Collect EMBED properties if not already done
+            if 'embed_assessment' not in analysis_data:
+                selected_properties = {}
+                for category, checkboxes in self.embed_checkboxes.items():
+                    selected_properties[category] = [
+                        prop_id for prop_id, var in checkboxes.items() if var.get()
+                    ]
+                
+                if any(selected_properties.values()):
+                    embed_assessment = self.embed_integrator.assess_device_properties(selected_properties)
+                    analysis_data['embed_assessment'] = embed_assessment
+                    
+                    # Add EMBED controls to mitigations
+                    embed_controls = embed_assessment.get('recommended_controls', [])
+                    analysis_data['mitigations'].extend(embed_controls)
+                    
+                    self.log_message(f"Added {len(embed_controls)} MITRE EMBED controls")
+        
+        return analysis_data
+    
+    def _finalize_analysis(self, analysis_data: Dict[str, Any]):
+        """Finalize analysis and prepare results"""
+        self.update_status("Finalizing analysis...")
+        self.log_message("Generating final analysis report...")
+        
+        # Store analysis data
+        self.analysis_data = analysis_data
+        
+        # Generate analysis summary
+        summary = self._generate_analysis_summary(analysis_data)
+        
+        # Display results
+        self.root.after(0, lambda: self._display_results(summary))
+        
+        self.update_status("Analysis complete!")
+        self.log_message("=== TARA Analysis Complete ===")
+    
+    def _generate_assets_from_properties(self, selected_properties: Dict[str, List[str]]) -> List[Dict[str, Any]]:
+        """Generate asset list from selected device properties"""
+        assets = []
+        
+        # Create assets based on property categories
+        for category, properties in selected_properties.items():
+            if properties:
+                asset = {
+                    'name': f'{category.replace("_", " ").title()} Component',
+                    'type': category,
+                    'description': f'Device component representing {category} properties',
+                    'properties': properties,
+                    'criticality': 'Medium'
+                }
+                assets.append(asset)
+        
+        return assets
+    
+    def _generate_analysis_summary(self, analysis_data: Dict[str, Any]) -> str:
+        """Generate comprehensive analysis summary"""
+        summary_lines = [
+            "TARA ANALYSIS SUMMARY",
+            "=" * 50,
+            "",
+            f"Analysis Type: {analysis_data.get('metadata', {}).get('input_type', 'Unknown')}",
+            f"Source: {analysis_data.get('metadata', {}).get('source', 'Unknown')}",
+            "",
+            "RESULTS OVERVIEW:",
+            f"• Threats Identified: {len(analysis_data.get('threats', []))}",
+            f"• Assets Analyzed: {len(analysis_data.get('assets', []))}",
+            f"• Data Flows: {len(analysis_data.get('data_flows', []))}",
+            f"• Mitigations: {len(analysis_data.get('mitigations', []))}",
+            ""
+        ]
+        
+        # Add MITRE mappings info
+        if 'mitre_mappings' in analysis_data:
+            mappings = analysis_data['mitre_mappings']
+            summary_lines.extend([
+                "MITRE ATT&CK INTEGRATION:",
+                f"• Technique Mappings: {len(mappings.get('technique_mappings', []))}",
+                f"• Recommendations: {len(analysis_data.get('recommendations', []))}",
+                ""
+            ])
+        
+        # Add EMBED assessment info
+        if 'embed_assessment' in analysis_data:
+            embed = analysis_data['embed_assessment']
+            summary_lines.extend([
+                "MITRE EMBED ASSESSMENT:",
+                f"• Device Properties: {len(embed.get('security_implications', {}))}",
+                f"• Threat Vectors: {len(embed.get('threat_vectors', []))}",
+                f"• Controls: {len(embed.get('recommended_controls', []))}",
+                ""
+            ])
+        
+        # Add threat breakdown
+        threats = analysis_data.get('threats', [])
+        if threats:
+            threat_categories = {}
+            for threat in threats:
+                category = threat.get('category', 'Unknown')
+                threat_categories[category] = threat_categories.get(category, 0) + 1
+            
+            summary_lines.extend([
+                "THREAT CATEGORIES:",
+                *[f"• {category}: {count}" for category, count in threat_categories.items()],
+                ""
+            ])
+        
+        summary_lines.extend([
+            "Analysis completed successfully.",
+            "Use 'Save PDF Report' or 'Save Excel Report' to export results."
+        ])
+        
+        return "\n".join(summary_lines)
+    
+    def _display_results(self, summary: str):
+        """Display analysis results in the text widget"""
+        self.results_text.config(state=tk.NORMAL)
+        self.results_text.delete(1.0, tk.END)
+        self.results_text.insert(tk.END, summary)
+        self.results_text.config(state=tk.DISABLED)
+        
+        # Scroll to top
+        self.results_text.see(1.0)
+    
+    def _analysis_complete(self):
+        """Re-enable UI elements after analysis completion"""
+        self.progress_bar.stop()
+        self.analyze_button.config(state=tk.NORMAL)
+        self.save_pdf_button.config(state=tk.NORMAL)
+        self.save_excel_button.config(state=tk.NORMAL)
             self.log_message(f"Generated {mappings_count} MITRE technique mappings")
             
             # Generate recommendations
