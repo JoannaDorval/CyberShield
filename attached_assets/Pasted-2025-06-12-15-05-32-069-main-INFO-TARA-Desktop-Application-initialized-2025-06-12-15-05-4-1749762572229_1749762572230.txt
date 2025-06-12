@@ -1,0 +1,26 @@
+2025-06-12 15:05:32,069 - __main__ - INFO - TARA Desktop Application initialized
+2025-06-12 15:05:48,915 - __main__ - INFO - Threat model file selected: Tester_Model.tm7
+2025-06-12 15:05:56,022 - __main__ - INFO - === Starting Enhanced TARA Analysis ===
+2025-06-12 15:05:56,022 - __main__ - INFO - Parsing threat model file...
+2025-06-12 15:05:56,427 - parsers - ERROR - Failed to parse .tm7 file: File is not a zip file
+2025-06-12 15:05:56,722 - __main__ - INFO - Loaded 0 threats, 0 assets
+2025-06-12 15:05:56,722 - __main__ - INFO - Auto-assessed 0 assets against MITRE EMBED
+2025-06-12 15:05:56,722 - __main__ - INFO - Added 1 EMBED threat vectors and 0 controls
+2025-06-12 15:05:56,722 - __main__ - INFO - Integrating with MITRE ATT&CK framework...
+2025-06-12 15:05:56,722 - __main__ - INFO - Using built-in MITRE ATT&CK mappings
+2025-06-12 15:05:56,722 - __main__ - INFO - Mapped 1 MITRE ATT&CK techniques
+2025-06-12 15:05:56,739 - __main__ - INFO - Generating final analysis report...
+2025-06-12 15:05:56,739 - __main__ - INFO - === TARA Analysis Complete ===
+2025-06-12 15:06:42,910 - __main__ - INFO - Generating Excel report...
+2025-06-12 15:06:43,328 - enhanced_excel_generator - ERROR - Failed to generate Excel report: 'MergedCell' object has no attribute 'column_letter'
+2025-06-12 15:06:43,344 - __main__ - ERROR - Failed to save Excel report: 'MergedCell' object has no attribute 'column_letter'
+Traceback (most recent call last):
+  File "J:\v7\CyberShieldTracker\tara_desktop.py", line 1029, in save_excel_report
+    excel_path = self.excel_generator.generate_excel_report(
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "J:\v7\CyberShieldTracker\enhanced_excel_generator.py", line 35, in generate_excel_report
+    self._create_consolidated_sheet(writer, analysis_data, input_type, cross_ref_source, embed_assessment)
+  File "J:\v7\CyberShieldTracker\enhanced_excel_generator.py", line 113, in _create_consolidated_sheet
+    column_letter = column[0].column_letter
+                    ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'MergedCell' object has no attribute 'column_letter'

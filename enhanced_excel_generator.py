@@ -108,16 +108,22 @@ class EnhancedTaraExcelGenerator:
             current_col += len(columns) + 1  # Add gap between sections
         
         # Auto-fit column widths
-        for column in ws.columns:
+        for col_idx in range(1, ws.max_column + 1):
             max_length = 0
-            column_letter = column[0].column_letter
-            for cell in column:
+            column_letter = ws.cell(row=1, column=col_idx).column_letter
+            
+            for row_idx in range(1, ws.max_row + 1):
+                cell = ws.cell(row=row_idx, column=col_idx)
                 try:
-                    if len(str(cell.value)) > max_length:
-                        max_length = len(str(cell.value))
+                    # Skip merged cells that don't have a value
+                    if hasattr(cell, 'value') and cell.value is not None:
+                        cell_length = len(str(cell.value))
+                        if cell_length > max_length:
+                            max_length = cell_length
                 except:
                     pass
-            adjusted_width = min(max_length + 2, 50)
+            
+            adjusted_width = min(max(max_length + 2, 12), 50)  # Min 12, max 50
             ws.column_dimensions[column_letter].width = adjusted_width
     
     def _create_section_header(self, ws, section_name, start_col, num_cols, fill_color):
