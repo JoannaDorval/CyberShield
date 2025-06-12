@@ -132,15 +132,18 @@ class TaraExcelGenerator:
             current_col += len(columns) + 1  # Add gap between sections
         
         # Auto-fit column widths
+        from openpyxl.utils import get_column_letter
+        from openpyxl.cell.cell import MergedCell
+        
         for col_idx in range(1, ws.max_column + 1):
             max_length = 0
-            column_letter = ws.cell(row=1, column=col_idx).column_letter
+            column_letter = get_column_letter(col_idx)
             
             for row_idx in range(1, ws.max_row + 1):
                 cell = ws.cell(row=row_idx, column=col_idx)
                 try:
-                    # Skip merged cells that don't have a value
-                    if hasattr(cell, 'value') and cell.value is not None:
+                    # Skip merged cells and check for actual content
+                    if not isinstance(cell, MergedCell) and cell.value is not None:
                         cell_length = len(str(cell.value))
                         if cell_length > max_length:
                             max_length = cell_length

@@ -1,0 +1,35 @@
+PS C:\Users\w102955> python "J:\V8\CyberShieldTracker\tara_desktop.py"
+2025-06-12 15:18:00,466 - __main__ - INFO - TARA Desktop Application initialized
+2025-06-12 15:18:21,059 - __main__ - INFO - === Starting Enhanced TARA Analysis ===
+2025-06-12 15:18:21,067 - __main__ - INFO - Processing device properties from questionnaire...
+2025-06-12 15:18:21,067 - __main__ - INFO - Generated 0 threats from 5 device properties
+2025-06-12 15:18:21,067 - __main__ - INFO - Auto-assessed 1 assets against MITRE EMBED
+2025-06-12 15:18:21,067 - __main__ - INFO - Added 0 EMBED threat vectors and 0 controls
+2025-06-12 15:18:21,067 - __main__ - INFO - Integrating with MITRE ATT&CK framework...
+2025-06-12 15:18:21,067 - __main__ - INFO - Using built-in MITRE ATT&CK mappings
+2025-06-12 15:18:21,067 - __main__ - INFO - Mapped 0 MITRE ATT&CK techniques
+2025-06-12 15:18:21,067 - __main__ - INFO - Generating final analysis report...
+2025-06-12 15:18:21,084 - __main__ - INFO - === TARA Analysis Complete ===
+2025-06-12 15:18:38,815 - __main__ - INFO - === Starting Enhanced TARA Analysis ===
+2025-06-12 15:18:38,842 - __main__ - INFO - Processing device properties from questionnaire...
+2025-06-12 15:18:38,850 - __main__ - INFO - Generated 1 threats from 14 device properties
+2025-06-12 15:18:38,850 - __main__ - INFO - Auto-assessed 4 assets against MITRE EMBED
+2025-06-12 15:18:38,875 - __main__ - INFO - Added 2 EMBED threat vectors and 0 controls
+2025-06-12 15:18:38,882 - __main__ - INFO - Integrating with MITRE ATT&CK framework...
+2025-06-12 15:18:38,882 - __main__ - INFO - Using built-in MITRE ATT&CK mappings
+2025-06-12 15:18:38,882 - __main__ - INFO - Mapped 3 MITRE ATT&CK techniques
+2025-06-12 15:18:38,900 - __main__ - INFO - Generating final analysis report...
+2025-06-12 15:18:38,905 - __main__ - INFO - === TARA Analysis Complete ===
+2025-06-12 15:18:58,910 - __main__ - INFO - Generating Excel report...
+2025-06-12 15:18:59,199 - enhanced_excel_generator - ERROR - Failed to generate Excel report: 'MergedCell' object has no attribute 'column_letter'
+2025-06-12 15:18:59,199 - __main__ - ERROR - Failed to save Excel report: 'MergedCell' object has no attribute 'column_letter'
+Traceback (most recent call last):
+  File "J:\V8\CyberShieldTracker\tara_desktop.py", line 1029, in save_excel_report
+    excel_path = self.excel_generator.generate_excel_report(
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "J:\V8\CyberShieldTracker\enhanced_excel_generator.py", line 35, in generate_excel_report
+    self._create_consolidated_sheet(writer, analysis_data, input_type, cross_ref_source, embed_assessment)
+  File "J:\V8\CyberShieldTracker\enhanced_excel_generator.py", line 113, in _create_consolidated_sheet
+    column_letter = ws.cell(row=1, column=col_idx).column_letter
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'MergedCell' object has no attribute 'column_letter'
