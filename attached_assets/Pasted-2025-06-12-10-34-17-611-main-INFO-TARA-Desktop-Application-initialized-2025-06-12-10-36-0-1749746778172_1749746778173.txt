@@ -1,0 +1,101 @@
+2025-06-12 10:34:17,611 - __main__ - INFO - TARA Desktop Application initialized
+2025-06-12 10:36:08,220 - __main__ - INFO - Threat model file selected: Tester_Model.tm7
+2025-06-12 10:36:41,765 - __main__ - INFO - Threat model file selected: iot_device_threat_model.json
+2025-06-12 10:37:00,714 - __main__ - INFO - Cross-mapping data file selected: crossmap_example.json
+2025-06-12 10:37:03,434 - __main__ - INFO - === Starting Enhanced TARA Analysis ===
+2025-06-12 10:37:03,444 - __main__ - INFO - Parsing threat model file...
+2025-06-12 10:37:03,751 - __main__ - INFO - Loaded 5 threats, 5 assets
+2025-06-12 10:37:03,751 - __main__ - INFO - Integrating with MITRE ATT&CK framework...
+2025-06-12 10:37:03,984 - __main__ - INFO - Mapped 2 MITRE techniques
+2025-06-12 10:37:03,984 - __main__ - INFO - Added 1 MITRE EMBED controls
+2025-06-12 10:37:03,984 - __main__ - INFO - Generating final analysis report...
+2025-06-12 10:37:03,984 - __main__ - INFO - === TARA Analysis Complete ===
+Exception in Tkinter callback
+Traceback (most recent call last):
+  File "C:\Users\w102955\AppData\Local\Programs\Python\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "J:\v4\CyberShieldTracker\tara_desktop.py", line 891, in save_excel_report
+    initialfile=f"TARA_Excel_Report_{self.analysis_data['id']}.xlsx"
+                                     ~~~~~~~~~~~~~~~~~~^^^^^^
+KeyError: 'id'
+Exception in Tkinter callback
+Traceback (most recent call last):
+  File "C:\Users\w102955\AppData\Local\Programs\Python\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "J:\v4\CyberShieldTracker\tara_desktop.py", line 891, in save_excel_report
+    initialfile=f"TARA_Excel_Report_{self.analysis_data['id']}.xlsx"
+                                     ~~~~~~~~~~~~~~~~~~^^^^^^
+KeyError: 'id'
+Exception in Tkinter callback
+Traceback (most recent call last):
+  File "C:\Users\w102955\AppData\Local\Programs\Python\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "J:\v4\CyberShieldTracker\tara_desktop.py", line 891, in save_excel_report
+    initialfile=f"TARA_Excel_Report_{self.analysis_data['id']}.xlsx"
+                                     ~~~~~~~~~~~~~~~~~~^^^^^^
+KeyError: 'id'
+Exception in Tkinter callback
+Traceback (most recent call last):
+  File "C:\Users\w102955\AppData\Local\Programs\Python\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "J:\v4\CyberShieldTracker\tara_desktop.py", line 891, in save_excel_report
+    initialfile=f"TARA_Excel_Report_{self.analysis_data['id']}.xlsx"
+                                     ~~~~~~~~~~~~~~~~~~^^^^^^
+KeyError: 'id'
+Exception in Tkinter callback
+Traceback (most recent call last):
+  File "C:\Users\w102955\AppData\Local\Programs\Python\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "J:\v4\CyberShieldTracker\tara_desktop.py", line 891, in save_excel_report
+    initialfile=f"TARA_Excel_Report_{self.analysis_data['id']}.xlsx"
+                                     ~~~~~~~~~~~~~~~~~~^^^^^^
+KeyError: 'id'
+Exception in Tkinter callback
+Traceback (most recent call last):
+  File "C:\Users\w102955\AppData\Local\Programs\Python\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "J:\v4\CyberShieldTracker\tara_desktop.py", line 891, in save_excel_report
+    initialfile=f"TARA_Excel_Report_{self.analysis_data['id']}.xlsx"
+                                     ~~~~~~~~~~~~~~~~~~^^^^^^
+KeyError: 'id'
+Exception in Tkinter callback
+Traceback (most recent call last):
+  File "C:\Users\w102955\AppData\Local\Programs\Python\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "J:\v4\CyberShieldTracker\tara_desktop.py", line 838, in save_pdf_report
+    initialfile=f"TARA_Report_{self.analysis_data['id']}.pdf"
+                               ~~~~~~~~~~~~~~~~~~^^^^^^
+KeyError: 'id'
+Exception in Tkinter callback
+Traceback (most recent call last):
+  File "C:\Users\w102955\AppData\Local\Programs\Python\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "J:\v4\CyberShieldTracker\tara_desktop.py", line 838, in save_pdf_report
+    initialfile=f"TARA_Report_{self.analysis_data['id']}.pdf"
+                               ~~~~~~~~~~~~~~~~~~^^^^^^
+KeyError: 'id'
+Exception in Tkinter callback
+Traceback (most recent call last):
+  File "C:\Users\w102955\AppData\Local\Programs\Python\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "J:\v4\CyberShieldTracker\tara_desktop.py", line 838, in save_pdf_report
+    initialfile=f"TARA_Report_{self.analysis_data['id']}.pdf"
+                               ~~~~~~~~~~~~~~~~~~^^^^^^
+KeyError: 'id'
+Exception in Tkinter callback
+Traceback (most recent call last):
+  File "C:\Users\w102955\AppData\Local\Programs\Python\Python312\Lib\tkinter\__init__.py", line 1968, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "J:\v4\CyberShieldTracker\tara_desktop.py", line 838, in save_pdf_report
+    initialfile=f"TARA_Report_{self.analysis_data['id']}.pdf"
+                  

@@ -1,0 +1,13 @@
+Name,Type,Description,Criticality,Location,Owner,Confidentiality,Integrity,Availability
+Web Server,Server,Main application web server,High,DMZ,IT Team,High,High,High
+Database Server,Database,Customer data storage,Critical,Internal Network,Database Team,Critical,Critical,High
+Load Balancer,Network,Traffic distribution system,Medium,DMZ,Network Team,Low,High,Critical
+Mobile App,Application,Customer mobile application,High,Cloud,Development Team,High,High,Medium
+API Gateway,Application,REST API management,High,DMZ,API Team,High,High,High
+File Storage,Storage,Document and media storage,Medium,Internal Network,Storage Team,Medium,Medium,Medium
+Payment Processor,System,Payment processing system,Critical,Secure Zone,Finance Team,Critical,Critical,Critical
+User Directory,Database,Authentication and user data,High,Internal Network,Security Team,High,Critical,High
+Firewall,Network,Network security appliance,High,Perimeter,Security Team,Medium,Critical,Critical
+Backup System,System,Data backup and recovery,Medium,Secure Zone,IT Team,High,Critical,Medium
+IoT Sensors,Device,Environmental monitoring devices,Low,Facility,Operations Team,Low,Medium,Medium
+Admin Console,Application,System administration interface,High,Internal Network,IT Team,High,High,High

@@ -200,14 +200,14 @@ class TaraDesktopApp:
         ttk.Radiobutton(self.input_frame, text="Multiple Files", variable=self.input_type, value="multiple").grid(row=1, column=0, sticky=tk.W, pady=(5,0))
         
         # Cross-reference source selection
-        ttk.Label(config_frame, text="Cross-Reference Framework:", font=('Arial', 10, 'bold')).grid(row=4, column=0, sticky=tk.W, pady=(10, 5))
+        ttk.Label(config_frame, text="Analysis Framework:", font=('Arial', 10, 'bold')).grid(row=4, column=0, sticky=tk.W, pady=(10, 5))
         
         ref_frame = ttk.Frame(config_frame)
         ref_frame.grid(row=5, column=0, columnspan=2, sticky="w", pady=(0, 10))
         
-        ttk.Radiobutton(ref_frame, text="MITRE ATT&CK", variable=self.cross_ref_source, value="mitre_attack", command=self.on_cross_ref_change).grid(row=0, column=0, sticky=tk.W, padx=(0, 20))
-        ttk.Radiobutton(ref_frame, text="MITRE EMBED", variable=self.cross_ref_source, value="mitre_embed", command=self.on_cross_ref_change).grid(row=0, column=1, sticky=tk.W, padx=(0, 20))
-        ttk.Radiobutton(ref_frame, text="Both Frameworks", variable=self.cross_ref_source, value="both", command=self.on_cross_ref_change).grid(row=0, column=2, sticky=tk.W)
+        ttk.Radiobutton(ref_frame, text="MITRE ATT&CK Integration", variable=self.cross_ref_source, value="mitre_attack", command=self.on_cross_ref_change).grid(row=0, column=0, sticky=tk.W, padx=(0, 20))
+        ttk.Radiobutton(ref_frame, text="MITRE EMBED Assessment", variable=self.cross_ref_source, value="mitre_embed", command=self.on_cross_ref_change).grid(row=0, column=1, sticky=tk.W, padx=(0, 20))
+        ttk.Radiobutton(ref_frame, text="Comprehensive Analysis", variable=self.cross_ref_source, value="both", command=self.on_cross_ref_change).grid(row=0, column=2, sticky=tk.W)
     
     def create_embed_properties_section(self, parent):
         """Create MITRE EMBED device properties section"""
@@ -320,8 +320,8 @@ class TaraDesktopApp:
         self.bd_button = ttk.Button(self.upload_frame, text="Browse", command=self.browse_block_diagram)
         self.bd_button.grid(row=2, column=2, pady=(10, 0))
         
-        # Cross-mapping data file
-        self.cm_label = ttk.Label(self.upload_frame, text="Cross-mapping Data (JSON):")
+        # Cross-mapping data file (optional)
+        self.cm_label = ttk.Label(self.upload_frame, text="Cross-mapping Data (Optional):")
         self.cm_label.grid(row=3, column=0, sticky=tk.W, padx=(0, 10), pady=(10, 0))
         self.cm_entry = ttk.Entry(self.upload_frame, textvariable=self.crossmap_file, width=50)
         self.cm_entry.grid(row=3, column=1, sticky="ew", padx=(0, 10), pady=(10, 0))
@@ -463,35 +463,71 @@ class TaraDesktopApp:
             self.log_message(f"Cross-mapping data file selected: {Path(filename).name}")
     
     def validate_files(self):
-        """Validate that required files are selected based on input type"""
+        """Validate that at least one input source is provided"""
         errors = []
+        workflow_mode = self.workflow_mode.get()
         input_type = self.input_type.get()
         
-        # Check threat model file if required
-        if input_type in ['threat_model', 'both']:
-            if not self.threat_model_file.get():
-                errors.append("Threat model file is required for selected analysis type")
-            elif not os.path.exists(self.threat_model_file.get()):
-                errors.append("Threat model file does not exist")
-            elif not self.threat_model_file.get().lower().endswith(('.json', '.yaml', '.yml')):
-                errors.append("Threat model file must be JSON or YAML format")
+        if workflow_mode == "questionnaire":
+            # For questionnaire mode, check if any EMBED properties are selected
+            has_properties = False
+            for category, checkboxes in self.embed_checkboxes.items():
+                if any(var.get() for var in checkboxes.values()):
+                    has_properties = True
+                    break
+            
+            if not has_properties:
+                errors.append("Please select at least one device property for MITRE EMBED assessment")
         
-        # Check block diagram file if required
-        if input_type in ['block_diagram', 'both']:
-            if not self.block_diagram_file.get():
-                errors.append("Block diagram file is required for selected analysis type")
-            elif not os.path.exists(self.block_diagram_file.get()):
-                errors.append("Block diagram file does not exist")
-            elif not self.block_diagram_file.get().lower().endswith(('.svg', '.png', '.jpg', '.jpeg')):
-                errors.append("Block diagram file must be SVG, PNG, or JPEG format")
-        
-        # Cross-mapping file is always required
-        if not self.crossmap_file.get():
-            errors.append("Cross-mapping data file is required")
-        elif not os.path.exists(self.crossmap_file.get()):
-            errors.append("Cross-mapping data file does not exist")
-        elif not self.crossmap_file.get().lower().endswith('.json'):
-            errors.append("Cross-mapping data file must be JSON format")
+        else:  # file_input mode
+            has_input = False
+            
+            # Check threat model file
+            if input_type == "threat_model" and self.threat_model_file.get():
+                if os.path.exists(self.threat_model_file.get()):
+                    has_input = True
+                else:
+                    errors.append("Threat model file does not exist")
+            
+            # Check asset list file  
+            elif input_type == "asset_list" and self.asset_list_file.get():
+                if os.path.exists(self.asset_list_file.get()):
+                    has_input = True
+                else:
+                    errors.append("Asset list file does not exist")
+            
+            # Check block diagram file
+            elif input_type == "block_diagram" and self.block_diagram_file.get():
+                if os.path.exists(self.block_diagram_file.get()):
+                    has_input = True
+                else:
+                    errors.append("Block diagram file does not exist")
+            
+            # Check multiple files
+            elif input_type == "multiple":
+                if (self.threat_model_file.get() and os.path.exists(self.threat_model_file.get())) or \
+                   (self.asset_list_file.get() and os.path.exists(self.asset_list_file.get())) or \
+                   (self.block_diagram_file.get() and os.path.exists(self.block_diagram_file.get())):
+                    has_input = True
+                
+                # Check individual file existence
+                if self.threat_model_file.get() and not os.path.exists(self.threat_model_file.get()):
+                    errors.append("Threat model file does not exist")
+                if self.asset_list_file.get() and not os.path.exists(self.asset_list_file.get()):
+                    errors.append("Asset list file does not exist")
+                if self.block_diagram_file.get() and not os.path.exists(self.block_diagram_file.get()):
+                    errors.append("Block diagram file does not exist")
+            
+            if not has_input and input_type != "multiple":
+                if input_type == "threat_model":
+                    errors.append("Please select a threat model file (.tm7/.json/.yaml)")
+                elif input_type == "asset_list":
+                    errors.append("Please select an Excel asset list file")
+                elif input_type == "block_diagram":
+                    errors.append("Please select a block diagram file")
+            
+            elif not has_input and input_type == "multiple":
+                errors.append("Please select at least one input file for analysis")
         
         return errors
     
@@ -664,11 +700,17 @@ class TaraDesktopApp:
             self.update_status("Mapping to MITRE ATT&CK...")
             self.log_message("Integrating with MITRE ATT&CK framework...")
             
-            # Load cross-mapping data if available
+            # Load cross-mapping data if available, otherwise use empty dict
             crossmap_data = {}
             crossmap_file = self.crossmap_file.get()
-            if crossmap_file:
-                crossmap_data = self.crossmap_parser.parse(crossmap_file)
+            if crossmap_file and os.path.exists(crossmap_file):
+                try:
+                    crossmap_data = self.crossmap_parser.parse(crossmap_file)
+                    self.log_message("Using custom cross-mapping data")
+                except Exception as e:
+                    self.log_message(f"Warning: Failed to load cross-mapping data, using built-in mappings: {e}")
+            else:
+                self.log_message("Using built-in MITRE ATT&CK mappings")
             
             # Perform MITRE integration
             mitre_mappings = self.mitre_integrator.map_threats_to_mitre(
@@ -715,7 +757,9 @@ class TaraDesktopApp:
         self.update_status("Finalizing analysis...")
         self.log_message("Generating final analysis report...")
         
-        # Store analysis data
+        # Store analysis data with proper ID
+        analysis_data['id'] = datetime.now().strftime('%Y%m%d_%H%M%S')
+        analysis_data['timestamp'] = datetime.now()
         self.analysis_data = analysis_data
         
         # Generate analysis summary
