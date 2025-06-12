@@ -4,6 +4,8 @@ import os
 import logging
 from PIL import Image
 import xml.etree.ElementTree as ET
+import pandas as pd
+import zipfile
 from typing import Dict, List, Any
 
 class ThreatModelParser:
@@ -15,14 +17,17 @@ class ThreatModelParser:
     def parse(self, filepath: str) -> Dict[str, Any]:
         """Parse threat model file and extract relevant data"""
         try:
-            with open(filepath, 'r', encoding='utf-8') as file:
-                # Determine file type and parse accordingly
-                if filepath.lower().endswith('.json'):
+            # Handle different file formats
+            if filepath.lower().endswith('.tm7'):
+                data = self._parse_tm7_file(filepath)
+            elif filepath.lower().endswith('.json'):
+                with open(filepath, 'r', encoding='utf-8') as file:
                     data = json.load(file)
-                elif filepath.lower().endswith(('.yaml', '.yml')):
+            elif filepath.lower().endswith(('.yaml', '.yml')):
+                with open(filepath, 'r', encoding='utf-8') as file:
                     data = yaml.safe_load(file)
-                else:
-                    raise ValueError("Unsupported file format")
+            else:
+                raise ValueError("Unsupported file format")
             
             # Extract and normalize threat model data
             return self._normalize_threat_model(data)
@@ -30,6 +35,102 @@ class ThreatModelParser:
         except Exception as e:
             self.logger.error(f"Failed to parse threat model: {e}")
             raise
+
+    def _parse_tm7_file(self, filepath: str) -> Dict[str, Any]:
+        """Parse Microsoft Threat Modeling Tool .tm7 file"""
+        try:
+            # .tm7 files are ZIP archives containing XML data
+            with zipfile.ZipFile(filepath, 'r') as zip_file:
+                # Read the main model file
+                model_xml = None
+                for filename in zip_file.namelist():
+                    if filename.endswith('.xml') and 'model' in filename.lower():
+                        model_xml = zip_file.read(filename).decode('utf-8')
+                        break
+                
+                if not model_xml:
+                    # Fallback to any XML file
+                    for filename in zip_file.namelist():
+                        if filename.endswith('.xml'):
+                            model_xml = zip_file.read(filename).decode('utf-8')
+                            break
+                
+                if not model_xml:
+                    raise ValueError("No XML model found in .tm7 file")
+                
+                # Parse XML to extract threat model data
+                return self._parse_tm7_xml(model_xml)
+        
+        except Exception as e:
+            self.logger.error(f"Failed to parse .tm7 file: {e}")
+            # Try to parse as regular JSON/XML if ZIP parsing fails
+            try:
+                with open(filepath, 'r', encoding='utf-8') as file:
+                    content = file.read()
+                    if content.strip().startswith('<'):
+                        return self._parse_tm7_xml(content)
+                    else:
+                        return json.loads(content)
+            except:
+                raise e
+
+    def _parse_tm7_xml(self, xml_content: str) -> Dict[str, Any]:
+        """Parse XML content from .tm7 file"""
+        root = ET.fromstring(xml_content)
+        
+        # Extract threats, assets, and other elements
+        data = {
+            'threats': [],
+            'assets': [],
+            'data_flows': [],
+            'trust_boundaries': [],
+            'metadata': {}
+        }
+        
+        # Parse threats
+        for threat in root.findall('.//Threat'):
+            threat_data = {
+                'id': threat.get('Id', ''),
+                'title': threat.get('Title', ''),
+                'description': threat.get('Description', ''),
+                'category': threat.get('Category', ''),
+                'interaction': threat.get('Interaction', ''),
+                'priority': threat.get('Priority', 'Medium'),
+                'state': threat.get('State', 'Not Started')
+            }
+            data['threats'].append(threat_data)
+        
+        # Parse elements (assets)
+        for element in root.findall('.//Element'):
+            element_data = {
+                'id': element.get('Id', ''),
+                'name': element.get('Name', ''),
+                'type': element.get('Type', ''),
+                'description': element.get('Description', ''),
+                'properties': {}
+            }
+            
+            # Extract properties
+            for prop in element.findall('.//Property'):
+                prop_name = prop.get('Name', '')
+                prop_value = prop.get('Value', '')
+                element_data['properties'][prop_name] = prop_value
+            
+            data['assets'].append(element_data)
+        
+        # Parse data flows
+        for flow in root.findall('.//DataFlow'):
+            flow_data = {
+                'id': flow.get('Id', ''),
+                'name': flow.get('Name', ''),
+                'source': flow.get('SourceElement', ''),
+                'target': flow.get('TargetElement', ''),
+                'protocol': flow.get('Protocol', ''),
+                'is_encrypted': flow.get('IsEncrypted', 'false').lower() == 'true'
+            }
+            data['data_flows'].append(flow_data)
+        
+        return data
 
     def _normalize_threat_model(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """Normalize threat model data to standard format"""
@@ -314,3 +415,217 @@ class CrossMapParser:
             normalized['technique_to_mitigation'] = data['mitigation_mappings']
         
         return normalized
+
+
+class AssetListParser:
+    """Parser for Excel asset list files"""
+    
+    def __init__(self):
+        self.logger = logging.getLogger(__name__)
+    
+    def parse(self, filepath: str) -> Dict[str, Any]:
+        """Parse Excel asset list file and extract asset data"""
+        try:
+            # Read Excel file
+            df = pd.read_excel(filepath, sheet_name=0)  # Read first sheet
+            
+            # Normalize column names (handle common variations)
+            df.columns = df.columns.str.strip().str.lower()
+            
+            # Extract asset data
+            assets = []
+            for _, row in df.iterrows():
+                asset_data = self._extract_asset_from_row(row)
+                if asset_data:
+                    assets.append(asset_data)
+            
+            # Generate threats and data flows from assets
+            threats = self._generate_threats_from_assets(assets)
+            data_flows = self._infer_data_flows_from_assets(assets)
+            
+            return {
+                'assets': assets,
+                'threats': threats,
+                'data_flows': data_flows,
+                'risks': [],
+                'mitigations': [],
+                'metadata': {
+                    'source': 'excel_asset_list',
+                    'asset_count': len(assets)
+                }
+            }
+            
+        except Exception as e:
+            self.logger.error(f"Failed to parse asset list: {e}")
+            raise
+    
+    def _extract_asset_from_row(self, row) -> Dict[str, Any]:
+        """Extract asset information from Excel row"""
+        # Common column mappings
+        column_mappings = {
+            'name': ['name', 'asset_name', 'asset', 'component'],
+            'type': ['type', 'asset_type', 'category', 'classification'],
+            'description': ['description', 'desc', 'details'],
+            'criticality': ['criticality', 'priority', 'importance', 'risk_level'],
+            'location': ['location', 'zone', 'network_zone'],
+            'owner': ['owner', 'responsible', 'team'],
+            'value': ['value', 'business_value', 'asset_value'],
+            'confidentiality': ['confidentiality', 'conf', 'c'],
+            'integrity': ['integrity', 'int', 'i'],
+            'availability': ['availability', 'avail', 'a']
+        }
+        
+        asset = {}
+        
+        # Map columns to standard asset properties
+        for prop, possible_cols in column_mappings.items():
+            for col in possible_cols:
+                if col in row.index and pd.notna(row[col]):
+                    asset[prop] = str(row[col]).strip()
+                    break
+        
+        # Must have at least a name
+        if 'name' not in asset or not asset['name']:
+            return None
+        
+        # Set defaults
+        asset.setdefault('type', 'Unknown')
+        asset.setdefault('criticality', 'Medium')
+        asset.setdefault('description', '')
+        
+        # Add CIA triad ratings if present
+        cia_ratings = {}
+        for cia in ['confidentiality', 'integrity', 'availability']:
+            if cia in asset:
+                cia_ratings[cia] = asset[cia]
+        
+        if cia_ratings:
+            asset['cia_ratings'] = cia_ratings
+        
+        return asset
+    
+    def _generate_threats_from_assets(self, assets: List[Dict]) -> List[Dict]:
+        """Generate common threats based on asset types"""
+        threats = []
+        threat_id = 1
+        
+        for asset in assets:
+            asset_type = asset.get('type', '').lower()
+            asset_name = asset.get('name', '')
+            
+            # Generate threats based on asset type
+            if 'database' in asset_type or 'data' in asset_type:
+                threats.extend([
+                    {
+                        'id': f'T{threat_id:03d}',
+                        'title': f'Data Breach - {asset_name}',
+                        'description': f'Unauthorized access to sensitive data stored in {asset_name}',
+                        'category': 'Information Disclosure',
+                        'severity': 'High',
+                        'affected_assets': [asset_name]
+                    },
+                    {
+                        'id': f'T{threat_id+1:03d}',
+                        'title': f'Data Corruption - {asset_name}',
+                        'description': f'Malicious modification or corruption of data in {asset_name}',
+                        'category': 'Tampering',
+                        'severity': 'High',
+                        'affected_assets': [asset_name]
+                    }
+                ])
+                threat_id += 2
+            
+            elif 'server' in asset_type or 'system' in asset_type:
+                threats.extend([
+                    {
+                        'id': f'T{threat_id:03d}',
+                        'title': f'System Compromise - {asset_name}',
+                        'description': f'Unauthorized access and control of {asset_name}',
+                        'category': 'Elevation of Privilege',
+                        'severity': 'Critical',
+                        'affected_assets': [asset_name]
+                    },
+                    {
+                        'id': f'T{threat_id+1:03d}',
+                        'title': f'Service Disruption - {asset_name}',
+                        'description': f'Denial of service attack targeting {asset_name}',
+                        'category': 'Denial of Service',
+                        'severity': 'Medium',
+                        'affected_assets': [asset_name]
+                    }
+                ])
+                threat_id += 2
+            
+            elif 'network' in asset_type or 'router' in asset_type or 'switch' in asset_type:
+                threats.append({
+                    'id': f'T{threat_id:03d}',
+                    'title': f'Network Interception - {asset_name}',
+                    'description': f'Man-in-the-middle attack on network traffic through {asset_name}',
+                    'category': 'Information Disclosure',
+                    'severity': 'High',
+                    'affected_assets': [asset_name]
+                })
+                threat_id += 1
+            
+            elif 'application' in asset_type or 'app' in asset_type:
+                threats.extend([
+                    {
+                        'id': f'T{threat_id:03d}',
+                        'title': f'Application Vulnerability - {asset_name}',
+                        'description': f'Exploitation of security vulnerabilities in {asset_name}',
+                        'category': 'Elevation of Privilege',
+                        'severity': 'High',
+                        'affected_assets': [asset_name]
+                    },
+                    {
+                        'id': f'T{threat_id+1:03d}',
+                        'title': f'Input Validation Attack - {asset_name}',
+                        'description': f'Injection attacks targeting input validation in {asset_name}',
+                        'category': 'Tampering',
+                        'severity': 'Medium',
+                        'affected_assets': [asset_name]
+                    }
+                ])
+                threat_id += 2
+        
+        return threats
+    
+    def _infer_data_flows_from_assets(self, assets: List[Dict]) -> List[Dict]:
+        """Infer data flows between assets"""
+        data_flows = []
+        flow_id = 1
+        
+        # Group assets by type for flow inference
+        databases = [a for a in assets if 'database' in a.get('type', '').lower()]
+        applications = [a for a in assets if 'application' in a.get('type', '').lower()]
+        servers = [a for a in assets if 'server' in a.get('type', '').lower()]
+        
+        # Application to Database flows
+        for app in applications:
+            for db in databases:
+                data_flows.append({
+                    'id': f'DF{flow_id:03d}',
+                    'name': f'{app["name"]} to {db["name"]}',
+                    'source': app['name'],
+                    'target': db['name'],
+                    'description': f'Data exchange between {app["name"]} and {db["name"]}',
+                    'protocol': 'HTTPS/SQL',
+                    'data_type': 'Sensitive Data'
+                })
+                flow_id += 1
+        
+        # Server to Application flows
+        for server in servers:
+            for app in applications:
+                data_flows.append({
+                    'id': f'DF{flow_id:03d}',
+                    'name': f'{server["name"]} to {app["name"]}',
+                    'source': server['name'],
+                    'target': app['name'],
+                    'description': f'Service communication between {server["name"]} and {app["name"]}',
+                    'protocol': 'HTTPS',
+                    'data_type': 'Application Data'
+                })
+                flow_id += 1
+        
+        return data_flows

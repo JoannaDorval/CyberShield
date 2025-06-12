@@ -19,7 +19,7 @@ from pathlib import Path
 import sys
 
 # Import the existing processing modules
-from parsers import ThreatModelParser, BlockDiagramParser, CrossMapParser
+from parsers import ThreatModelParser, BlockDiagramParser, CrossMapParser, AssetListParser
 from mitre_integration import MitreIntegrator
 from mitre_embed import MitreEmbedIntegrator
 from pdf_generator import TaraReportGenerator
@@ -405,6 +405,8 @@ class TaraDesktopApp:
         filename = filedialog.askopenfilename(
             title="Select Threat Model File",
             filetypes=[
+                ("Threat Model files", "*.tm7 *.json *.yaml *.yml"),
+                ("TM7 files", "*.tm7"),
                 ("JSON files", "*.json"),
                 ("YAML files", "*.yaml *.yml"),
                 ("All files", "*.*")
@@ -413,6 +415,21 @@ class TaraDesktopApp:
         if filename:
             self.threat_model_file.set(filename)
             self.log_message(f"Threat model file selected: {Path(filename).name}")
+    
+    def browse_asset_list(self):
+        """Open file dialog for asset list Excel file"""
+        filename = filedialog.askopenfilename(
+            title="Select Asset List Excel File",
+            filetypes=[
+                ("Excel files", "*.xlsx *.xls"),
+                ("XLSX files", "*.xlsx"),
+                ("XLS files", "*.xls"),
+                ("All files", "*.*")
+            ]
+        )
+        if filename:
+            self.asset_list_file.set(filename)
+            self.log_message(f"Asset list file selected: {Path(filename).name}")
     
     def browse_block_diagram(self):
         """Open file dialog for block diagram file"""
