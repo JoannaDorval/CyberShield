@@ -17,6 +17,7 @@ import logging
 from datetime import datetime
 from pathlib import Path
 import sys
+from typing import Dict, List, Any
 
 # Import the existing processing modules
 from parsers import ThreatModelParser, BlockDiagramParser, CrossMapParser, AssetListParser
@@ -819,128 +820,6 @@ class TaraDesktopApp:
         self.analyze_button.config(state=tk.NORMAL)
         self.save_pdf_button.config(state=tk.NORMAL)
         self.save_excel_button.config(state=tk.NORMAL)
-            self.log_message(f"Generated {mappings_count} MITRE technique mappings")
-            
-            # Generate recommendations
-            self.update_status("Generating security recommendations...")
-            self.log_message("Generating security recommendations...")
-            recommendations = self.mitre_integrator.generate_recommendations(
-                threat_data.get('threats', []),
-                mitre_mappings,
-                threat_data.get('mitigations', [])
-            )
-            recommendations_count = len(recommendations)
-            self.log_message(f"Generated {recommendations_count} recommendations")
-            
-            # Store analysis data
-            self.analysis_data = {
-                'id': datetime.now().strftime('%Y%m%d_%H%M%S'),
-                'timestamp': datetime.now(),
-                'threat_model_filename': Path(self.threat_model_file.get()).name,
-                'block_diagram_filename': Path(self.block_diagram_file.get()).name,
-                'crossmap_filename': Path(self.crossmap_file.get()).name,
-                'threats': threat_data.get('threats', []),
-                'assets': threat_data.get('assets', []),
-                'risks': threat_data.get('risks', []),
-                'mitigations': threat_data.get('mitigations', []),
-                'mitre_mappings': mitre_mappings,
-                'recommendations': recommendations,
-                'status': 'completed'
-            }
-            
-            # Display results
-            self.root.after(0, self.display_results)
-            
-            self.update_status("Analysis completed successfully!")
-            self.log_message("=== Analysis Completed Successfully ===")
-            
-        except Exception as e:
-            error_msg = f"Analysis failed: {str(e)}"
-            self.logger.error(error_msg, exc_info=True)
-            self.root.after(0, lambda: self.analysis_error(error_msg))
-    
-    def analysis_error(self, error_msg):
-        """Handle analysis errors (runs on main thread)"""
-        self.progress_bar.stop()
-        self.analyze_button.config(state=tk.NORMAL)
-        self.update_status("Analysis failed!")
-        self.log_message(f"ERROR: {error_msg}")
-        messagebox.showerror("Analysis Error", error_msg)
-    
-    def display_results(self):
-        """Display analysis results in the text area"""
-        self.progress_bar.stop()
-        self.analyze_button.config(state=tk.NORMAL)
-        self.save_button.config(state=tk.NORMAL)
-        
-        if not self.analysis_data:
-            return
-        
-        # Build results summary
-        results = []
-        results.append("=== TARA ANALYSIS RESULTS ===\n")
-        results.append(f"Analysis ID: {self.analysis_data['id']}")
-        results.append(f"Generated: {self.analysis_data['timestamp'].strftime('%Y-%m-%d %H:%M:%S')}")
-        results.append(f"Status: {self.analysis_data['status'].title()}\n")
-        
-        # File information
-        results.append("=== INPUT FILES ===")
-        results.append(f"Threat Model: {self.analysis_data['threat_model_filename']}")
-        results.append(f"Block Diagram: {self.analysis_data['block_diagram_filename']}")
-        results.append(f"Cross-mapping Data: {self.analysis_data['crossmap_filename']}\n")
-        
-        # Summary statistics
-        results.append("=== SUMMARY STATISTICS ===")
-        results.append(f"Threats Identified: {len(self.analysis_data['threats'])}")
-        results.append(f"Assets Analyzed: {len(self.analysis_data['assets'])}")
-        results.append(f"MITRE Techniques Mapped: {len(self.analysis_data['mitre_mappings'].get('technique_mappings', []))}")
-        results.append(f"Recommendations Generated: {len(self.analysis_data['recommendations'])}\n")
-        
-        # MITRE mappings summary
-        if self.analysis_data['mitre_mappings'].get('tactic_coverage'):
-            results.append("=== MITRE ATT&CK TACTIC COVERAGE ===")
-            for tactic, count in self.analysis_data['mitre_mappings']['tactic_coverage'].items():
-                results.append(f"• {tactic}: {count} technique(s)")
-            results.append("")
-        
-        # Top threats
-        if self.analysis_data['threats']:
-            results.append("=== TOP IDENTIFIED THREATS ===")
-            for i, threat in enumerate(self.analysis_data['threats'][:5], 1):
-                results.append(f"{i}. {threat.get('name', 'Unnamed Threat')}")
-                results.append(f"   Severity: {threat.get('severity', 'Unknown')}")
-                results.append(f"   Category: {threat.get('category', 'Unknown')}")
-                if threat.get('description'):
-                    desc = threat['description'][:100] + "..." if len(threat['description']) > 100 else threat['description']
-                    results.append(f"   Description: {desc}")
-                results.append("")
-        
-        # Top recommendations
-        if self.analysis_data['recommendations']:
-            results.append("=== TOP PRIORITY RECOMMENDATIONS ===")
-            # Sort by priority
-            priority_order = {'Critical': 0, 'High': 1, 'Medium': 2, 'Low': 3}
-            sorted_recs = sorted(
-                self.analysis_data['recommendations'], 
-                key=lambda x: priority_order.get(x.get('priority', 'Medium'), 2)
-            )
-            
-            for i, rec in enumerate(sorted_recs[:5], 1):
-                results.append(f"{i}. {rec.get('title', 'Untitled Recommendation')}")
-                results.append(f"   Priority: {rec.get('priority', 'Medium')}")
-                results.append(f"   Category: {rec.get('category', 'Unknown')}")
-                if rec.get('description'):
-                    desc = rec['description'][:100] + "..." if len(rec['description']) > 100 else rec['description']
-                    results.append(f"   Description: {desc}")
-                results.append("")
-        
-        # Display in text widget
-        self.results_text.config(state=tk.NORMAL)
-        self.results_text.insert(tk.END, "\n".join(results))
-        self.results_text.config(state=tk.DISABLED)
-        
-        # Scroll to top
-        self.results_text.see(1.0)
     
     def save_pdf_report(self):
         """Save the TARA report as PDF"""
