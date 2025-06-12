@@ -32,8 +32,11 @@ class TaraDesktopApp:
     def __init__(self, root):
         self.root = root
         self.root.title("TARA - Threat Assessment and Remediation Analysis")
-        self.root.geometry("900x700")
+        self.root.geometry("1200x800")
         self.root.resizable(True, True)
+        
+        # Configure window to handle scrolling
+        self.root.minsize(800, 600)
         
         # Set up logging
         self.setup_logging()
@@ -42,11 +45,13 @@ class TaraDesktopApp:
         self.threat_model_file = tk.StringVar()
         self.block_diagram_file = tk.StringVar()
         self.crossmap_file = tk.StringVar()
+        self.asset_list_file = tk.StringVar()  # New: Excel asset list
         self.analysis_data = None
         
-        # Enhanced configuration variables
-        self.input_type = tk.StringVar(value="both")
+        # Enhanced configuration variables with new input types
+        self.input_type = tk.StringVar(value="threat_model")
         self.cross_ref_source = tk.StringVar(value="mitre_attack")
+        self.workflow_mode = tk.StringVar(value="file_input")  # file_input or questionnaire
         self.embed_properties = {
             'hardware': [],
             'system_software': [],
@@ -67,6 +72,15 @@ class TaraDesktopApp:
         self.create_widgets()
         
         self.logger.info("TARA Desktop Application initialized")
+    
+    def _on_mousewheel(self, event):
+        """Handle mouse wheel scrolling"""
+        self.main_canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+    
+    def _on_canvas_configure(self, event):
+        """Handle canvas resize to adjust scrollable frame width"""
+        canvas_width = event.width
+        self.main_canvas.itemconfig(self.canvas_window, width=canvas_width)
     
     def setup_logging(self):
         """Set up logging for the application"""
@@ -89,18 +103,46 @@ class TaraDesktopApp:
         self.logger = logging.getLogger(__name__)
     
     def create_widgets(self):
-        """Create and arrange GUI widgets"""
+        """Create and arrange GUI widgets with scrollable interface"""
         # Configure root window
         self.root.configure(bg='#f0f0f0')
         
-        # Main frame
-        main_frame = ttk.Frame(self.root, padding="20")
+        # Create main canvas and scrollbar for scrollable interface
+        self.main_canvas = tk.Canvas(self.root, bg='#f0f0f0')
+        self.scrollbar = ttk.Scrollbar(self.root, orient="vertical", command=self.main_canvas.yview)
+        self.scrollable_frame = ttk.Frame(self.main_canvas)
+        
+        # Configure scrollable frame
+        self.scrollable_frame.bind(
+            "<Configure>",
+            lambda e: self.main_canvas.configure(scrollregion=self.main_canvas.bbox("all"))
+        )
+        
+        # Create window in canvas
+        self.canvas_window = self.main_canvas.create_window((0, 0), window=self.scrollable_frame, anchor="nw")
+        
+        # Configure canvas scrolling
+        self.main_canvas.configure(yscrollcommand=self.scrollbar.set)
+        
+        # Pack canvas and scrollbar
+        self.main_canvas.pack(side="left", fill="both", expand=True)
+        self.scrollbar.pack(side="right", fill="y")
+        
+        # Bind mousewheel to canvas
+        self.main_canvas.bind("<MouseWheel>", self._on_mousewheel)
+        self.scrollable_frame.bind("<MouseWheel>", self._on_mousewheel)
+        
+        # Main content frame
+        main_frame = ttk.Frame(self.scrollable_frame, padding="20")
         main_frame.grid(row=0, column=0, sticky="nsew")
         
         # Configure grid weights
-        self.root.columnconfigure(0, weight=1)
-        self.root.rowconfigure(0, weight=1)
+        self.scrollable_frame.columnconfigure(0, weight=1)
+        self.scrollable_frame.rowconfigure(0, weight=1)
         main_frame.columnconfigure(1, weight=1)
+        
+        # Bind canvas resize
+        self.main_canvas.bind('<Configure>', self._on_canvas_configure)
         
         # Title
         title_label = ttk.Label(
@@ -129,26 +171,37 @@ class TaraDesktopApp:
         self.create_buttons_section(main_frame)
     
     def create_configuration_section(self, parent):
-        """Create configuration options section"""
+        """Create enhanced configuration options section"""
         config_frame = ttk.LabelFrame(parent, text="Analysis Configuration", padding="10")
         config_frame.grid(row=1, column=0, columnspan=2, sticky="ew", pady=(0, 20))
         config_frame.columnconfigure(1, weight=1)
         
-        # Input type selection
-        ttk.Label(config_frame, text="Input Document Type:", font=('Arial', 10, 'bold')).grid(row=0, column=0, sticky=tk.W, pady=(0, 5))
+        # Workflow mode selection
+        ttk.Label(config_frame, text="Analysis Workflow:", font=('Arial', 10, 'bold')).grid(row=0, column=0, sticky=tk.W, pady=(0, 5))
         
-        input_frame = ttk.Frame(config_frame)
-        input_frame.grid(row=1, column=0, columnspan=2, sticky="w", pady=(0, 15))
+        workflow_frame = ttk.Frame(config_frame)
+        workflow_frame.grid(row=1, column=0, columnspan=2, sticky="w", pady=(0, 15))
         
-        ttk.Radiobutton(input_frame, text="Threat Model Only", variable=self.input_type, value="threat_model").grid(row=0, column=0, sticky=tk.W, padx=(0, 20))
-        ttk.Radiobutton(input_frame, text="Block Diagram Only", variable=self.input_type, value="block_diagram").grid(row=0, column=1, sticky=tk.W, padx=(0, 20))
-        ttk.Radiobutton(input_frame, text="Both Documents", variable=self.input_type, value="both").grid(row=0, column=2, sticky=tk.W)
+        ttk.Radiobutton(workflow_frame, text="File Input Analysis", variable=self.workflow_mode, value="file_input", command=self.on_workflow_change).grid(row=0, column=0, sticky=tk.W, padx=(0, 20))
+        ttk.Radiobutton(workflow_frame, text="MITRE EMBED Questionnaire", variable=self.workflow_mode, value="questionnaire", command=self.on_workflow_change).grid(row=0, column=1, sticky=tk.W)
+        
+        # Input type selection (for file input mode)
+        self.input_type_label = ttk.Label(config_frame, text="Input Document Type:", font=('Arial', 10, 'bold'))
+        self.input_type_label.grid(row=2, column=0, sticky=tk.W, pady=(10, 5))
+        
+        self.input_frame = ttk.Frame(config_frame)
+        self.input_frame.grid(row=3, column=0, columnspan=2, sticky="w", pady=(0, 15))
+        
+        ttk.Radiobutton(self.input_frame, text="Threat Model (.tm7/.json)", variable=self.input_type, value="threat_model").grid(row=0, column=0, sticky=tk.W, padx=(0, 15))
+        ttk.Radiobutton(self.input_frame, text="Asset List (Excel)", variable=self.input_type, value="asset_list").grid(row=0, column=1, sticky=tk.W, padx=(0, 15))
+        ttk.Radiobutton(self.input_frame, text="Block Diagram", variable=self.input_type, value="block_diagram").grid(row=0, column=2, sticky=tk.W, padx=(0, 15))
+        ttk.Radiobutton(self.input_frame, text="Multiple Files", variable=self.input_type, value="multiple").grid(row=1, column=0, sticky=tk.W, pady=(5,0))
         
         # Cross-reference source selection
-        ttk.Label(config_frame, text="Cross-Reference Framework:", font=('Arial', 10, 'bold')).grid(row=2, column=0, sticky=tk.W, pady=(10, 5))
+        ttk.Label(config_frame, text="Cross-Reference Framework:", font=('Arial', 10, 'bold')).grid(row=4, column=0, sticky=tk.W, pady=(10, 5))
         
         ref_frame = ttk.Frame(config_frame)
-        ref_frame.grid(row=3, column=0, columnspan=2, sticky="w", pady=(0, 10))
+        ref_frame.grid(row=5, column=0, columnspan=2, sticky="w", pady=(0, 10))
         
         ttk.Radiobutton(ref_frame, text="MITRE ATT&CK", variable=self.cross_ref_source, value="mitre_attack", command=self.on_cross_ref_change).grid(row=0, column=0, sticky=tk.W, padx=(0, 20))
         ttk.Radiobutton(ref_frame, text="MITRE EMBED", variable=self.cross_ref_source, value="mitre_embed", command=self.on_cross_ref_change).grid(row=0, column=1, sticky=tk.W, padx=(0, 20))
@@ -217,27 +270,61 @@ class TaraDesktopApp:
         else:
             self.embed_frame.grid_remove()
     
+    def on_workflow_change(self):
+        """Handle workflow mode change"""
+        mode = self.workflow_mode.get()
+        if mode == "file_input":
+            # Show file upload section and input type selection
+            self.upload_frame.grid()
+            self.input_type_label.grid()
+            self.input_frame.grid()
+        else:  # questionnaire mode
+            # Hide file upload section and input type selection
+            self.upload_frame.grid_remove()
+            self.input_type_label.grid_remove()
+            self.input_frame.grid_remove()
+            # Force MITRE EMBED for questionnaire mode
+            self.cross_ref_source.set("mitre_embed")
+            self.on_cross_ref_change()
+    
     def create_file_upload_section(self, parent):
-        """Create file upload widgets"""
+        """Create enhanced file upload widgets with support for new input types"""
         # File upload frame
-        upload_frame = ttk.LabelFrame(parent, text="File Upload", padding="10")
-        upload_frame.grid(row=2, column=0, columnspan=2, sticky="ew", pady=(0, 20))
-        upload_frame.columnconfigure(1, weight=1)
+        self.upload_frame = ttk.LabelFrame(parent, text="File Upload", padding="10")
+        self.upload_frame.grid(row=2, column=0, columnspan=2, sticky="ew", pady=(0, 20))
+        self.upload_frame.columnconfigure(1, weight=1)
         
-        # Threat Model file
-        ttk.Label(upload_frame, text="Threat Model (JSON/YAML):").grid(row=0, column=0, sticky=tk.W, padx=(0, 10))
-        ttk.Entry(upload_frame, textvariable=self.threat_model_file, width=50).grid(row=0, column=1, sticky="ew", padx=(0, 10))
-        ttk.Button(upload_frame, text="Browse", command=self.browse_threat_model).grid(row=0, column=2)
+        # Threat Model file (.tm7, .json, .yaml)
+        self.tm_label = ttk.Label(self.upload_frame, text="Threat Model (.tm7/.json/.yaml):")
+        self.tm_label.grid(row=0, column=0, sticky=tk.W, padx=(0, 10))
+        self.tm_entry = ttk.Entry(self.upload_frame, textvariable=self.threat_model_file, width=50)
+        self.tm_entry.grid(row=0, column=1, sticky="ew", padx=(0, 10))
+        self.tm_button = ttk.Button(self.upload_frame, text="Browse", command=self.browse_threat_model)
+        self.tm_button.grid(row=0, column=2)
+        
+        # Asset List file (Excel)
+        self.asset_label = ttk.Label(self.upload_frame, text="Asset List (Excel .xlsx/.xls):")
+        self.asset_label.grid(row=1, column=0, sticky=tk.W, padx=(0, 10), pady=(10, 0))
+        self.asset_entry = ttk.Entry(self.upload_frame, textvariable=self.asset_list_file, width=50)
+        self.asset_entry.grid(row=1, column=1, sticky="ew", padx=(0, 10), pady=(10, 0))
+        self.asset_button = ttk.Button(self.upload_frame, text="Browse", command=self.browse_asset_list)
+        self.asset_button.grid(row=1, column=2, pady=(10, 0))
         
         # Block Diagram file
-        ttk.Label(upload_frame, text="Block Diagram (SVG/PNG/JPEG):").grid(row=1, column=0, sticky=tk.W, padx=(0, 10), pady=(10, 0))
-        ttk.Entry(upload_frame, textvariable=self.block_diagram_file, width=50).grid(row=1, column=1, sticky="ew", padx=(0, 10), pady=(10, 0))
-        ttk.Button(upload_frame, text="Browse", command=self.browse_block_diagram).grid(row=1, column=2, pady=(10, 0))
+        self.bd_label = ttk.Label(self.upload_frame, text="Block Diagram (SVG/PNG/JPEG):")
+        self.bd_label.grid(row=2, column=0, sticky=tk.W, padx=(0, 10), pady=(10, 0))
+        self.bd_entry = ttk.Entry(self.upload_frame, textvariable=self.block_diagram_file, width=50)
+        self.bd_entry.grid(row=2, column=1, sticky="ew", padx=(0, 10), pady=(10, 0))
+        self.bd_button = ttk.Button(self.upload_frame, text="Browse", command=self.browse_block_diagram)
+        self.bd_button.grid(row=2, column=2, pady=(10, 0))
         
         # Cross-mapping data file
-        ttk.Label(upload_frame, text="Cross-mapping Data (JSON):").grid(row=2, column=0, sticky=tk.W, padx=(0, 10), pady=(10, 0))
-        ttk.Entry(upload_frame, textvariable=self.crossmap_file, width=50).grid(row=2, column=1, sticky="ew", padx=(0, 10), pady=(10, 0))
-        ttk.Button(upload_frame, text="Browse", command=self.browse_crossmap).grid(row=2, column=2, pady=(10, 0))
+        self.cm_label = ttk.Label(self.upload_frame, text="Cross-mapping Data (JSON):")
+        self.cm_label.grid(row=3, column=0, sticky=tk.W, padx=(0, 10), pady=(10, 0))
+        self.cm_entry = ttk.Entry(self.upload_frame, textvariable=self.crossmap_file, width=50)
+        self.cm_entry.grid(row=3, column=1, sticky="ew", padx=(0, 10), pady=(10, 0))
+        self.cm_button = ttk.Button(self.upload_frame, text="Browse", command=self.browse_crossmap)
+        self.cm_button.grid(row=3, column=2, pady=(10, 0))
     
     def create_progress_section(self, parent):
         """Create progress and status widgets"""
