@@ -340,60 +340,24 @@ class TaraDesktopApp:
             self.embed_frame.grid_remove()
     
     def on_workflow_change(self):
-        """Handle workflow mode change"""
+        """Handle workflow mode change for two-path toggle"""
         mode = self.workflow_mode.get()
-        if mode == "file_input":
-            # Show file upload section and input type selection
+        if mode == "threat_model":
+            # Show threat model upload, hide questionnaire
             self.upload_frame.grid()
-            self.input_type_label.grid()
-            self.input_frame.grid()
+            self.embed_frame.grid_remove()
         else:  # questionnaire mode
-            # Hide file upload section and input type selection
+            # Show questionnaire, hide threat model upload
             self.upload_frame.grid_remove()
-            self.input_type_label.grid_remove()
-            self.input_frame.grid_remove()
-            # Force MITRE EMBED for questionnaire mode
-            self.cross_ref_source.set("mitre_embed")
-            self.on_cross_ref_change()
+            self.embed_frame.grid()
     
-    def create_file_upload_section(self, parent):
-        """Create enhanced file upload widgets with support for new input types"""
-        # File upload frame
-        self.upload_frame = ttk.LabelFrame(parent, text="File Upload", padding="10")
-        self.upload_frame.grid(row=2, column=0, columnspan=2, sticky="ew", pady=(0, 20))
-        self.upload_frame.columnconfigure(1, weight=1)
-        
-        # Threat Model file (.tm7, .json, .yaml)
-        self.tm_label = ttk.Label(self.upload_frame, text="Threat Model (.tm7/.json/.yaml):")
-        self.tm_label.grid(row=0, column=0, sticky=tk.W, padx=(0, 10))
-        self.tm_entry = ttk.Entry(self.upload_frame, textvariable=self.threat_model_file, width=50)
-        self.tm_entry.grid(row=0, column=1, sticky="ew", padx=(0, 10))
-        self.tm_button = ttk.Button(self.upload_frame, text="Browse", command=self.browse_threat_model)
-        self.tm_button.grid(row=0, column=2)
-        
-        # Asset List file (Excel)
-        self.asset_label = ttk.Label(self.upload_frame, text="Asset List (Excel .xlsx/.xls):")
-        self.asset_label.grid(row=1, column=0, sticky=tk.W, padx=(0, 10), pady=(10, 0))
-        self.asset_entry = ttk.Entry(self.upload_frame, textvariable=self.asset_list_file, width=50)
-        self.asset_entry.grid(row=1, column=1, sticky="ew", padx=(0, 10), pady=(10, 0))
-        self.asset_button = ttk.Button(self.upload_frame, text="Browse", command=self.browse_asset_list)
-        self.asset_button.grid(row=1, column=2, pady=(10, 0))
-        
-        # Block Diagram file
-        self.bd_label = ttk.Label(self.upload_frame, text="Block Diagram (SVG/PNG/JPEG):")
-        self.bd_label.grid(row=2, column=0, sticky=tk.W, padx=(0, 10), pady=(10, 0))
-        self.bd_entry = ttk.Entry(self.upload_frame, textvariable=self.block_diagram_file, width=50)
-        self.bd_entry.grid(row=2, column=1, sticky="ew", padx=(0, 10), pady=(10, 0))
-        self.bd_button = ttk.Button(self.upload_frame, text="Browse", command=self.browse_block_diagram)
-        self.bd_button.grid(row=2, column=2, pady=(10, 0))
-        
-        # Cross-mapping data file (optional)
-        self.cm_label = ttk.Label(self.upload_frame, text="Cross-mapping Data (Optional):")
-        self.cm_label.grid(row=3, column=0, sticky=tk.W, padx=(0, 10), pady=(10, 0))
-        self.cm_entry = ttk.Entry(self.upload_frame, textvariable=self.crossmap_file, width=50)
-        self.cm_entry.grid(row=3, column=1, sticky="ew", padx=(0, 10), pady=(10, 0))
-        self.cm_button = ttk.Button(self.upload_frame, text="Browse", command=self.browse_crossmap)
-        self.cm_button.grid(row=3, column=2, pady=(10, 0))
+    def clear_all_fields(self):
+        """Clear all questionnaire fields"""
+        for category in self.embed_checkboxes:
+            for prop_id in self.embed_checkboxes[category]:
+                self.embed_checkboxes[category][prop_id].set(False)
+    
+
     
     def create_progress_section(self, parent):
         """Create progress and status widgets"""
@@ -429,17 +393,25 @@ class TaraDesktopApp:
         self.results_text.grid(row=0, column=0, sticky="nsew")
     
     def create_buttons_section(self, parent):
-        """Create action buttons"""
+        """Create action buttons with Excel template generation"""
         # Buttons frame
         buttons_frame = ttk.Frame(parent)
         buttons_frame.grid(row=6, column=0, columnspan=2, pady=(0, 10))
+        
+        # Generate Template button (always enabled)
+        self.template_button = ttk.Button(
+            buttons_frame, 
+            text="Generate Excel Template", 
+            command=self.generate_excel_template,
+            style='Accent.TButton'
+        )
+        self.template_button.pack(side=tk.LEFT, padx=(0, 10))
         
         # Analyze button
         self.analyze_button = ttk.Button(
             buttons_frame, 
             text="Generate TARA Report", 
-            command=self.start_analysis,
-            style='Accent.TButton'
+            command=self.start_analysis
         )
         self.analyze_button.pack(side=tk.LEFT, padx=(0, 10))
         
@@ -469,6 +441,128 @@ class TaraDesktopApp:
         )
         self.clear_button.pack(side=tk.LEFT)
     
+    def generate_excel_template(self):
+        """Generate and save Excel template for asset configuration"""
+        try:
+            # Ask user where to save the template
+            filename = filedialog.asksaveasfilename(
+                defaultextension=".xlsx",
+                filetypes=[("Excel files", "*.xlsx"), ("All files", "*.*")],
+                title="Save Excel Template As...",
+                initialvalue="TARA_Template.xlsx"
+            )
+            
+            if filename:
+                # Create Excel template with proper structure
+                from openpyxl import Workbook
+                from openpyxl.styles import Font, PatternFill, Alignment
+                
+                wb = Workbook()
+                ws = wb.active
+                ws.title = "Asset Configuration"
+                
+                # Headers
+                headers = [
+                    "Asset Name", "Asset Type", "Description", "Criticality Level",
+                    "Network Exposure", "Data Sensitivity", "Security Controls",
+                    "Dependencies", "Vulnerabilities", "Threat Sources"
+                ]
+                
+                # Apply header styling
+                header_font = Font(bold=True, color="FFFFFF")
+                header_fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
+                
+                for col, header in enumerate(headers, 1):
+                    cell = ws.cell(row=1, column=col, value=header)
+                    cell.font = header_font
+                    cell.fill = header_fill
+                    cell.alignment = Alignment(horizontal="center", vertical="center")
+                
+                # Add sample data rows
+                sample_data = [
+                    ["Web Server", "Server", "Main application server", "High", "Internet-facing", "Medium", "Firewall, SSL/TLS", "Database Server", "CVE-2023-XXXX", "External Attackers"],
+                    ["Database Server", "Database", "Customer data storage", "Critical", "Internal", "High", "Access Controls, Encryption", "Web Server", "SQL Injection", "Internal Threats"],
+                    ["User Workstation", "Endpoint", "Employee workstation", "Medium", "Internal", "Low", "Antivirus, Updates", "Network Infrastructure", "Malware", "Insider Threats"]
+                ]
+                
+                for row_idx, row_data in enumerate(sample_data, 2):
+                    for col_idx, value in enumerate(row_data, 1):
+                        ws.cell(row=row_idx, column=col_idx, value=value)
+                
+                # Auto-adjust column widths
+                for column in ws.columns:
+                    max_length = 0
+                    column_letter = column[0].column_letter
+                    for cell in column:
+                        try:
+                            if len(str(cell.value)) > max_length:
+                                max_length = len(str(cell.value))
+                        except:
+                            pass
+                    adjusted_width = min(max_length + 2, 30)
+                    ws.column_dimensions[column_letter].width = adjusted_width
+                
+                # Add instructions sheet
+                instructions_ws = wb.create_sheet("Instructions")
+                instructions = [
+                    ["TARA Excel Template Instructions", ""],
+                    ["", ""],
+                    ["How to use this template:", ""],
+                    ["1. Fill in the Asset Configuration sheet with your system assets", ""],
+                    ["2. Replace sample data with your actual asset information", ""],
+                    ["3. Save the file and upload it to the TARA application", ""],
+                    ["", ""],
+                    ["Column Descriptions:", ""],
+                    ["Asset Name", "Unique identifier for the asset"],
+                    ["Asset Type", "Category: Server, Database, Endpoint, Network, etc."],
+                    ["Description", "Brief description of the asset's purpose"],
+                    ["Criticality Level", "Low, Medium, High, Critical"],
+                    ["Network Exposure", "Internal, DMZ, Internet-facing"],
+                    ["Data Sensitivity", "Low, Medium, High"],
+                    ["Security Controls", "Existing security measures"],
+                    ["Dependencies", "Other assets this depends on"],
+                    ["Vulnerabilities", "Known security vulnerabilities"],
+                    ["Threat Sources", "Potential sources of threats"]
+                ]
+                
+                for row_idx, (col1, col2) in enumerate(instructions, 1):
+                    instructions_ws.cell(row=row_idx, column=1, value=col1)
+                    instructions_ws.cell(row=row_idx, column=2, value=col2)
+                    if row_idx == 1:
+                        cell = instructions_ws.cell(row=1, column=1)
+                        cell.font = Font(bold=True, size=14)
+                
+                # Auto-adjust column widths for instructions
+                for column in instructions_ws.columns:
+                    max_length = 0
+                    column_letter = column[0].column_letter
+                    for cell in column:
+                        try:
+                            if len(str(cell.value)) > max_length:
+                                max_length = len(str(cell.value))
+                        except:
+                            pass
+                    adjusted_width = min(max_length + 2, 50)
+                    instructions_ws.column_dimensions[column_letter].width = adjusted_width
+                
+                # Save the template
+                wb.save(filename)
+                
+                self.update_status(f"Excel template saved successfully: {filename}")
+                self.log_message(f"Excel template generated and saved to: {filename}")
+                
+                # Show success message
+                messagebox.showinfo(
+                    "Template Generated", 
+                    f"Excel template has been saved to:\n{filename}\n\nYou can now fill in your asset data and use this file for TARA analysis."
+                )
+                
+        except Exception as e:
+            error_msg = f"Error generating Excel template: {str(e)}"
+            self.update_status(error_msg)
+            self.log_message(error_msg)
+            messagebox.showerror("Error", error_msg)
+    
     def browse_threat_model(self):
         """Open file dialog for threat model file"""
         filename = filedialog.askopenfilename(
@@ -482,6 +576,7 @@ class TaraDesktopApp:
             ]
         )
         if filename:
+            self.file_path_var.set(filename)
             self.threat_model_file.set(filename)
             self.log_message(f"Threat model file selected: {Path(filename).name}")
     
