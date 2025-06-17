@@ -696,9 +696,7 @@ class TaraDesktopApp:
     def start_analysis(self):
         """Start the analysis process in a separate thread"""
         # Validate files first
-        errors = self.validate_files()
-        if errors:
-            messagebox.showerror("Validation Error", "\n".join(errors))
+        if not self.validate_files():
             return
         
         # Disable buttons and start progress
@@ -723,16 +721,15 @@ class TaraDesktopApp:
             self.update_status("Starting enhanced TARA analysis...")
             self.log_message("=== Starting Enhanced TARA Analysis ===")
             
-            # Determine workflow mode and input type
+            # Determine workflow mode
             workflow_mode = self.workflow_mode.get()
-            input_type = self.input_type.get()
             
             if workflow_mode == "questionnaire":
                 # MITRE EMBED Questionnaire Mode
                 analysis_data = self._process_questionnaire_mode()
             else:
-                # File Input Mode
-                analysis_data = self._process_file_input_mode(input_type)
+                # Threat Model Mode
+                analysis_data = self._process_threat_model_mode()
             
             # Integrate with MITRE frameworks
             analysis_data = self._integrate_mitre_frameworks(analysis_data)
@@ -786,77 +783,48 @@ class TaraDesktopApp:
         self.log_message(f"Generated {len(threats)} threats from {analysis_data['metadata']['properties_count']} device properties")
         return analysis_data
     
-    def _process_file_input_mode(self, input_type: str) -> Dict[str, Any]:
-        """Process file-based input analysis"""
-        self.update_status(f"Processing {input_type} input...")
-        
-        analysis_data = {
-            'threats': [],
-            'assets': [],
-            'data_flows': [],
-            'risks': [],
-            'mitigations': [],
-            'metadata': {'source': 'file_input', 'input_type': input_type}
-        }
-        
-        if input_type == "threat_model":
-            self.log_message("Parsing threat model file...")
-            threat_file = self.threat_model_file.get()
-            if threat_file:
-                threat_data = self.threat_parser.parse(threat_file)
-                analysis_data.update(threat_data)
-                self.log_message(f"Loaded {len(threat_data.get('threats', []))} threats, {len(threat_data.get('assets', []))} assets")
-        
-        elif input_type == "asset_list":
-            self.log_message("Parsing Excel asset list...")
-            asset_file = self.asset_list_file.get()
-            if asset_file:
-                asset_data = self.asset_parser.parse(asset_file)
-                analysis_data.update(asset_data)
-                self.log_message(f"Loaded {len(asset_data.get('assets', []))} assets, generated {len(asset_data.get('threats', []))} threats")
-        
-        elif input_type == "block_diagram":
-            self.log_message("Analyzing block diagram...")
-            diagram_file = self.block_diagram_file.get()
-            if diagram_file:
-                diagram_data = self.diagram_parser.parse(diagram_file)
-                analysis_data['data_flows'] = diagram_data.get('data_flows', [])
-                analysis_data['assets'].extend(diagram_data.get('components', []))
-                self.log_message(f"Identified {len(diagram_data.get('components', []))} components")
-        
-        elif input_type == "multiple":
-            self.log_message("Processing multiple input files...")
+    def _process_threat_model_mode(self) -> Dict[str, Any]:
+        """Process threat model file analysis"""
+        try:
+            self.update_status("Processing threat model file...")
+            self.log_message(f"Processing threat model: {Path(self.threat_model_file.get()).name}")
             
-            # Process threat model if provided
-            threat_file = self.threat_model_file.get()
-            if threat_file:
-                threat_data = self.threat_parser.parse(threat_file)
-                analysis_data['threats'].extend(threat_data.get('threats', []))
-                analysis_data['assets'].extend(threat_data.get('assets', []))
-                analysis_data['mitigations'].extend(threat_data.get('mitigations', []))
+            analysis_data = {
+                'assets': [],
+                'threats': [],
+                'mitigations': [],
+                'metadata': {
+                    'analysis_type': 'threat_model',
+                    'input_file': Path(self.threat_model_file.get()).name,
+                    'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                }
+            }
             
-            # Process asset list if provided
-            asset_file = self.asset_list_file.get()
-            if asset_file:
-                asset_data = self.asset_parser.parse(asset_file)
-                analysis_data['assets'].extend(asset_data.get('assets', []))
-                analysis_data['threats'].extend(asset_data.get('threats', []))
-                analysis_data['data_flows'].extend(asset_data.get('data_flows', []))
+            # Process threat model file
+            try:
+                tm_data = self.threat_parser.parse_file(self.threat_model_file.get())
+                if tm_data:
+                    analysis_data['assets'].extend(tm_data.get('assets', []))
+                    analysis_data['threats'].extend(tm_data.get('threats', []))
+                    self.log_message(f"Found {len(tm_data.get('assets', []))} assets and {len(tm_data.get('threats', []))} threats")
+                else:
+                    self.log_message("No data extracted from threat model file")
+            except Exception as e:
+                self.log_message(f"Error parsing threat model: {str(e)}")
+                raise
             
-            # Process block diagram if provided
-            diagram_file = self.block_diagram_file.get()
-            if diagram_file:
-                diagram_data = self.diagram_parser.parse(diagram_file)
-                analysis_data['data_flows'].extend(diagram_data.get('data_flows', []))
-                analysis_data['assets'].extend(diagram_data.get('components', []))
+            # Ensure we have some data for analysis
+            if not analysis_data['assets'] and not analysis_data['threats']:
+                raise ValueError("No valid data found in threat model file")
             
-            self.log_message(f"Combined analysis: {len(analysis_data['threats'])} threats, {len(analysis_data['assets'])} assets")
-        
-        return analysis_data
+            return analysis_data
+            
+        except Exception as e:
+            self.log_message(f"Error in threat model processing: {str(e)}")
+            raise
     
     def _integrate_mitre_frameworks(self, analysis_data: Dict[str, Any]) -> Dict[str, Any]:
-        """Integrate analysis with MITRE frameworks"""
-        cross_ref_source = self.cross_ref_source.get()
+        """Integrate analysis with MITRE frameworks - always includes both ATT&CK and EMBED"""
         
 
         
