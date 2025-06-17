@@ -331,13 +331,7 @@ class TaraDesktopApp:
                 self.embed_checkboxes[category][prop_id] = var
                 row += 1
     
-    def on_cross_ref_change(self):
-        """Handle cross-reference source change"""
-        source = self.cross_ref_source.get()
-        if source in ['mitre_embed', 'both']:
-            self.embed_frame.grid()
-        else:
-            self.embed_frame.grid_remove()
+
     
     def on_workflow_change(self):
         """Handle workflow mode change for two-path toggle"""
@@ -580,55 +574,11 @@ class TaraDesktopApp:
             self.threat_model_file.set(filename)
             self.log_message(f"Threat model file selected: {Path(filename).name}")
     
-    def browse_asset_list(self):
-        """Open file dialog for asset list Excel file"""
-        filename = filedialog.askopenfilename(
-            title="Select Asset List Excel File",
-            filetypes=[
-                ("Excel files", "*.xlsx *.xls"),
-                ("XLSX files", "*.xlsx"),
-                ("XLS files", "*.xls"),
-                ("All files", "*.*")
-            ]
-        )
-        if filename:
-            self.asset_list_file.set(filename)
-            self.log_message(f"Asset list file selected: {Path(filename).name}")
-    
-    def browse_block_diagram(self):
-        """Open file dialog for block diagram file"""
-        filename = filedialog.askopenfilename(
-            title="Select Block Diagram File",
-            filetypes=[
-                ("Image files", "*.png *.jpg *.jpeg *.svg"),
-                ("SVG files", "*.svg"),
-                ("PNG files", "*.png"),
-                ("JPEG files", "*.jpg *.jpeg"),
-                ("All files", "*.*")
-            ]
-        )
-        if filename:
-            self.block_diagram_file.set(filename)
-            self.log_message(f"Block diagram file selected: {Path(filename).name}")
-    
-    def browse_crossmap(self):
-        """Open file dialog for cross-mapping data file"""
-        filename = filedialog.askopenfilename(
-            title="Select Cross-mapping Data File",
-            filetypes=[
-                ("JSON files", "*.json"),
-                ("All files", "*.*")
-            ]
-        )
-        if filename:
-            self.crossmap_file.set(filename)
-            self.log_message(f"Cross-mapping data file selected: {Path(filename).name}")
+
     
     def validate_files(self):
-        """Validate that at least one input source is provided"""
-        errors = []
+        """Validate that input is provided for the selected workflow"""
         workflow_mode = self.workflow_mode.get()
-        input_type = self.input_type.get()
         
         if workflow_mode == "questionnaire":
             # For questionnaire mode, check if any EMBED properties are selected
@@ -639,59 +589,20 @@ class TaraDesktopApp:
                     break
             
             if not has_properties:
-                errors.append("Please select at least one device property for MITRE EMBED assessment")
+                messagebox.showerror("Validation Error", "Please select at least one device property from the MITRE EMB3D questionnaire.")
+                return False
         
-        else:  # file_input mode
-            has_input = False
-            
+        else:  # threat_model mode
             # Check threat model file
-            if input_type == "threat_model" and self.threat_model_file.get():
-                if os.path.exists(self.threat_model_file.get()):
-                    has_input = True
-                else:
-                    errors.append("Threat model file does not exist")
+            if not self.threat_model_file.get():
+                messagebox.showerror("Validation Error", "Please select a threat model file (.tm7/.tb7).")
+                return False
             
-            # Check asset list file  
-            elif input_type == "asset_list" and self.asset_list_file.get():
-                if os.path.exists(self.asset_list_file.get()):
-                    has_input = True
-                else:
-                    errors.append("Asset list file does not exist")
-            
-            # Check block diagram file
-            elif input_type == "block_diagram" and self.block_diagram_file.get():
-                if os.path.exists(self.block_diagram_file.get()):
-                    has_input = True
-                else:
-                    errors.append("Block diagram file does not exist")
-            
-            # Check multiple files
-            elif input_type == "multiple":
-                if (self.threat_model_file.get() and os.path.exists(self.threat_model_file.get())) or \
-                   (self.asset_list_file.get() and os.path.exists(self.asset_list_file.get())) or \
-                   (self.block_diagram_file.get() and os.path.exists(self.block_diagram_file.get())):
-                    has_input = True
-                
-                # Check individual file existence
-                if self.threat_model_file.get() and not os.path.exists(self.threat_model_file.get()):
-                    errors.append("Threat model file does not exist")
-                if self.asset_list_file.get() and not os.path.exists(self.asset_list_file.get()):
-                    errors.append("Asset list file does not exist")
-                if self.block_diagram_file.get() and not os.path.exists(self.block_diagram_file.get()):
-                    errors.append("Block diagram file does not exist")
-            
-            if not has_input and input_type != "multiple":
-                if input_type == "threat_model":
-                    errors.append("Please select a threat model file (.tm7/.json/.yaml)")
-                elif input_type == "asset_list":
-                    errors.append("Please select an Excel asset list file")
-                elif input_type == "block_diagram":
-                    errors.append("Please select a block diagram file")
-            
-            elif not has_input and input_type == "multiple":
-                errors.append("Please select at least one input file for analysis")
+            if not os.path.exists(self.threat_model_file.get()):
+                messagebox.showerror("Validation Error", "The selected threat model file does not exist.")
+                return False
         
-        return errors
+        return True
     
     def start_analysis(self):
         """Start the analysis process in a separate thread"""
@@ -826,8 +737,6 @@ class TaraDesktopApp:
     def _integrate_mitre_frameworks(self, analysis_data: Dict[str, Any]) -> Dict[str, Any]:
         """Integrate analysis with MITRE frameworks - always includes both ATT&CK and EMBED"""
         
-
-        
         # Always perform MITRE EMBED assessment for all assets
         self.update_status("Processing MITRE EMBED assessment...")
         
@@ -853,16 +762,9 @@ class TaraDesktopApp:
         self.log_message("Integrating with MITRE ATT&CK framework...")
         
         # Load cross-mapping data if available, otherwise use empty dict
+        # Use built-in MITRE ATT&CK mappings for streamlined workflow
         crossmap_data = {}
-        crossmap_file = self.crossmap_file.get()
-        if crossmap_file and os.path.exists(crossmap_file):
-            try:
-                crossmap_data = self.crossmap_parser.parse(crossmap_file)
-                self.log_message("Using custom cross-mapping data")
-            except Exception as e:
-                self.log_message(f"Warning: Failed to load cross-mapping data, using built-in mappings: {e}")
-        else:
-            self.log_message("Using built-in MITRE ATT&CK mappings")
+        self.log_message("Using built-in MITRE ATT&CK mappings")
         
         # Perform MITRE integration with all threats
         all_threats = analysis_data.get('threats', [])
@@ -1145,21 +1047,23 @@ class TaraDesktopApp:
             
             # Collect EMBED properties if selected
             embed_assessment = None
-            if self.cross_ref_source.get() in ['mitre_embed', 'both']:
-                selected_properties = {}
-                for category, checkboxes in self.embed_checkboxes.items():
-                    selected_properties[category] = [
-                        prop_id for prop_id, var in checkboxes.items() if var.get()
-                    ]
-                
-                if any(selected_properties.values()):
-                    embed_assessment = self.embed_integrator.assess_device_properties(selected_properties)
+            selected_properties = {}
+            for category, checkboxes in self.embed_checkboxes.items():
+                selected_properties[category] = [
+                    prop_id for prop_id, var in checkboxes.items() if var.get()
+                ]
+            
+            if any(selected_properties.values()):
+                embed_assessment = self.embed_integrator.assess_device_properties(selected_properties)
+            
+            # Determine input type based on workflow
+            input_type = "threat_model" if self.workflow_mode.get() == "threat_model" else "questionnaire"
             
             # Generate Excel report
             excel_path = self.excel_generator.generate_excel_report(
                 self.analysis_data,
-                self.input_type.get(),
-                self.cross_ref_source.get(),
+                input_type,
+                "both",  # Always use comprehensive analysis
                 embed_assessment
             )
             
