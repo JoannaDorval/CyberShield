@@ -89,6 +89,18 @@ TARA is a comprehensive cybersecurity threat analysis application that processes
 - **Cross-platform Compatibility**: Windows, macOS, and Linux support
 
 ## Changelog
+
+### June 17, 2025 - Major Application Restructuring
+- **Two-Path Toggle Implementation**: Replaced complex multi-file input system with streamlined approach
+  - Option 1: Upload threat model files (.tm7/.tb7)
+  - Option 2: Complete MITRE EMB3D questionnaire
+- **Enhanced Excel Template Generation**: Added always-available template generation with proper formatting
+- **Universal MITRE Integration**: All assets now evaluated against both ATT&CK and EMBED frameworks regardless of input method
+- **Streamlined UI**: Removed analysis framework selection, consolidated file upload sections
+- **Clear All Functionality**: Added comprehensive field clearing for questionnaire responses
+- **Single Consolidated Excel Output**: Replaced multi-sheet format with horizontal color-coded sections
+
+### Previous Updates
 - June 17, 2025. Initial setup
 
 ## User Preferences

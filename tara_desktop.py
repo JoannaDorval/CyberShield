@@ -802,7 +802,7 @@ class TaraDesktopApp:
             
             # Process threat model file
             try:
-                tm_data = self.threat_parser.parse_file(self.threat_model_file.get())
+                tm_data = self.threat_parser.parse(self.threat_model_file.get())
                 if tm_data:
                     analysis_data['assets'].extend(tm_data.get('assets', []))
                     analysis_data['threats'].extend(tm_data.get('threats', []))
@@ -1183,18 +1183,28 @@ class TaraDesktopApp:
     
     def clear_all(self):
         """Clear all inputs and results"""
+        # Clear file path
         self.threat_model_file.set("")
-        self.block_diagram_file.set("")
-        self.crossmap_file.set("")
+        if hasattr(self, 'file_path_var'):
+            self.file_path_var.set("")
+        
+        # Clear questionnaire selections
+        for category in self.embed_checkboxes:
+            for prop_id in self.embed_checkboxes[category]:
+                self.embed_checkboxes[category][prop_id].set(False)
+        
+        # Clear analysis data and results
         self.analysis_data = None
         
         self.results_text.config(state=tk.NORMAL)
         self.results_text.delete(1.0, tk.END)
         self.results_text.config(state=tk.DISABLED)
         
+        # Reset button states
         self.save_pdf_button.config(state=tk.DISABLED)
         self.save_excel_button.config(state=tk.DISABLED)
-        self.update_status("Ready to process files...")
+        
+        self.update_status("Ready for analysis...")
         self.log_message("All fields cleared")
     
     def update_status(self, message):
