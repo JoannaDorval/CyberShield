@@ -1,0 +1,44 @@
+Please apply the following updates and fixes to the app:
+
+1. **Asset Configuration Logic**:
+   - Replace current behavior with a toggle: the user must either:
+     a) Upload a **threat model file** (`.tm7` or `.tb7`)  
+     OR  
+     b) Complete a **MITRE EMB3D questionnaire** form.
+   - Ensure **only one of the two paths** is active at a time. If a threat model file is uploaded, the EMB3D form should be disabled, and vice versa.
+
+2. **MITRE EMB3D Questionnaire UI Fixes**:
+   - Add a **"Clear All Fields"** button that resets every input in the questionnaire form.
+   - Ensure form state fully resets including dropdowns, checkboxes, and text inputs.
+
+3. **File Upload Validation**:
+   - Accept only `.tm7` and `.tb7` file extensions in the threat model upload.
+   - Display a validation error if the file extension is not supported.
+
+4. **Remove "Analysis Framework" Section**:
+   - This section is no longer needed and should be completely removed from the UI and logic.
+   - The backend logic should automatically route everything through both **MITRE EMB3D** and **MITRE ATT&CK** once either input path is provided.
+
+5. **Unified Flow**:
+   - Regardless of whether data is from a threat model or the questionnaire, the app should:
+     - Extract or infer threats and assets.
+     - Cross-reference with MITRE EMB3D.
+     - Map related items to MITRE ATT&CK techniques.
+     - Generate a **TARA Excel report**.
+
+6. **Template Output Fix**:
+   - The current output (attached: `TARA_Excel_Report_20250617_170348.xlsx`) does **not** match the desired format.
+   - Use the second file (`TARA Template V0001.xlsx`) as the **gold standard for formatting**, including:
+     - Column structure
+     - Styles (headers, borders, colors)
+     - Field naming and ordering
+     - Any formulas or static fields
+
+7. **Scroll Wheel Bug**:
+   - Fix the scroll behavior so that users can scroll the full app interface with a mouse wheel (e.g., ensure `overflow-y: auto` or scrollable containers are implemented correctly).
+
+8. **Template Generation Fix**:
+   - Review the logic that generates the Excel file and refactor it to strictly follow the structure from `TARA Template V0001.xlsx`.
+   - If necessary, use an Excel manipulation library that allows you to copy cell styles, formats, and headers from a template (e.g., `openpyxl` or `xlsxwriter` with a base file).
+
+The final product should give the user a clean path to either upload a model or use a guided form, and in both cases generate a high-fidelity Excel TARA report in the V0001 format.

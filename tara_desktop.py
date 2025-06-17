@@ -42,17 +42,12 @@ class TaraDesktopApp:
         # Set up logging
         self.setup_logging()
         
-        # Initialize variables
+        # Initialize variables for two-path approach
         self.threat_model_file = tk.StringVar()
-        self.block_diagram_file = tk.StringVar()
-        self.crossmap_file = tk.StringVar()
-        self.asset_list_file = tk.StringVar()  # New: Excel asset list
         self.analysis_data = None
         
-        # Enhanced configuration variables with new input types
-        self.input_type = tk.StringVar(value="threat_model")
-        self.cross_ref_source = tk.StringVar(value="mitre_attack")
-        self.workflow_mode = tk.StringVar(value="file_input")  # file_input or questionnaire
+        # Two-path workflow: threat_model OR questionnaire
+        self.workflow_mode = tk.StringVar(value="threat_model")  # threat_model or questionnaire
         self.embed_properties = {
             'hardware': [],
             'system_software': [],
@@ -157,11 +152,11 @@ class TaraDesktopApp:
         # Configuration section
         self.create_configuration_section(main_frame)
         
-        # File upload section
-        self.create_file_upload_section(main_frame)
+        # File upload section (for threat model path)
+        self.create_threat_model_upload_section(main_frame)
         
-        # MITRE EMBED properties section
-        self.create_embed_properties_section(main_frame)
+        # MITRE EMB3D questionnaire section
+        self.create_embed_questionnaire_section(main_frame)
         
         # Progress and status section
         self.create_progress_section(main_frame)
@@ -173,54 +168,126 @@ class TaraDesktopApp:
         self.create_buttons_section(main_frame)
     
     def create_configuration_section(self, parent):
-        """Create enhanced configuration options section"""
-        config_frame = ttk.LabelFrame(parent, text="Analysis Configuration", padding="10")
+        """Create two-path toggle configuration section"""
+        config_frame = ttk.LabelFrame(parent, text="Analysis Method", padding="15")
         config_frame.grid(row=1, column=0, columnspan=2, sticky="ew", pady=(0, 20))
         config_frame.columnconfigure(1, weight=1)
         
-        # Workflow mode selection
-        ttk.Label(config_frame, text="Analysis Workflow:", font=('Arial', 10, 'bold')).grid(row=0, column=0, sticky=tk.W, pady=(0, 5))
+        # Main instruction
+        instruction_label = ttk.Label(
+            config_frame, 
+            text="Choose your analysis method:", 
+            font=('Arial', 11, 'bold')
+        )
+        instruction_label.grid(row=0, column=0, columnspan=2, sticky=tk.W, pady=(0, 15))
         
+        # Two-path workflow selection
         workflow_frame = ttk.Frame(config_frame)
-        workflow_frame.grid(row=1, column=0, columnspan=2, sticky="w", pady=(0, 15))
+        workflow_frame.grid(row=1, column=0, columnspan=2, sticky="ew", pady=(0, 10))
+        workflow_frame.columnconfigure(0, weight=1)
+        workflow_frame.columnconfigure(1, weight=1)
         
-        ttk.Radiobutton(workflow_frame, text="File Input Analysis", variable=self.workflow_mode, value="file_input", command=self.on_workflow_change).grid(row=0, column=0, sticky=tk.W, padx=(0, 20))
-        ttk.Radiobutton(workflow_frame, text="MITRE EMBED Questionnaire", variable=self.workflow_mode, value="questionnaire", command=self.on_workflow_change).grid(row=0, column=1, sticky=tk.W)
+        # Threat Model Upload Option
+        threat_model_frame = ttk.LabelFrame(workflow_frame, text="Option 1: Upload Threat Model", padding="10")
+        threat_model_frame.grid(row=0, column=0, sticky="ew", padx=(0, 10))
         
-        # Input type selection (for file input mode)
-        self.input_type_label = ttk.Label(config_frame, text="Input Document Type:", font=('Arial', 10, 'bold'))
-        self.input_type_label.grid(row=2, column=0, sticky=tk.W, pady=(10, 5))
+        ttk.Radiobutton(
+            threat_model_frame, 
+            text="Upload .tm7 or .tb7 file", 
+            variable=self.workflow_mode, 
+            value="threat_model", 
+            command=self.on_workflow_change
+        ).grid(row=0, column=0, sticky=tk.W, pady=(0, 5))
         
-        self.input_frame = ttk.Frame(config_frame)
-        self.input_frame.grid(row=3, column=0, columnspan=2, sticky="w", pady=(0, 15))
+        ttk.Label(
+            threat_model_frame, 
+            text="Import threats and assets from\nMicrosoft Threat Modeling Tool", 
+            font=('Arial', 9), 
+            foreground='gray'
+        ).grid(row=1, column=0, sticky=tk.W)
         
-        ttk.Radiobutton(self.input_frame, text="Threat Model (.tm7/.json)", variable=self.input_type, value="threat_model").grid(row=0, column=0, sticky=tk.W, padx=(0, 15))
-        ttk.Radiobutton(self.input_frame, text="Asset List (Excel)", variable=self.input_type, value="asset_list").grid(row=0, column=1, sticky=tk.W, padx=(0, 15))
-        ttk.Radiobutton(self.input_frame, text="Block Diagram", variable=self.input_type, value="block_diagram").grid(row=0, column=2, sticky=tk.W, padx=(0, 15))
-        ttk.Radiobutton(self.input_frame, text="Multiple Files", variable=self.input_type, value="multiple").grid(row=1, column=0, sticky=tk.W, pady=(5,0))
+        # Questionnaire Option
+        questionnaire_frame = ttk.LabelFrame(workflow_frame, text="Option 2: Complete Questionnaire", padding="10")
+        questionnaire_frame.grid(row=0, column=1, sticky="ew", padx=(10, 0))
         
-        # Cross-reference source selection
-        ttk.Label(config_frame, text="Analysis Framework:", font=('Arial', 10, 'bold')).grid(row=4, column=0, sticky=tk.W, pady=(10, 5))
+        ttk.Radiobutton(
+            questionnaire_frame, 
+            text="Complete MITRE EMB3D form", 
+            variable=self.workflow_mode, 
+            value="questionnaire", 
+            command=self.on_workflow_change
+        ).grid(row=0, column=0, sticky=tk.W, pady=(0, 5))
         
-        ref_frame = ttk.Frame(config_frame)
-        ref_frame.grid(row=5, column=0, columnspan=2, sticky="w", pady=(0, 10))
-        
-        ttk.Radiobutton(ref_frame, text="MITRE ATT&CK Integration", variable=self.cross_ref_source, value="mitre_attack", command=self.on_cross_ref_change).grid(row=0, column=0, sticky=tk.W, padx=(0, 20))
-        ttk.Radiobutton(ref_frame, text="MITRE EMBED Assessment", variable=self.cross_ref_source, value="mitre_embed", command=self.on_cross_ref_change).grid(row=0, column=1, sticky=tk.W, padx=(0, 20))
-        ttk.Radiobutton(ref_frame, text="Comprehensive Analysis", variable=self.cross_ref_source, value="both", command=self.on_cross_ref_change).grid(row=0, column=2, sticky=tk.W)
+        ttk.Label(
+            questionnaire_frame, 
+            text="Answer guided questions about\nyour system components", 
+            font=('Arial', 9), 
+            foreground='gray'
+        ).grid(row=1, column=0, sticky=tk.W)
     
-    def create_embed_properties_section(self, parent):
+    def create_threat_model_upload_section(self, parent):
+        """Create threat model file upload section"""
+        self.upload_frame = ttk.LabelFrame(parent, text="Threat Model Upload", padding="15")
+        self.upload_frame.grid(row=2, column=0, columnspan=2, sticky="ew", pady=(0, 20))
+        self.upload_frame.columnconfigure(1, weight=1)
+        
+        # File selection
+        ttk.Label(self.upload_frame, text="Select File:", font=('Arial', 10, 'bold')).grid(row=0, column=0, sticky=tk.W, pady=(0, 5))
+        
+        file_frame = ttk.Frame(self.upload_frame)
+        file_frame.grid(row=1, column=0, columnspan=2, sticky="ew", pady=(0, 10))
+        file_frame.columnconfigure(0, weight=1)
+        
+        self.file_path_var = tk.StringVar()
+        self.file_entry = ttk.Entry(file_frame, textvariable=self.file_path_var, state="readonly", width=50)
+        self.file_entry.grid(row=0, column=0, sticky="ew", padx=(0, 10))
+        
+        self.browse_button = ttk.Button(file_frame, text="Browse", command=self.browse_threat_model)
+        self.browse_button.grid(row=0, column=1)
+        
+        # File format info
+        info_label = ttk.Label(
+            self.upload_frame, 
+            text="Supported formats: .tm7, .tb7 (Microsoft Threat Modeling Tool files)", 
+            font=('Arial', 9), 
+            foreground='gray'
+        )
+        info_label.grid(row=2, column=0, columnspan=2, sticky=tk.W)
+        
+        # Initially hidden
+        self.upload_frame.grid_remove()
+    
+    def create_embed_questionnaire_section(self, parent):
         """Create MITRE EMBED device properties section"""
         self.embed_frame = ttk.LabelFrame(parent, text="MITRE EMBED Device Properties", padding="10")
         self.embed_frame.grid(row=3, column=0, columnspan=2, sticky="ew", pady=(0, 20))
         self.embed_frame.columnconfigure(0, weight=1)
         
-        # Initially hidden
-        self.embed_frame.grid_remove()
+        # Instructions and clear button
+        header_frame = ttk.Frame(self.embed_frame)
+        header_frame.grid(row=0, column=0, sticky="ew", pady=(0, 10))
+        header_frame.columnconfigure(0, weight=1)
+        
+        instruction_label = ttk.Label(
+            header_frame, 
+            text="Select the device properties that apply to your system:", 
+            font=('Arial', 10, 'bold')
+        )
+        instruction_label.grid(row=0, column=0, sticky=tk.W)
+        
+        self.clear_button = ttk.Button(
+            header_frame, 
+            text="Clear All Fields", 
+            command=self.clear_all_fields
+        )
+        self.clear_button.grid(row=0, column=1, sticky=tk.E)
         
         # Create notebook for categories
         self.embed_notebook = ttk.Notebook(self.embed_frame)
-        self.embed_notebook.grid(row=0, column=0, sticky="ew", pady=(0, 10))
+        self.embed_notebook.grid(row=1, column=0, sticky="ew", pady=(0, 10))
+        
+        # Initially hidden
+        self.embed_frame.grid_remove()
         
         # Get device properties from MITRE EMBED integrator
         device_props = self.embed_integrator.get_device_properties_form()
