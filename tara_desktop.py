@@ -449,7 +449,7 @@ class TaraDesktopApp:
                 defaultextension=".xlsx",
                 filetypes=[("Excel files", "*.xlsx"), ("All files", "*.*")],
                 title="Save Excel Template As...",
-                initialvalue="TARA_Template.xlsx"
+                initialfile="TARA_Template.xlsx"
             )
             
             if filename:
