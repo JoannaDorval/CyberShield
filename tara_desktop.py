@@ -387,19 +387,28 @@ class TaraDesktopApp:
         self.results_text.grid(row=0, column=0, sticky="nsew")
     
     def create_buttons_section(self, parent):
-        """Create action buttons focused on Excel report generation"""
+        """Create action buttons for TARA analysis and Excel saving"""
         # Buttons frame
         buttons_frame = ttk.Frame(parent)
         buttons_frame.grid(row=6, column=0, columnspan=2, pady=(0, 10))
         
-        # Generate TARA Excel Report button (primary action - automatically saves)
+        # Generate TARA Analysis button
         self.analyze_button = ttk.Button(
             buttons_frame, 
-            text="Generate TARA Excel Report", 
+            text="Generate TARA Analysis", 
             command=self.start_analysis,
             style='Accent.TButton'
         )
         self.analyze_button.pack(side=tk.LEFT, padx=(0, 10))
+        
+        # Save Excel Report button (disabled until analysis is complete)
+        self.save_excel_button = ttk.Button(
+            buttons_frame, 
+            text="Save Excel Report", 
+            command=self.save_excel_report,
+            state=tk.DISABLED
+        )
+        self.save_excel_button.pack(side=tk.LEFT, padx=(0, 10))
         
         # Clear button
         self.clear_button = ttk.Button(
@@ -899,7 +908,7 @@ class TaraDesktopApp:
             return self.embed_integrator.assess_device_properties(default_properties)
     
     def _finalize_analysis(self, analysis_data: Dict[str, Any]):
-        """Finalize analysis and automatically save Excel report"""
+        """Finalize analysis and enable Excel saving"""
         self.update_status("Finalizing analysis...")
         self.log_message("Generating final analysis report...")
         
@@ -914,11 +923,71 @@ class TaraDesktopApp:
         # Display results
         self.root.after(0, lambda: self._display_results(summary))
         
-        # Automatically save Excel report
-        self._auto_save_excel_report()
+        # Enable Excel save button
+        self.save_excel_button.config(state=tk.NORMAL)
         
-        self.update_status("Analysis complete! Excel report saved automatically.")
+        self.update_status("Analysis complete! You can now save the Excel report.")
         self.log_message("=== TARA Analysis Complete ===")
+    
+    def save_excel_report(self):
+        """Save the TARA report as Excel with user-selected location"""
+        if not self.analysis_data:
+            messagebox.showerror("Error", "No analysis data available to save")
+            return
+        
+        # Get save location from user
+        filename = filedialog.asksaveasfilename(
+            defaultextension=".xlsx",
+            filetypes=[("Excel files", "*.xlsx"), ("All files", "*.*")],
+            title="Save TARA Excel Report",
+            initialfile=f"TARA_Report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
+        )
+        
+        if filename:
+            try:
+                self.update_status("Generating Excel report...")
+                self.log_message("Generating Excel report...")
+                
+                # Collect EMBED properties if selected
+                embed_assessment = None
+                selected_properties = {}
+                for category, checkboxes in self.embed_checkboxes.items():
+                    selected_properties[category] = [
+                        prop_id for prop_id, var in checkboxes.items() if var.get()
+                    ]
+                
+                if any(selected_properties.values()):
+                    embed_assessment = self.embed_integrator.assess_device_properties(selected_properties)
+                
+                # Determine input type based on workflow
+                input_type = "threat_model" if self.workflow_mode.get() == "threat_model" else "questionnaire"
+                
+                # Generate Excel report
+                excel_path = self.excel_generator.generate_excel_report(
+                    self.analysis_data,
+                    input_type,
+                    "both",  # Always use comprehensive analysis
+                    embed_assessment
+                )
+                
+                # Copy to user-selected location
+                import shutil
+                shutil.copy2(excel_path, filename)
+                
+                self.update_status("Excel report saved successfully!")
+                self.log_message(f"Excel report saved to: {filename}")
+                
+                # Show success message
+                messagebox.showinfo(
+                    "Report Saved", 
+                    f"TARA Excel report has been saved to:\n{filename}\n\nThe report contains comprehensive threat analysis with MITRE ATT&CK and EMBED framework mappings."
+                )
+                
+            except Exception as e:
+                error_msg = f"Failed to save Excel report: {str(e)}"
+                self.update_status("Failed to save Excel report!")
+                self.log_message(error_msg)
+                messagebox.showerror("Save Error", error_msg)
     
     def _auto_save_excel_report(self):
         """Automatically save Excel report with timestamped filename"""
@@ -1200,7 +1269,8 @@ class TaraDesktopApp:
         self.results_text.delete(1.0, tk.END)
         self.results_text.config(state=tk.DISABLED)
         
-        # Reset analysis state
+        # Reset button states
+        self.save_excel_button.config(state=tk.DISABLED)
         
         self.update_status("Ready for analysis...")
         self.log_message("All fields cleared")
