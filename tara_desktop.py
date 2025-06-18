@@ -387,45 +387,19 @@ class TaraDesktopApp:
         self.results_text.grid(row=0, column=0, sticky="nsew")
     
     def create_buttons_section(self, parent):
-        """Create action buttons with Excel template generation"""
+        """Create action buttons focused on Excel report generation"""
         # Buttons frame
         buttons_frame = ttk.Frame(parent)
         buttons_frame.grid(row=6, column=0, columnspan=2, pady=(0, 10))
         
-        # Generate Template button (always enabled)
-        self.template_button = ttk.Button(
-            buttons_frame, 
-            text="Generate Excel Template", 
-            command=self.generate_excel_template,
-            style='Accent.TButton'
-        )
-        self.template_button.pack(side=tk.LEFT, padx=(0, 10))
-        
-        # Analyze button
+        # Generate TARA Excel Report button (primary action - automatically saves)
         self.analyze_button = ttk.Button(
             buttons_frame, 
-            text="Generate TARA Report", 
-            command=self.start_analysis
+            text="Generate TARA Excel Report", 
+            command=self.start_analysis,
+            style='Accent.TButton'
         )
         self.analyze_button.pack(side=tk.LEFT, padx=(0, 10))
-        
-        # Save PDF report button
-        self.save_pdf_button = ttk.Button(
-            buttons_frame, 
-            text="Save PDF Report", 
-            command=self.save_pdf_report,
-            state=tk.DISABLED
-        )
-        self.save_pdf_button.pack(side=tk.LEFT, padx=(0, 10))
-        
-        # Save Excel report button
-        self.save_excel_button = ttk.Button(
-            buttons_frame, 
-            text="Save Excel Report", 
-            command=self.save_excel_report,
-            state=tk.DISABLED
-        )
-        self.save_excel_button.pack(side=tk.LEFT, padx=(0, 10))
         
         # Clear button
         self.clear_button = ttk.Button(
@@ -856,7 +830,7 @@ class TaraDesktopApp:
             return self.embed_integrator.assess_device_properties(default_properties)
     
     def _finalize_analysis(self, analysis_data: Dict[str, Any]):
-        """Finalize analysis and prepare results"""
+        """Finalize analysis and automatically save Excel report"""
         self.update_status("Finalizing analysis...")
         self.log_message("Generating final analysis report...")
         
@@ -871,7 +845,10 @@ class TaraDesktopApp:
         # Display results
         self.root.after(0, lambda: self._display_results(summary))
         
-        self.update_status("Analysis complete!")
+        # Automatically save Excel report
+        self._auto_save_excel_report()
+        
+        self.update_status("Analysis complete! Excel report saved automatically.")
         self.log_message("=== TARA Analysis Complete ===")
     
     def _generate_assets_from_properties(self, selected_properties: Dict[str, List[str]]) -> List[Dict[str, Any]]:
