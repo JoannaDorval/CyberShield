@@ -535,81 +535,6 @@ class TaraDesktopApp:
             self.update_status(error_msg)
             self.log_message(error_msg)
             messagebox.showerror("Error", error_msg)
-                        ws.cell(row=row_idx, column=col_idx, value=value)
-                
-                # Auto-adjust column widths
-                for column in ws.columns:
-                    max_length = 0
-                    column_letter = column[0].column_letter
-                    for cell in column:
-                        try:
-                            if len(str(cell.value)) > max_length:
-                                max_length = len(str(cell.value))
-                        except:
-                            pass
-                    adjusted_width = min(max_length + 2, 30)
-                    ws.column_dimensions[column_letter].width = adjusted_width
-                
-                # Add instructions sheet
-                instructions_ws = wb.create_sheet("Instructions")
-                instructions = [
-                    ["TARA Excel Template Instructions", ""],
-                    ["", ""],
-                    ["How to use this template:", ""],
-                    ["1. Fill in the Asset Configuration sheet with your system assets", ""],
-                    ["2. Replace sample data with your actual asset information", ""],
-                    ["3. Save the file and upload it to the TARA application", ""],
-                    ["", ""],
-                    ["Column Descriptions:", ""],
-                    ["Asset Name", "Unique identifier for the asset"],
-                    ["Asset Type", "Category: Server, Database, Endpoint, Network, etc."],
-                    ["Description", "Brief description of the asset's purpose"],
-                    ["Criticality Level", "Low, Medium, High, Critical"],
-                    ["Network Exposure", "Internal, DMZ, Internet-facing"],
-                    ["Data Sensitivity", "Low, Medium, High"],
-                    ["Security Controls", "Existing security measures"],
-                    ["Dependencies", "Other assets this depends on"],
-                    ["Vulnerabilities", "Known security vulnerabilities"],
-                    ["Threat Sources", "Potential sources of threats"]
-                ]
-                
-                for row_idx, (col1, col2) in enumerate(instructions, 1):
-                    instructions_ws.cell(row=row_idx, column=1, value=col1)
-                    instructions_ws.cell(row=row_idx, column=2, value=col2)
-                    if row_idx == 1:
-                        cell = instructions_ws.cell(row=1, column=1)
-                        cell.font = Font(bold=True, size=14)
-                
-                # Auto-adjust column widths for instructions
-                for column in instructions_ws.columns:
-                    max_length = 0
-                    column_letter = column[0].column_letter
-                    for cell in column:
-                        try:
-                            if len(str(cell.value)) > max_length:
-                                max_length = len(str(cell.value))
-                        except:
-                            pass
-                    adjusted_width = min(max_length + 2, 50)
-                    instructions_ws.column_dimensions[column_letter].width = adjusted_width
-                
-                # Save the template
-                wb.save(filename)
-                
-                self.update_status(f"Excel template saved successfully: {filename}")
-                self.log_message(f"Excel template generated and saved to: {filename}")
-                
-                # Show success message
-                messagebox.showinfo(
-                    "Template Generated", 
-                    f"Excel template has been saved to:\n{filename}\n\nYou can now fill in your asset data and use this file for TARA analysis."
-                )
-                
-        except Exception as e:
-            error_msg = f"Error generating Excel template: {str(e)}"
-            self.update_status(error_msg)
-            self.log_message(error_msg)
-            messagebox.showerror("Error", error_msg)
     
     def browse_threat_model(self):
         """Open file dialog for threat model file"""
@@ -627,8 +552,6 @@ class TaraDesktopApp:
             self.file_path_var.set(filename)
             self.threat_model_file.set(filename)
             self.log_message(f"Threat model file selected: {Path(filename).name}")
-    
-
     
     def validate_files(self):
         """Validate that input is provided for the selected workflow"""
