@@ -410,51 +410,122 @@ class TaraDesktopApp:
         self.clear_button.pack(side=tk.LEFT)
     
     def generate_excel_template(self):
-        """Generate and save Excel template for asset configuration"""
+        """Generate and save TARA Excel template with proper project information format"""
         try:
             # Ask user where to save the template
             filename = filedialog.asksaveasfilename(
                 defaultextension=".xlsx",
                 filetypes=[("Excel files", "*.xlsx"), ("All files", "*.*")],
-                title="Save Excel Template As...",
+                title="Save TARA Template As...",
                 initialfile="TARA_Template.xlsx"
             )
             
             if filename:
-                # Create Excel template with proper structure
+                # Create TARA template with proper structure
                 from openpyxl import Workbook
-                from openpyxl.styles import Font, PatternFill, Alignment
+                from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+                from openpyxl.utils import get_column_letter
                 
                 wb = Workbook()
                 ws = wb.active
-                ws.title = "Asset Configuration"
+                ws.title = "TARA Template"
                 
-                # Headers
-                headers = [
-                    "Asset Name", "Asset Type", "Description", "Criticality Level",
+                # Set column widths exactly as specified in your format
+                column_widths = {
+                    'A': 14.285, 'B': 8.0, 'C': 10.43, 'D': 14.285, 'E': 10.0,
+                    'F': 10.285, 'G': 10.0, 'H': 11.57, 'I': 10.57, 'J': 12.57,
+                    'K': 11.57, 'L': 11.0, 'M': 10.57, 'N': 9.57
+                }
+                for col, width in column_widths.items():
+                    ws.column_dimensions[col].width = width
+                
+                # Add project information header (rows 3-4) exactly as specified
+                project_data = {
+                    3: [
+                        {'column': 'A', 'value': 'Project Name:', 'font': Font(bold=True), 
+                         'alignment': Alignment(horizontal='right')},
+                        {'column': 'B', 'value': None, 'font': Font()},
+                        {'column': 'C', 'value': 'Project Number:', 'font': Font(bold=True), 
+                         'alignment': Alignment(horizontal='right')},
+                        {'column': 'D', 'value': None, 'font': Font()},
+                    ],
+                    4: [
+                        {'column': 'A', 'value': 'Analyst Name:', 'font': Font(bold=True), 
+                         'alignment': Alignment(horizontal='right')},
+                        {'column': 'B', 'value': None, 'font': Font()},
+                        {'column': 'C', 'value': 'Date:', 'font': Font(bold=True), 
+                         'alignment': Alignment(horizontal='right')},
+                        {'column': 'D', 'value': None, 'font': Font(), 'number_format': 'm/d/yyyy'},
+                    ]
+                }
+                
+                # Apply project information formatting exactly as provided
+                for row_num, cells in project_data.items():
+                    for cell_info in cells:
+                        col = cell_info['column']
+                        cell = ws[f"{col}{row_num}"]
+                        cell.value = cell_info['value']
+                        cell.font = cell_info['font']
+                        if 'alignment' in cell_info:
+                            cell.alignment = cell_info['alignment']
+                        if 'number_format' in cell_info:
+                            cell.number_format = cell_info['number_format']
+                        cell.border = Border()
+                
+                # Add section headers for TARA analysis starting from row 6
+                section_row = 6
+                
+                # Add main TARA analysis header
+                ws[f"A{section_row}"].value = "TARA Analysis - Asset Information"
+                ws[f"A{section_row}"].font = Font(bold=True, size=14)
+                ws[f"A{section_row}"].fill = PatternFill(start_color="D9E1F2", end_color="D9E1F2", fill_type="solid")
+                
+                # Add column headers for analysis (row 8)
+                headers_row = section_row + 2
+                analysis_headers = [
+                    "Asset Name", "Asset Type", "Description", "Criticality", 
                     "Network Exposure", "Data Sensitivity", "Security Controls",
                     "Dependencies", "Vulnerabilities", "Threat Sources"
                 ]
                 
-                # Apply header styling
                 header_font = Font(bold=True, color="FFFFFF")
                 header_fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
                 
-                for col, header in enumerate(headers, 1):
-                    cell = ws.cell(row=1, column=col, value=header)
+                for col, header in enumerate(analysis_headers, 1):
+                    cell = ws.cell(row=headers_row, column=col, value=header)
                     cell.font = header_font
                     cell.fill = header_fill
                     cell.alignment = Alignment(horizontal="center", vertical="center")
                 
-                # Add sample data rows
+                # Add sample data rows for demonstration
                 sample_data = [
                     ["Web Server", "Server", "Main application server", "High", "Internet-facing", "Medium", "Firewall, SSL/TLS", "Database Server", "CVE-2023-XXXX", "External Attackers"],
                     ["Database Server", "Database", "Customer data storage", "Critical", "Internal", "High", "Access Controls, Encryption", "Web Server", "SQL Injection", "Internal Threats"],
                     ["User Workstation", "Endpoint", "Employee workstation", "Medium", "Internal", "Low", "Antivirus, Updates", "Network Infrastructure", "Malware", "Insider Threats"]
                 ]
                 
-                for row_idx, row_data in enumerate(sample_data, 2):
+                # Add sample data to demonstrate the format
+                for row_idx, row_data in enumerate(sample_data, headers_row + 1):
                     for col_idx, value in enumerate(row_data, 1):
+                        ws.cell(row=row_idx, column=col_idx, value=value)
+                
+                # Save the template
+                wb.save(filename)
+                
+                self.update_status(f"TARA template saved: {filename}")
+                self.log_message(f"TARA Excel template generated and saved to: {filename}")
+                
+                # Show success message
+                messagebox.showinfo(
+                    "TARA Template Generated", 
+                    f"TARA Excel template has been saved to:\n{filename}\n\nThis template includes proper project information formatting and follows the official TARA structure."
+                )
+                
+        except Exception as e:
+            error_msg = f"Error generating TARA template: {str(e)}"
+            self.update_status(error_msg)
+            self.log_message(error_msg)
+            messagebox.showerror("Error", error_msg)
                         ws.cell(row=row_idx, column=col_idx, value=value)
                 
                 # Auto-adjust column widths

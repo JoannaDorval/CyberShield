@@ -1,0 +1,60 @@
+from openpyxl import Workbook
+from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+from openpyxl.utils import get_column_letter
+
+# Initialize a new workbook
+wb = Workbook()
+ws = wb.active
+
+# Set column widths (copied from your original sheet)
+column_widths = {
+    'A': 14.285, 'B': 8.0, 'C': 10.43, 'D': 14.285, 'E': 10.0,
+    'F': 10.285, 'G': 10.0, 'H': 11.57, 'I': 10.57, 'J': 12.57,
+    'K': 11.57, 'L': 11.0, 'M': 10.57, 'N': 9.57
+}
+for col, width in column_widths.items():
+    ws.column_dimensions[col].width = width
+
+# Define border utility
+def copy_border(original):
+    def copy_side(side):
+        return Side(
+            style=side.style,
+            color=side.color.rgb if side.color else None
+        ) if side else Side()
+    return Border(
+        left=copy_side(original.left),
+        right=copy_side(original.right),
+        top=copy_side(original.top),
+        bottom=copy_side(original.bottom)
+    )
+
+# Paste cell data from rows 3 and 4
+data = {
+    3: [
+        {'column': 'A', 'value': 'Project Name:', 'font': Font(bold=True), 'fill': PatternFill(fill_type=None),
+         'alignment': Alignment(horizontal='right'), 'border': Border(), 'number_format': 'General'},
+        {'column': 'B', 'value': None, 'font': Font(), 'fill': PatternFill(), 'alignment': Alignment(), 'border': Border(), 'number_format': 'General'},
+        {'column': 'C', 'value': 'Project Number:', 'font': Font(bold=True), 'fill': PatternFill(), 'alignment': Alignment(horizontal='right'), 'border': Border(), 'number_format': 'General'},
+        {'column': 'D', 'value': None, 'font': Font(), 'fill': PatternFill(), 'alignment': Alignment(), 'border': Border(), 'number_format': 'General'},
+    ],
+    4: [
+        {'column': 'A', 'value': 'Analyst Name:', 'font': Font(bold=True), 'fill': PatternFill(), 'alignment': Alignment(horizontal='right'), 'border': Border(), 'number_format': 'General'},
+        {'column': 'B', 'value': None, 'font': Font(), 'fill': PatternFill(), 'alignment': Alignment(), 'border': Border(), 'number_format': 'General'},
+        {'column': 'C', 'value': 'Date:', 'font': Font(bold=True), 'fill': PatternFill(), 'alignment': Alignment(horizontal='right'), 'border': Border(), 'number_format': 'm/d/yyyy'},
+        {'column': 'D', 'value': None, 'font': Font(), 'fill': PatternFill(), 'alignment': Alignment(), 'border': Border(), 'number_format': 'm/d/yyyy'},
+    ]
+}
+
+for row_num, cells in data.items():
+    for cell in cells:
+        col = cell['column']
+        ws[f"{col}{row_num}"].value = cell['value']
+        ws[f"{col}{row_num}"].font = cell['font']
+        ws[f"{col}{row_num}"].fill = cell['fill']
+        ws[f"{col}{row_num}"].alignment = cell['alignment']
+        ws[f"{col}{row_num}"].border = cell['border']
+        ws[f"{col}{row_num}"].number_format = cell['number_format']
+
+# Save workbook
+wb.save("TARA_Recreated.xlsx")
