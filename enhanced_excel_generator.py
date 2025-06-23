@@ -42,9 +42,11 @@ class EnhancedTaraExcelGenerator:
             raise
     
     def _create_consolidated_sheet(self, writer, analysis_data: Dict, input_type: str, cross_ref_source: str, embed_assessment: Optional[Dict]):
-        """Create single consolidated worksheet with all sections arranged horizontally"""
         from openpyxl.styles import PatternFill, Font, Alignment, Border, Side
-        
+        #Create Work sheets
+        general_info = writer.book.create_sheet('General Information')
+        writer.book.active = ws
+        colors = 
         # Create the main worksheet
         ws = writer.book.create_sheet('TARA Analysis Report')
         writer.book.active = ws
