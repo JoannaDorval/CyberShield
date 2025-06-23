@@ -648,10 +648,11 @@ class EnhancedTaraExcelGenerator:
     
     def _create_required_worksheets(self, wb):
         """Create all required worksheets with specified column headers"""
+        from openpyxl.styles import PatternFill, Font, Alignment, Border, Side
         
-        # General Information sheet
+        # General Information sheet with specific formatting
         general_info = wb.create_sheet("General information")
-        general_info.append(["Document Title", "Author", "Date", "System Name", "Version"])
+        self._format_general_info_sheet(general_info)
         
         # Item Definition sheet
         item_def = wb.create_sheet("Item definition")
@@ -700,3 +701,88 @@ class EnhancedTaraExcelGenerator:
         rev_sheet.append([
             "Version", "Date", "Author", "Changes"
         ])
+    
+    def _format_general_info_sheet(self, ws):
+        """Format the General Information sheet with exact specifications"""
+        from openpyxl.styles import PatternFill, Font, Alignment, Border, Side
+        
+        # Define styles
+        header_fill = PatternFill(start_color="BF8F00", end_color="BF8F00", fill_type="solid")
+        border = Border(
+            left=Side(style='thin', color='000000'),
+            right=Side(style='thin', color='000000'),
+            top=Side(style='thin', color='000000'),
+            bottom=Side(style='thin', color='000000')
+        )
+        
+        # Title font styles
+        title_font = Font(name='Calibri', size=20, bold=True, color='000000')
+        project_font = Font(name='Calibri', size=14, color='000000')
+        responsible_font = Font(name='Calibri', size=14, color='000000')
+        revision_font = Font(name='Calibri', size=11, color='000000')
+        header_font = Font(name='Calibri', size=11, color='000000')
+        
+        center_alignment = Alignment(horizontal='center', vertical='center')
+        left_alignment = Alignment(horizontal='left', vertical='center')
+        
+        # Lines 1-3: Merge cells B-H and add content with styling
+        ws.merge_cells('B1:H1')
+        ws['B1'] = "Threat analysis and risk assessment (TARA)"
+        ws['B1'].font = title_font
+        ws['B1'].alignment = center_alignment
+        ws['B1'].fill = header_fill
+        
+        ws.merge_cells('B2:H2')
+        ws['B2'] = "Project:"
+        ws['B2'].font = project_font
+        ws['B2'].alignment = center_alignment
+        ws['B2'].fill = header_fill
+        
+        ws.merge_cells('B3:H3')
+        ws['B3'] = "Responsible:"
+        ws['B3'].font = responsible_font
+        ws['B3'].alignment = center_alignment
+        ws['B3'].fill = header_fill
+        
+        # Apply borders to merged cells B1:H3
+        for row in range(1, 4):
+            for col in range(2, 9):  # B to H
+                cell = ws.cell(row=row, column=col)
+                cell.border = border
+        
+        # Line 4: blank (no content needed)
+        
+        # Line 5: "Revision history" in column B
+        ws['B5'] = "Revision history"
+        ws['B5'].font = revision_font
+        ws['B5'].alignment = left_alignment
+        
+        # Lines 6-19: Revision history table
+        # Set column widths as specified
+        ws.column_dimensions['B'].width = 18.26  # Revision number
+        ws.column_dimensions['C'].width = 16.11  # Revision reason
+        ws.column_dimensions['D'].width = 26.26  # Author(s)
+        ws.column_dimensions['E'].width = 51.11  # Description
+        ws.column_dimensions['F'].width = 15.11  # Date
+        ws.column_dimensions['G'].width = 26.26  # Approver(s)
+        ws.column_dimensions['H'].width = 18.26  # Approval date
+        
+        # Row 6: Headers with formatting
+        headers = [
+            "Revision number", "Revision reason", "Author(s)", 
+            "Description", "Date", "Approver(s)", "Approval date"
+        ]
+        
+        for col_idx, header in enumerate(headers, start=2):  # Start from column B
+            cell = ws.cell(row=6, column=col_idx)
+            cell.value = header
+            cell.font = header_font
+            cell.alignment = left_alignment
+            cell.fill = header_fill
+            cell.border = border
+        
+        # Rows 7-19: Empty data rows with borders
+        for row in range(7, 20):
+            for col in range(2, 9):  # B to H
+                cell = ws.cell(row=row, column=col)
+                cell.border = border
