@@ -23,7 +23,7 @@ from typing import Dict, List, Any
 from parsers import ThreatModelParser, BlockDiagramParser, CrossMapParser, AssetListParser
 from mitre_integration import MitreIntegrator
 from mitre_embed import MitreEmbedIntegrator
-from pdf_generator import TaraReportGenerator
+# PDF generator removed - Excel reports only
 from enhanced_excel_generator import EnhancedTaraExcelGenerator
 
 
@@ -62,7 +62,7 @@ class TaraDesktopApp:
         self.asset_parser = AssetListParser()
         self.mitre_integrator = MitreIntegrator()
         self.embed_integrator = MitreEmbedIntegrator()
-        self.report_generator = TaraReportGenerator()
+        # PDF report generator removed - Excel reports only
         self.excel_generator = EnhancedTaraExcelGenerator()
         
         # Create GUI
@@ -1056,58 +1056,7 @@ class TaraDesktopApp:
         self.progress_bar.stop()
         self.analyze_button.config(state=tk.NORMAL)
     
-    def save_pdf_report(self):
-        """Save the TARA report as PDF"""
-        if not self.analysis_data:
-            messagebox.showerror("Error", "No analysis data available to save")
-            return
-        
-        # Get save location
-        filename = filedialog.asksaveasfilename(
-            title="Save TARA Report",
-            defaultextension=".pdf",
-            filetypes=[
-                ("PDF files", "*.pdf"),
-                ("All files", "*.*")
-            ],
-            initialfile=f"TARA_Report_{self.analysis_data['id']}.pdf"
-        )
-        
-        if not filename:
-            return
-        
-        try:
-            self.update_status("Generating PDF report...")
-            self.log_message("Generating PDF report...")
-            
-            # Create a mock analysis object for the report generator
-            class MockAnalysis:
-                def __init__(self, data):
-                    for key, value in data.items():
-                        setattr(self, key, value)
-            
-            analysis_obj = MockAnalysis(self.analysis_data)
-            
-            # Generate PDF
-            temp_pdf_path = self.report_generator.generate_report(analysis_obj)
-            
-            # Copy to desired location
-            import shutil
-            shutil.copy2(temp_pdf_path, filename)
-            
-            # Clean up temporary file
-            if os.path.exists(temp_pdf_path):
-                os.remove(temp_pdf_path)
-            
-            self.update_status("Report saved successfully!")
-            self.log_message(f"Report saved to: {filename}")
-            messagebox.showinfo("Success", f"TARA report saved successfully to:\n{filename}")
-            
-        except Exception as e:
-            error_msg = f"Failed to save report: {str(e)}"
-            self.logger.error(error_msg, exc_info=True)
-            self.update_status("Failed to save report!")
-            messagebox.showerror("Save Error", error_msg)
+    # PDF functionality removed - Excel reports only
     
     def save_excel_report(self):
         """Save the TARA report as Excel"""
