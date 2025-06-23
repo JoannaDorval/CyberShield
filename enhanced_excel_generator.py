@@ -43,10 +43,10 @@ class EnhancedTaraExcelGenerator:
     
     def _create_consolidated_sheet(self, writer, analysis_data: Dict, input_type: str, cross_ref_source: str, embed_assessment: Optional[Dict]):
         from openpyxl.styles import PatternFill, Font, Alignment, Border, Side
-        #Create Work sheets
-        general_info = writer.book.create_sheet('General Information')
-        writer.book.active = ws
-        colors = 
+        
+        # Create all required worksheets as specified
+        self._create_required_worksheets(writer.book)
+        
         # Create the main worksheet
         ws = writer.book.create_sheet('TARA Analysis Report')
         writer.book.active = ws
@@ -645,3 +645,58 @@ class EnhancedTaraExcelGenerator:
             'cal': 'CAL-2' if severity in ['Critical', 'High'] else 'CAL-1',
             'expected_functionality': 'Security controls operate as designed without impacting system functionality'
         }
+    
+    def _create_required_worksheets(self, wb):
+        """Create all required worksheets with specified column headers"""
+        
+        # General Information sheet
+        general_info = wb.create_sheet("General information")
+        general_info.append(["Document Title", "Author", "Date", "System Name", "Version"])
+        
+        # Item Definition sheet
+        item_def = wb.create_sheet("Item definition")
+        item_def.append([
+            "Item ID", "Item Name", "Function", "Zone", "Environment",
+            "CAL", "Cybersecurity Goals", "Stakeholders"
+        ])
+        
+        # Threat Model sheet
+        threat_model = wb.create_sheet("Item definition - Threat model")
+        threat_model.append([
+            "Threat ID", "Item ID", "Technique ID", "Technique Name", 
+            "Tactic", "Summary", "Security Loss", "Stakeholder Impact"
+        ])
+        
+        # Asset Identification sheet
+        asset_id_sheet = wb.create_sheet("Asset identification")
+        asset_id_sheet.append([
+            "Asset ID", "Asset Name", "Asset Type", "Location", "CAL",
+            "Connectivity", "Vendor", "Function"
+        ])
+        
+        # TARA sheet (main analysis sheet)
+        tara_sheet = wb.create_sheet("TARA")
+        tara_sheet.append([
+            "Asset ID", "Asset", "Security property loss", "Stakeholder",
+            "Damage Scenario description", "Safety", "Financial", "Operational", "Privacy",
+            "Impact level", "Impact level justification", "Cybersecurity control",
+            "Cybersecurity control ID", "Spoofing", "Tampering", "Repudiation",
+            "Information disclosure", "Denial of service", "Elevation of privileges",
+            "Attack path", "Elapsed time", "Specialist expertise",
+            "Knowledge of the item or component", "Window of opportunity", "Equipment",
+            "Attack vector", "Summary", "Attack feasibility", "Risk determination",
+            "Risk threshold level", "Risk treatment option", "ID",
+            "Cybersecurity goal", "Cybersecurity claim", "CAL"
+        ])
+        
+        # Matrices and Guidelines sheet
+        matrix_sheet = wb.create_sheet("Matrices and guidlines")
+        matrix_sheet.append([
+            "Impact Level", "Likelihood", "Risk Level", "Thresholds", "Mitigation Notes"
+        ])
+        
+        # Template Revision History sheet
+        rev_sheet = wb.create_sheet("Template revision history")
+        rev_sheet.append([
+            "Version", "Date", "Author", "Changes"
+        ])
