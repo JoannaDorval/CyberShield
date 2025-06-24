@@ -658,19 +658,13 @@ class EnhancedTaraExcelGenerator:
         item_def = wb.create_sheet("Item definition")
         self._format_item_definition_sheet(item_def)
         
-        # Threat Model sheet
+        # Threat Model sheet with specific formatting
         threat_model = wb.create_sheet("Item definition - Threat model")
-        threat_model.append([
-            "Threat ID", "Item ID", "Technique ID", "Technique Name", 
-            "Tactic", "Summary", "Security Loss", "Stakeholder Impact"
-        ])
+        self._format_threat_model_sheet(threat_model)
         
-        # Asset Identification sheet
+        # Asset Identification sheet with specific formatting
         asset_id_sheet = wb.create_sheet("Asset identification")
-        asset_id_sheet.append([
-            "Asset ID", "Asset Name", "Asset Type", "Location", "CAL",
-            "Connectivity", "Vendor", "Function"
-        ])
+        self._format_asset_identification_sheet(asset_id_sheet)
         
         # TARA sheet (main analysis sheet)
         tara_sheet = wb.create_sheet("TARA")
@@ -946,3 +940,231 @@ class EnhancedTaraExcelGenerator:
                 top=current_border.top,
                 bottom=current_border.bottom
             )
+    
+    def _format_threat_model_sheet(self, ws):
+        """Format the Item definition - Threat model sheet"""
+        from openpyxl.styles import PatternFill, Font, Alignment, Border, Side
+        
+        # Define styles
+        header_fill = PatternFill(start_color="F4B084", end_color="F4B084", fill_type="solid")
+        section_fill = PatternFill(start_color="D0CECE", end_color="D0CECE", fill_type="solid")
+        border = Border(
+            left=Side(style='thin', color='000000'),
+            right=Side(style='thin', color='000000'),
+            top=Side(style='thin', color='000000'),
+            bottom=Side(style='thin', color='000000')
+        )
+        
+        title_font = Font(name='Calibri', size=16, color='000000')
+        header_font = Font(name='Calibri', size=11, color='000000')
+        center_alignment = Alignment(horizontal='center', vertical='center')
+        
+        # Lines 1-2: Merge B-D for title
+        ws.merge_cells('B1:D2')
+        ws['B1'] = "Item definition – Threat model"
+        ws['B1'].font = title_font
+        ws['B1'].alignment = center_alignment
+        ws['B1'].fill = header_fill
+        
+        # Apply borders to merged cells B1:D2
+        for row in range(1, 3):
+            for col in range(2, 5):  # B to D
+                cell = ws.cell(row=row, column=col)
+                cell.border = border
+        
+        # Lines 4-32: Column headers
+        ws['B4'] = "Threat model – ECU 01"
+        ws['B4'].font = header_font
+        ws['B4'].alignment = center_alignment
+        ws['B4'].fill = section_fill
+        ws['B4'].border = border
+        
+        ws['D4'] = "Threat model – ECU 02"
+        ws['D4'].font = header_font
+        ws['D4'].alignment = center_alignment
+        ws['D4'].fill = section_fill
+        ws['D4'].border = border
+        
+        # Apply borders to data rows 5-32 for columns B and D
+        for row in range(5, 33):
+            for col in [2, 4]:  # B, D
+                cell = ws.cell(row=row, column=col)
+                cell.border = border
+    
+    def _format_asset_identification_sheet(self, ws):
+        """Format the Asset identification sheet"""
+        from openpyxl.styles import PatternFill, Font, Alignment, Border, Side
+        
+        # Define styles and colors
+        main_header_fill = PatternFill(start_color="9BC2E6", end_color="9BC2E6", fill_type="solid")
+        derivation_fill = PatternFill(start_color="FFF2CC", end_color="FFF2CC", fill_type="solid")
+        security_fill = PatternFill(start_color="E2EFDA", end_color="E2EFDA", fill_type="solid")
+        cyber_assets_fill = PatternFill(start_color="D6DCE4", end_color="D6DCE4", fill_type="solid")
+        approach_fill = PatternFill(start_color="AEAAAA", end_color="AEAAAA", fill_type="solid")
+        data_fill = PatternFill(start_color="D0CECE", end_color="D0CECE", fill_type="solid")
+        
+        border = Border(
+            left=Side(style='thin', color='000000'),
+            right=Side(style='thin', color='000000'),
+            top=Side(style='thin', color='000000'),
+            bottom=Side(style='thin', color='000000')
+        )
+        
+        title_font = Font(name='Calibri', size=16, color='000000')
+        header_font = Font(name='Calibri', size=11, color='000000')
+        center_alignment = Alignment(horizontal='center', vertical='center')
+        
+        # Set column widths
+        ws.column_dimensions['A'].width = 8.58
+        ws.column_dimensions['B'].width = 19.68
+        ws.column_dimensions['C'].width = 42
+        ws.column_dimensions['D'].width = 22
+        ws.column_dimensions['E'].width = 22
+        ws.column_dimensions['F'].width = 22
+        ws.column_dimensions['G'].width = 28.68
+        ws.column_dimensions['H'].width = 18.58
+        
+        # Rows 1-2: Main header B-H merged
+        ws.merge_cells('B1:H2')
+        ws['B1'] = "Asset identification process"
+        ws['B1'].font = title_font
+        ws['B1'].alignment = center_alignment
+        ws['B1'].fill = main_header_fill
+        
+        # Apply borders to main header
+        for row in range(1, 3):
+            for col in range(2, 9):  # B to H
+                cell = ws.cell(row=row, column=col)
+                cell.border = border
+        
+        # Row 3: Section headers
+        # B-C merged: "Derivation of a candidate asset"
+        ws.merge_cells('B3:C3')
+        ws['B3'] = "Derivation of a candidate asset"
+        ws['B3'].font = header_font
+        ws['B3'].alignment = center_alignment
+        ws['B3'].fill = derivation_fill
+        
+        # D-F merged: "Determination of security property loss"
+        ws.merge_cells('D3:F3')
+        ws['D3'] = "Determination of security property loss"
+        ws['D3'].font = header_font
+        ws['D3'].alignment = center_alignment
+        ws['D3'].fill = security_fill
+        
+        # G-H merged: "List of cybersecurity assets"
+        ws.merge_cells('G3:H3')
+        ws['G3'] = "List of cybersecurity assets"
+        ws['G3'].font = header_font
+        ws['G3'].alignment = center_alignment
+        ws['G3'].fill = cyber_assets_fill
+        
+        # Apply borders to row 3
+        for col in range(2, 9):
+            cell = ws.cell(row=3, column=col)
+            cell.border = border
+        
+        # Row 4: Sub-headers
+        ws['B4'] = "ID function / ID technical approach"
+        ws['B4'].font = header_font
+        ws['B4'].alignment = center_alignment
+        ws['B4'].fill = derivation_fill
+        ws['B4'].border = border
+        
+        ws['C4'] = "Asset candidate"
+        ws['C4'].font = header_font
+        ws['C4'].alignment = center_alignment
+        ws['C4'].fill = derivation_fill
+        ws['C4'].border = border
+        
+        ws['D4'] = "C – Confidentiality"
+        ws['D4'].font = header_font
+        ws['D4'].alignment = center_alignment
+        ws['D4'].fill = security_fill
+        ws['D4'].border = border
+        
+        ws['E4'] = "I – Integrity"
+        ws['E4'].font = header_font
+        ws['E4'].alignment = center_alignment
+        ws['E4'].fill = security_fill
+        ws['E4'].border = border
+        
+        ws['F4'] = "A - Availability"
+        ws['F4'].font = header_font
+        ws['F4'].alignment = center_alignment
+        ws['F4'].fill = security_fill
+        ws['F4'].border = border
+        
+        ws['G4'] = "The asset candidate requires further analysis?"
+        ws['G4'].font = header_font
+        ws['G4'].alignment = center_alignment
+        ws['G4'].fill = cyber_assets_fill
+        ws['G4'].border = border
+        
+        ws['H4'] = "Identified asset ID"
+        ws['H4'].font = header_font
+        ws['H4'].alignment = center_alignment
+        ws['H4'].fill = cyber_assets_fill
+        ws['H4'].border = border
+        
+        # Row 5: Functional approach (B-H merged)
+        ws.merge_cells('B5:H5')
+        ws['B5'] = "Functional approach"
+        ws['B5'].font = header_font
+        ws['B5'].alignment = center_alignment
+        ws['B5'].fill = approach_fill
+        
+        for col in range(2, 9):
+            cell = ws.cell(row=5, column=col)
+            cell.border = border
+        
+        # Rows 6-15: FA01-FA10 data rows
+        for i, row in enumerate(range(6, 16), 1):
+            # Column B: FA labels with derivation background
+            ws[f'B{row}'] = f"FA{i:02d}"
+            ws[f'B{row}'].fill = derivation_fill
+            ws[f'B{row}'].border = border
+            
+            # Column C: derivation background
+            ws[f'C{row}'].fill = derivation_fill
+            ws[f'C{row}'].border = border
+            
+            # Columns D, E, F, G: data background
+            for col in ['D', 'E', 'F', 'G']:
+                ws[f'{col}{row}'].fill = data_fill
+                ws[f'{col}{row}'].border = border
+            
+            # Column H: cyber assets background
+            ws[f'H{row}'].fill = cyber_assets_fill
+            ws[f'H{row}'].border = border
+        
+        # Row 16: Technical approach (B-H merged)
+        ws.merge_cells('B16:H16')
+        ws['B16'] = "Technical approach"
+        ws['B16'].font = header_font
+        ws['B16'].alignment = center_alignment
+        ws['B16'].fill = approach_fill
+        
+        for col in range(2, 9):
+            cell = ws.cell(row=16, column=col)
+            cell.border = border
+        
+        # Rows 17-26: TA01-TA10 data rows
+        for i, row in enumerate(range(17, 27), 1):
+            # Column B: TA labels with derivation background
+            ws[f'B{row}'] = f"TA{i:02d}"
+            ws[f'B{row}'].fill = derivation_fill
+            ws[f'B{row}'].border = border
+            
+            # Column C: derivation background
+            ws[f'C{row}'].fill = derivation_fill
+            ws[f'C{row}'].border = border
+            
+            # Columns D, E, F, G: data background
+            for col in ['D', 'E', 'F', 'G']:
+                ws[f'{col}{row}'].fill = data_fill
+                ws[f'{col}{row}'].border = border
+            
+            # Column H: cyber assets background
+            ws[f'H{row}'].fill = cyber_assets_fill
+            ws[f'H{row}'].border = border

@@ -1,0 +1,14 @@
+Item definition – Threat model
+Lines 1 and 2 columns B-D should be merged and outlined in black. The background color should be #F4B084 back ground. It should say “Item definition – Threat model in black Calibri 16 center justified. Lines 4-32 column B should be outlined in black. 4-32 D should also be outlined in black Line 4B should be titled “Threat model – ECU 01 and 4D should say “Threat model – ECU 02” the background color should be  #D0CECE and the text should be calibri 11 black and center justified. Only the outlines around the titles and the external outlines should be black. The rest of lines should be invisible lines
+Asset identification tab- 
+Column; width 
+ A;8.58  B;19.68  C;42  D;22  E;22  F;22  G;28.68  H; 18.58
+Rows 1 and 2 B-H should be black outlined and merged with a title “Asset identification process in calibr 16 center justified black with a #9BC2E6 back ground
+Rows 3-26 columns B-H should be outlined black row 3 B and C should be merged and titled “Derivation of a candidate asset in black Calibri 11 font center justified and the back ground color is #FFF2CC
+Row 4 B should be titiled “ID function / ID technical approach and 4b should be titled “Asset candidate bothe with center justified black calibry 11 font and #FFF2CC as the background color. Columns B and C row 6-15 and B and C 17-26 should also have a background color #FFF2CC B6-15 should be labled FA 01, FA02 … FA10 and B17-26 should be labled TA01, TA02…TA10
+Row 3 columns D,E and F should be merged and labled Determination of security property loss center justified black in Calibri 11 font and a #E2EFDA back ground
+Row 4 D should be labeled C – Confidentiality 4E should be labled I – Integrity and 4F A-Availability. They should all be black calibri 11 center justified with #E2EFDA background. 
+Row 3 G and H should be merged and titled List of cybersecurity assets 4G should be labeled The asset candidate requires further analysis? And 4H should be titled Identified asset ID – all should be black calibri 11 center justified and a background color of #D6DCE4. Row H 6-15 and 17-26 should also be #D6DCE4
+Rows 6-15 and 17-26 columns DEFG should all be D0CECE back ground
+Row 5 b-H should be merged and say Functional approach in calibri black 11 center justified with a #AEAAAA background
+Row 16B-H should also have a AEAAAA background and merged cells with a center justified title “Technical approach”
