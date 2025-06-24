@@ -654,12 +654,9 @@ class EnhancedTaraExcelGenerator:
         general_info = wb.create_sheet("General information")
         self._format_general_info_sheet(general_info)
         
-        # Item Definition sheet
+        # Item Definition sheet with specific formatting
         item_def = wb.create_sheet("Item definition")
-        item_def.append([
-            "Item ID", "Item Name", "Function", "Zone", "Environment",
-            "CAL", "Cybersecurity Goals", "Stakeholders"
-        ])
+        self._format_item_definition_sheet(item_def)
         
         # Threat Model sheet
         threat_model = wb.create_sheet("Item definition - Threat model")
@@ -786,3 +783,166 @@ class EnhancedTaraExcelGenerator:
             for col in range(2, 9):  # B to H
                 cell = ws.cell(row=row, column=col)
                 cell.border = border
+    
+    def _format_item_definition_sheet(self, ws):
+        """Format the Item Definition sheet with exact specifications"""
+        from openpyxl.styles import PatternFill, Font, Alignment, Border, Side
+        
+        # Define styles
+        header_fill = PatternFill(start_color="F4B084", end_color="F4B084", fill_type="solid")
+        section_fill = PatternFill(start_color="D0CECE", end_color="D0CECE", fill_type="solid")
+        border = Border(
+            left=Side(style='thin', color='000000'),
+            right=Side(style='thin', color='000000'),
+            top=Side(style='thin', color='000000'),
+            bottom=Side(style='thin', color='000000')
+        )
+        
+        # Font styles
+        title_font = Font(name='Calibri', size=20, bold=True, color='000000')
+        header_font = Font(name='Calibri', size=11, color='000000')
+        
+        center_alignment = Alignment(horizontal='center', vertical='center')
+        left_alignment = Alignment(horizontal='left', vertical='center')
+        
+        # Set column widths as specified
+        ws.column_dimensions['A'].width = 8.58
+        ws.column_dimensions['B'].width = 8.84
+        ws.column_dimensions['C'].width = 101.58
+        ws.column_dimensions['D'].width = 8.58
+        ws.column_dimensions['E'].width = 150.58
+        ws.column_dimensions['F'].width = 8.58
+        
+        # Rows 1-2: Merge B-E for "Item Definition" title
+        ws.merge_cells('B1:E2')
+        ws['B1'] = "Item Definition"
+        ws['B1'].font = title_font
+        ws['B1'].alignment = center_alignment
+        ws['B1'].fill = header_fill
+        
+        # Apply borders to merged cells B1:E2
+        for row in range(1, 3):
+            for col in range(2, 6):  # B to E
+                cell = ws.cell(row=row, column=col)
+                cell.border = border
+        
+        # Row 4-25: ID and Item functions section
+        # Headers in row 4
+        ws['B4'] = "ID"
+        ws['B4'].font = header_font
+        ws['B4'].alignment = left_alignment
+        ws['B4'].fill = section_fill
+        ws['B4'].border = border
+        
+        ws['C4'] = "Item functions/Technical approach"
+        ws['C4'].font = header_font
+        ws['C4'].alignment = left_alignment
+        ws['C4'].fill = section_fill
+        ws['C4'].border = border
+        
+        # Preliminary architecture header in E4
+        ws['E4'] = "Preliminary architecture"
+        ws['E4'].font = header_font
+        ws['E4'].alignment = center_alignment
+        ws['E4'].fill = section_fill
+        ws['E4'].border = border
+        
+        # Apply borders to data rows 5-25 for columns B, C, E
+        for row in range(5, 26):
+            for col in [2, 3, 5]:  # B, C, E
+                cell = ws.cell(row=row, column=col)
+                cell.border = border
+        
+        # Row 27-34: Operational environment section
+        ws['B27'] = "ID"
+        ws['B27'].font = header_font
+        ws['B27'].alignment = left_alignment
+        ws['B27'].fill = section_fill
+        ws['B27'].border = border
+        
+        ws['C27'] = "Operational environment"
+        ws['C27'].font = header_font
+        ws['C27'].alignment = left_alignment
+        ws['C27'].fill = section_fill
+        ws['C27'].border = border
+        
+        # Module overview header in E27
+        ws['E27'] = "Module overview"
+        ws['E27'].font = header_font
+        ws['E27'].alignment = center_alignment
+        ws['E27'].fill = section_fill
+        ws['E27'].border = border
+        
+        # Apply borders to rows 28-34 for columns B, C
+        for row in range(28, 35):
+            for col in [2, 3]:  # B, C
+                cell = ws.cell(row=row, column=col)
+                cell.border = border
+        
+        # Row 36-43: Assumptions section
+        ws['B36'] = "ID"
+        ws['B36'].font = header_font
+        ws['B36'].alignment = left_alignment
+        ws['B36'].fill = section_fill
+        ws['B36'].border = border
+        
+        ws['C36'] = "Assumptions"
+        ws['C36'].font = header_font
+        ws['C36'].alignment = left_alignment
+        ws['C36'].fill = section_fill
+        ws['C36'].border = border
+        
+        # Apply borders to rows 37-43 for columns B, C
+        for row in range(37, 44):
+            for col in [2, 3]:  # B, C
+                cell = ws.cell(row=row, column=col)
+                cell.border = border
+        
+        # Apply borders to column E for rows 28-43 (Module overview section)
+        for row in range(28, 44):
+            cell = ws.cell(row=row, column=5)  # Column E
+            cell.border = border
+        
+        # Row 45-65: Item Boundary section
+        ws.merge_cells('B45:E45')
+        ws['B45'] = "Item Boundary"
+        ws['B45'].font = header_font
+        ws['B45'].alignment = center_alignment
+        ws['B45'].fill = section_fill
+        ws['B45'].border = border
+        
+        # Apply borders to merged header B45:E45
+        for col in range(2, 6):  # B to E
+            cell = ws.cell(row=45, column=col)
+            cell.border = border
+        
+        # Apply outer borders only to rows 46-65 for columns B-E (no internal lines)
+        # Top border for row 46
+        for col in range(2, 6):  # B to E
+            cell = ws.cell(row=46, column=col)
+            cell.border = Border(top=Side(style='thin', color='000000'))
+        
+        # Bottom border for row 65
+        for col in range(2, 6):  # B to E
+            cell = ws.cell(row=65, column=col)
+            cell.border = Border(bottom=Side(style='thin', color='000000'))
+        
+        # Left border for column B (rows 46-65)
+        for row in range(46, 66):
+            cell = ws.cell(row=row, column=2)  # Column B
+            current_border = cell.border
+            cell.border = Border(
+                left=Side(style='thin', color='000000'),
+                top=current_border.top,
+                bottom=current_border.bottom
+            )
+        
+        # Right border for column E (rows 46-65)
+        for row in range(46, 66):
+            cell = ws.cell(row=row, column=5)  # Column E
+            current_border = cell.border
+            cell.border = Border(
+                right=Side(style='thin', color='000000'),
+                top=current_border.top,
+                bottom=current_border.bottom
+            )
