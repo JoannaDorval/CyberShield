@@ -1302,6 +1302,93 @@ class EnhancedTaraExcelGenerator:
                 cell = ws.cell(row=row, column=col_num)
                 cell.border = border
         
+        # Complete remaining headers for TARA sheet
+        
+        # Cybersecurity control headers (R-S)
+        ws.merge_cells('R4:R5')
+        ws['R4'] = "ID"
+        ws['R4'].font = header_font
+        ws['R4'].alignment = center_alignment
+        ws['R4'].fill = cyber_control_fill
+        
+        ws.merge_cells('S4:S5')
+        ws['S4'] = "Cybersecurity control"
+        ws['S4'].font = header_font
+        ws['S4'].alignment = center_alignment
+        ws['S4'].fill = cyber_control_fill
+        
+        # STRIDE headers (T-Y)
+        ws.merge_cells('T4:Y4')
+        ws['T4'] = "Attack method – STRIDE"
+        ws['T4'].font = header_font
+        ws['T4'].alignment = center_alignment
+        ws['T4'].fill = stride_fill
+        
+        stride_categories = ['Spoofing', 'Tampering', 'Repudiation', 'Information disclosure', 'Denial of service', 'Elevation of privileges']
+        for i, category in enumerate(stride_categories):
+            col_letter = get_column_letter(20 + i)  # T=20, U=21, etc.
+            ws[f'{col_letter}5'] = category
+            ws[f'{col_letter}5'].font = header_font
+            ws[f'{col_letter}5'].alignment = center_alignment
+            ws[f'{col_letter}5'].fill = stride_fill
+        
+        # Attack potential evaluation headers (AA-AK)
+        ws.merge_cells('AA4:AK4')
+        ws['AA4'] = "Attack potential evaluation"
+        ws['AA4'].font = header_font
+        ws['AA4'].alignment = center_alignment
+        ws['AA4'].fill = potential_fill
+        
+        attack_potential_categories = [
+            ('AA5:AB5', 'Elapsed time'),
+            ('AC5:AD5', 'Specialist expertise'),
+            ('AE5:AF5', 'Knowledge of the item or component'),
+            ('AG5:AH5', 'Window of opportunity'),
+            ('AI5:AJ5', 'Equipment'),
+            ('AK5:AK5', 'Attack Vector')
+        ]
+        
+        for cell_range, text in attack_potential_categories:
+            ws.merge_cells(cell_range)
+            start_cell = cell_range.split(':')[0]
+            ws[start_cell] = text
+            ws[start_cell].font = header_font
+            ws[start_cell].alignment = center_alignment
+            ws[start_cell].fill = potential_fill
+        
+        # Risk evaluation headers (AL-AN)
+        ws.merge_cells('AL4:AN4')
+        ws['AL4'] = "Risk evaluation"
+        ws['AL4'].font = header_font
+        ws['AL4'].alignment = center_alignment
+        ws['AL4'].fill = risk_eval_fill
+        
+        risk_eval_categories = ['Summary', 'Attack feasibility', 'Risk determination']
+        for i, category in enumerate(risk_eval_categories):
+            col_letter = get_column_letter(38 + i)  # AL=38, AM=39, AN=40
+            ws[f'{col_letter}5'] = category
+            ws[f'{col_letter}5'].font = header_font
+            ws[f'{col_letter}5'].alignment = center_alignment
+            ws[f'{col_letter}5'].fill = risk_eval_fill
+        
+        # Risk treatment headers (AO-AT)
+        risk_treatment_categories = [
+            ('AO4:AO5', 'Risk threshold level'),
+            ('AP4:AP5', 'Risk treatment option'),
+            ('AQ4:AQ5', 'ID'),
+            ('AR4:AR5', 'Cybersecurity goal'),
+            ('AS4:AS5', 'Cyber security claim'),
+            ('AT4:AT5', 'CAL')
+        ]
+        
+        for cell_range, text in risk_treatment_categories:
+            ws.merge_cells(cell_range)
+            start_cell = cell_range.split(':')[0]
+            ws[start_cell] = text
+            ws[start_cell].font = header_font
+            ws[start_cell].alignment = center_alignment
+            ws[start_cell].fill = risk_treatment_fill
+        
         # Apply background colors and borders to data area (rows 6-52)
         for row in range(6, 53):
             # Even rows: merge B-AT with special background
@@ -1320,3 +1407,7 @@ class EnhancedTaraExcelGenerator:
                     col_letter = get_column_letter(col_num)
                     if col_letter in ['H', 'J', 'L', 'N', 'O', 'AB', 'AD', 'AF', 'AH', 'AJ']:
                         cell.fill = even_row_fill
+        
+        # Apply borders to the Z column (Attack Path) for all rows
+        for row in range(3, 53):
+            ws[f'Z{row}'].border = border
