@@ -666,20 +666,9 @@ class EnhancedTaraExcelGenerator:
         asset_id_sheet = wb.create_sheet("Asset identification")
         self._format_asset_identification_sheet(asset_id_sheet)
         
-        # TARA sheet (main analysis sheet)
+        # TARA sheet (main analysis sheet) with specific formatting
         tara_sheet = wb.create_sheet("TARA")
-        tara_sheet.append([
-            "Asset ID", "Asset", "Security property loss", "Stakeholder",
-            "Damage Scenario description", "Safety", "Financial", "Operational", "Privacy",
-            "Impact level", "Impact level justification", "Cybersecurity control",
-            "Cybersecurity control ID", "Spoofing", "Tampering", "Repudiation",
-            "Information disclosure", "Denial of service", "Elevation of privileges",
-            "Attack path", "Elapsed time", "Specialist expertise",
-            "Knowledge of the item or component", "Window of opportunity", "Equipment",
-            "Attack vector", "Summary", "Attack feasibility", "Risk determination",
-            "Risk threshold level", "Risk treatment option", "ID",
-            "Cybersecurity goal", "Cybersecurity claim", "CAL"
-        ])
+        self._format_tara_sheet(tara_sheet)
         
         # Matrices and Guidelines sheet
         matrix_sheet = wb.create_sheet("Matrices and guidlines")
@@ -1168,3 +1157,166 @@ class EnhancedTaraExcelGenerator:
             # Column H: cyber assets background
             ws[f'H{row}'].fill = cyber_assets_fill
             ws[f'H{row}'].border = border
+    
+    def _format_tara_sheet(self, ws):
+        """Format the TARA sheet with complex column structure and styling"""
+        from openpyxl.styles import PatternFill, Font, Alignment, Border, Side
+        from openpyxl.utils import get_column_letter
+        
+        # Define all colors
+        main_header_fill = PatternFill(start_color="FFD966", end_color="FFD966", fill_type="solid")
+        assets_fill = PatternFill(start_color="D6DCE4", end_color="D6DCE4", fill_type="solid")
+        damage_fill = PatternFill(start_color="E2EFDA", end_color="E2EFDA", fill_type="solid")
+        impact_fill = PatternFill(start_color="F2F2F2", end_color="F2F2F2", fill_type="solid")
+        cyber_control_fill = PatternFill(start_color="F4B084", end_color="F4B084", fill_type="solid")
+        stride_fill = PatternFill(start_color="FCE4D6", end_color="FCE4D6", fill_type="solid")
+        attack_path_fill = PatternFill(start_color="E7E6E6", end_color="E7E6E6", fill_type="solid")
+        potential_fill = PatternFill(start_color="DAEEF3", end_color="DAEEF3", fill_type="solid")
+        risk_eval_fill = PatternFill(start_color="D5E8D4", end_color="D5E8D4", fill_type="solid")
+        risk_treatment_fill = PatternFill(start_color="FFF2CC", end_color="FFF2CC", fill_type="solid")
+        even_row_fill = PatternFill(start_color="D0CECE", end_color="D0CECE", fill_type="solid")
+        
+        border = Border(
+            left=Side(style='thin', color='000000'),
+            right=Side(style='thin', color='000000'),
+            top=Side(style='thin', color='000000'),
+            bottom=Side(style='thin', color='000000')
+        )
+        
+        title_font = Font(name='Calibri', size=16, color='000000')
+        header_font = Font(name='Calibri', size=11, color='000000')
+        center_alignment = Alignment(horizontal='center', vertical='center')
+        
+        # Set all column widths as specified
+        column_widths = {
+            'A': 8.58, 'B': 12.68, 'C': 23.26, 'D': 14.68, 'E': 14.58, 'F': 35, 'G': 15.26, 
+            'H': 4.42, 'I': 15.26, 'J': 4.42, 'K': 15.26, 'L': 4.42, 'M': 15.26, 'N': 4.42, 
+            'O': 4.42, 'P': 15.26, 'Q': 39.58, 'R': 10.26, 'S': 30, 'T': 37.11, 'U': 37.11, 
+            'V': 37.11, 'W': 37.11, 'X': 37.11, 'Y': 37.11, 'Z': 62.11, 'AA': 15.26, 'AB': 4.42, 
+            'AC': 15.26, 'AD': 4.42, 'AE': 15.26, 'AF': 4.42, 'AG': 15.26, 'AH': 4.42, 'AI': 15.26, 
+            'AJ': 4.42, 'AK': 15.26, 'AL': 15.26, 'AM': 15.26, 'AN': 15.26, 'AO': 28.26, 'AP': 28.26, 
+            'AQ': 28.26, 'AR': 28.26, 'AS': 28.26, 'AT': 28.26, 'AU': 8.58
+        }
+        
+        for col, width in column_widths.items():
+            ws.column_dimensions[col].width = width
+        
+        # Line 1: Main title B-AT merged
+        ws.merge_cells('B1:AT1')
+        ws['B1'] = "Threat analysis and risk assessment"
+        ws['B1'].font = title_font
+        ws['B1'].alignment = center_alignment
+        ws['B1'].fill = main_header_fill
+        
+        # Apply borders to main title
+        for col_num in range(2, 47):  # B to AT
+            cell = ws.cell(row=1, column=col_num)
+            cell.border = border
+        
+        # Line 3: Section headers with proper merging and colors
+        section_headers = [
+            ('B3:D3', 'Assets', assets_fill),
+            ('E3:F3', 'Damage Scenario', damage_fill),
+            ('G3:Q3', 'Impact analysis', impact_fill),
+            ('R3:S3', 'Cybersecurity control', cyber_control_fill),
+            ('T3:Y3', 'Attack method – STRIDE', stride_fill),
+            ('AA3:AK3', 'Attack potential evaluation', potential_fill),
+            ('AL3:AN3', 'Risk evaluation', risk_eval_fill),
+            ('AO3:AT3', 'Risk treatment', risk_treatment_fill)
+        ]
+        
+        for cell_range, text, fill in section_headers:
+            ws.merge_cells(cell_range)
+            start_cell = cell_range.split(':')[0]
+            ws[start_cell] = text
+            ws[start_cell].font = header_font
+            ws[start_cell].alignment = center_alignment
+            ws[start_cell].fill = fill
+        
+        # Z: Attack Path (merged 3-5)
+        ws.merge_cells('Z3:Z5')
+        ws['Z3'] = "Attack Path"
+        ws['Z3'].font = header_font
+        ws['Z3'].alignment = center_alignment
+        ws['Z3'].fill = attack_path_fill
+        
+        # Apply borders to line 3
+        for col_num in range(2, 47):  # B to AT
+            cell = ws.cell(row=3, column=col_num)
+            cell.border = border
+        
+        # Lines 4-5: Detailed headers with proper merging
+        # Asset headers (A-F)
+        asset_headers = [
+            ('A4:A5', 'Asset ID'),
+            ('B4:B5', 'Asset'),
+            ('C4:C5', 'Security Property loss'),
+            ('D4:D5', 'Stakeholder'),
+            ('E4:F5', 'Damage Scenario')
+        ]
+        
+        for cell_range, text in asset_headers:
+            ws.merge_cells(cell_range)
+            start_cell = cell_range.split(':')[0]
+            ws[start_cell] = text
+            ws[start_cell].font = header_font
+            ws[start_cell].alignment = center_alignment
+            if start_cell[0] in ['B', 'C', 'D']:
+                ws[start_cell].fill = assets_fill
+            elif start_cell[0] in ['E']:
+                ws[start_cell].fill = damage_fill
+        
+        # Impact section headers
+        ws.merge_cells('G4:P4')
+        ws['G4'] = "Impact category"
+        ws['G4'].font = header_font
+        ws['G4'].alignment = center_alignment
+        ws['G4'].fill = impact_fill
+        
+        ws.merge_cells('Q4:Q5')
+        ws['Q4'] = "Justification(optional)"
+        ws['Q4'].font = header_font
+        ws['Q4'].alignment = center_alignment
+        ws['Q4'].fill = impact_fill
+        
+        # Impact categories (line 5)
+        impact_categories = [
+            ('G5:H5', 'Safety'),
+            ('I5:J5', 'Financial'),
+            ('K5:L5', 'Operational'),
+            ('M5:N5', 'Privacy'),
+            ('O5:P5', 'Impact Level')
+        ]
+        
+        for cell_range, text in impact_categories:
+            ws.merge_cells(cell_range)
+            start_cell = cell_range.split(':')[0]
+            ws[start_cell] = text
+            ws[start_cell].font = header_font
+            ws[start_cell].alignment = center_alignment
+            ws[start_cell].fill = impact_fill
+        
+        # Apply borders to all header rows
+        for row in [4, 5]:
+            for col_num in range(1, 47):  # A to AT
+                cell = ws.cell(row=row, column=col_num)
+                cell.border = border
+        
+        # Apply background colors and borders to data area (rows 6-52)
+        for row in range(6, 53):
+            # Even rows: merge B-AT with special background
+            if row % 2 == 0:
+                ws.merge_cells(f'B{row}:AT{row}')
+                ws[f'B{row}'].fill = even_row_fill
+                for col in range(2, 47):
+                    ws.cell(row=row, column=col).border = border
+            else:
+                # Odd rows: apply borders to all cells and special background to specific columns
+                for col_num in range(2, 47):  # B to AT
+                    cell = ws.cell(row=row, column=col_num)
+                    cell.border = border
+                    
+                    # Special background for specific columns in odd rows
+                    col_letter = get_column_letter(col_num)
+                    if col_letter in ['H', 'J', 'L', 'N', 'O', 'AB', 'AD', 'AF', 'AH', 'AJ']:
+                        cell.fill = even_row_fill

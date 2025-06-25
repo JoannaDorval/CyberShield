@@ -1,0 +1,17 @@
+TARA tab –
+Column; width
+A;8.58  b;12.68  c;23.26  d;14.68 e; 14.58 f;35 g;15.26  h;4.42  I;15.26  j;4.42  k;15.26  l;4.42  m;15.26  n;4.42  o;4.42  p;15.26  q;39.58  r;10.26  s;30 t;37.11  u;37.11  v;37.11  w;37.11  x;37.11  y;37.11  z;62.11  aa;15.26 ab;4.42 ac;15.26 ad;4.42 ae;15.26 af;4.42 ag;15.26  ah;4.42 ai;15.26 aj;4.42 ak;15.26 al;15.26 am;15.26 an;15.26 ao;28.26 ap;28.26 aq;28.26  ar;28.26  as;28.26  at; 28.26 au;8.58
+Column B-AT on line one should be outlined in black with “Threat analysis and risk assessment” in black letters calibri size 16 font center justified in the merged cells with a background of #FFD966
+Columns b-at lines 3 through 52 should be outlined in black 
+On line three BCD should be merged and “Assets should be center justified in calibri 11 background color #D6DCE4 for bcd all the way down to line 52. All headers in the tab should be calibri 11 black and center justified unless otherwise specified. Line 3 e and f merge and Damage Scenario is the title #E2EFDA background  color for 3-52 E/f g-q should be merged on line 3 and titled Impact analysis #F2F2F2 is the background color down to 52. Rand S should be merged and labled Cyber security controls on line three background color #F8CBAD down to line 52. Line 3 t-y should merge and be labled threat scenarios background color #FFF2CC all the way to 52. Line 3-5 column z should be merged and Attack path should be its lable and #D0CECE its background down to line 52. Line 3 AA -AN should be merged and labled Attack feasibility assessment background #C6E0B4 down to line 52. Line 3 AO-AT should be merged and labled Cybersecurity goals and claims back ground color #EDEDED down to line 52. 
+Line 4 and 5 should be merged for columbs A- F and the lables should be Asset ID, Asset, Security Property loss, Stakeholder and Damage Scenario
+Line 4 G-P should be merged and Labeled Impact category with Line 5 G-P being labeled Safety, Financial, Operational ,Privacy, Impact Level for line 4 and 5 Q should be merged and labeled Justification(optional) 
+Column R and S should merge rows 4 and 5 and be labeld ID and Cybersecurity control
+Line 4 T-y should be merged and labeled Attack method – STRIDE
+Line 5 T-Y should be labeled Spoofing, Tampering, Repudiation, Information disclosure, Denial of service, Elevation of privileges
+Column Z Lines 3-5 should be merged and labeled Attack Path
+AA-AK line 4 should be merged and labeled Attack potential evaluation and line 5 AA-AK should be labeled Elapsed time, Specialist expertise, Knowledge of the item or component, Window of opportunity, Equipment, Attack Vector
+Line 5 AL-AN should be merged and labeled Risk evaluation. Line 5 AL-AN should be labeled Summary, Attack feasibility, Risk determination
+Line 4 and 5for columns  AO-AT should be merged and the columns labeled Risk threshold level, Risk treatment option, ID, Cybersecurity goal, Cyber security claim, CAL
+Every even row starting with 6 and ending at 52 columns B-AT should be merged and the color should be #D0CECE with a black outline around it. 
+Every ODD row starting at 7 and ending at 51 for columns H, J, L, N, O , AB, AD, AF, AH, AJ should all have a #D0CECE background
