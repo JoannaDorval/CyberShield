@@ -670,11 +670,9 @@ class EnhancedTaraExcelGenerator:
         tara_sheet = wb.create_sheet("TARA")
         self._format_tara_sheet(tara_sheet)
         
-        # Matrices and Guidelines sheet
+        # Matrices and Guidelines sheet with specific formatting
         matrix_sheet = wb.create_sheet("Matrices and guidlines")
-        matrix_sheet.append([
-            "Impact Level", "Likelihood", "Risk Level", "Thresholds", "Mitigation Notes"
-        ])
+        self._format_matrices_guidelines_sheet(matrix_sheet)
         
         # Template Revision History sheet
         rev_sheet = wb.create_sheet("Template revision history")
@@ -1411,3 +1409,260 @@ class EnhancedTaraExcelGenerator:
         # Apply borders to the Z column (Attack Path) for all rows
         for row in range(3, 53):
             ws[f'Z{row}'].border = border
+    
+    def _format_matrices_guidelines_sheet(self, ws):
+        """Format the Matrices and guidelines sheet with complex structure"""
+        from openpyxl.styles import PatternFill, Font, Alignment, Border, Side
+        from openpyxl.utils import get_column_letter
+        
+        # Define all colors
+        asset_header_fill = PatternFill(start_color="9BC2E6", end_color="9BC2E6", fill_type="solid")
+        security_property_fill = PatternFill(start_color="E2EFDA", end_color="E2EFDA", fill_type="solid")
+        tara_header_fill = PatternFill(start_color="FFD966", end_color="FFD966", fill_type="solid")
+        impact_analysis_fill = PatternFill(start_color="F2F2F2", end_color="F2F2F2", fill_type="solid")
+        risk_eval_fill = PatternFill(start_color="C6E0B4", end_color="C6E0B4", fill_type="solid")
+        
+        # Risk value colors
+        low_risk_fill = PatternFill(start_color="70AD47", end_color="70AD47", fill_type="solid")
+        medium_risk_fill = PatternFill(start_color="FFC000", end_color="FFC000", fill_type="solid")
+        high_risk_fill = PatternFill(start_color="BF8F00", end_color="BF8F00", fill_type="solid")
+        critical_risk_fill = PatternFill(start_color="FF0000", end_color="FF0000", fill_type="solid")
+        
+        border = Border(
+            left=Side(style='thin', color='000000'),
+            right=Side(style='thin', color='000000'),
+            top=Side(style='thin', color='000000'),
+            bottom=Side(style='thin', color='000000')
+        )
+        
+        bold_border = Border(
+            left=Side(style='thick', color='000000'),
+            right=Side(style='thick', color='000000'),
+            top=Side(style='thick', color='000000'),
+            bottom=Side(style='thick', color='000000')
+        )
+        
+        header_font = Font(name='Calibri', size=12, bold=True, color='000000')
+        subheader_font = Font(name='Calibri', size=11, bold=True, color='000000')
+        regular_font = Font(name='Calibri', size=11, color='000000')
+        center_alignment = Alignment(horizontal='center', vertical='center')
+        left_alignment = Alignment(horizontal='left', vertical='center')
+        right_alignment = Alignment(horizontal='right', vertical='center')
+        
+        # Set column widths
+        column_widths = {
+            'A': 8.58, 'B': 47.42, 'C': 8.58, 'D': 17.42, 'E': 17.42, 'F': 8.58, 'G': 18.84,
+            'H': 18.84, 'I': 18.84, 'J': 8.58, 'K': 35, 'L': 8.84, 'M': 35, 'N': 8.84, 'O': 35,
+            'P': 8.84, 'Q': 35, 'R': 8.84, 'S': 35, 'T': 8.84, 'U': 8.84, 'V': 8.84, 'W': 8.84,
+            'X': 8.84, 'Y': 8.84, 'Z': 8.84, 'AA': 8.84, 'AB': 8.84, 'AC': 8.84, 'AD': 8.84, 'AE': 8.84
+        }
+        
+        for col, width in column_widths.items():
+            ws.column_dimensions[col].width = width
+        
+        # Column B formatting
+        ws['B2'] = "Asset identification process"
+        ws['B2'].font = header_font
+        ws['B2'].fill = asset_header_fill
+        ws['B2'].alignment = center_alignment
+        ws['B2'].border = border
+        
+        ws['B3'] = "Determination of security property loss"
+        ws['B3'].font = subheader_font
+        ws['B3'].fill = security_property_fill
+        ws['B3'].alignment = center_alignment
+        ws['B3'].border = bold_border
+        
+        ws['B4'] = "Negligible impact"
+        ws['B4'].font = regular_font
+        ws['B4'].alignment = left_alignment
+        ws['B4'].border = border
+        
+        ws['B5'] = "Non negligible impact"
+        ws['B5'].font = regular_font
+        ws['B5'].alignment = left_alignment
+        ws['B5'].border = border
+        
+        # Line 2: Main TARA header (D2:AD2)
+        ws.merge_cells('D2:AD2')
+        ws['D2'] = "Threat analysis and risk assessment"
+        ws['D2'].font = header_font
+        ws['D2'].fill = tara_header_fill
+        ws['D2'].alignment = center_alignment
+        
+        # Apply borders to main header
+        for col_num in range(4, 31):  # D to AD
+            cell = ws.cell(row=2, column=col_num)
+            cell.border = border
+        
+        # Line 3: Impact analysis section (D3:E3)
+        ws.merge_cells('D3:E3')
+        ws['D3'] = "Impact analysis - category values"
+        ws['D3'].font = subheader_font
+        ws['D3'].fill = impact_analysis_fill
+        ws['D3'].alignment = center_alignment
+        
+        # Apply borders to D3:E3
+        for col in ['D', 'E']:
+            ws[f'{col}3'].border = border
+        
+        # Line 4: Impact category headers
+        ws['D4'] = "Impact category"
+        ws['D4'].font = subheader_font
+        ws['D4'].fill = impact_analysis_fill
+        ws['D4'].alignment = center_alignment
+        ws['D4'].border = border
+        
+        ws['E4'] = "Impact value"
+        ws['E4'].font = subheader_font
+        ws['E4'].fill = impact_analysis_fill
+        ws['E4'].alignment = center_alignment
+        ws['E4'].border = border
+        
+        # Impact categories and values (D5:D8, E5:E8)
+        impact_categories = ['Negligible', 'Moderate', 'Major', 'Severe']
+        impact_values = ['0', '1', '3', '5']
+        
+        for i, (category, value) in enumerate(zip(impact_categories, impact_values)):
+            row = 5 + i
+            ws[f'D{row}'] = category
+            ws[f'D{row}'].font = regular_font
+            ws[f'D{row}'].alignment = left_alignment
+            ws[f'D{row}'].border = border
+            
+            ws[f'E{row}'] = value
+            ws[f'E{row}'].font = regular_font
+            ws[f'E{row}'].alignment = center_alignment
+            ws[f'E{row}'].border = border
+        
+        # Line 11: Attack feasibility section (D11:K11)
+        ws.merge_cells('D11:K11')
+        ws['D11'] = "Attack feasibility"
+        ws['D11'].font = subheader_font
+        ws['D11'].fill = impact_analysis_fill
+        ws['D11'].alignment = center_alignment
+        
+        for col_num in range(4, 12):  # D to K
+            cell = ws.cell(row=11, column=col_num)
+            cell.border = border
+        
+        # Risk evaluation section (V3:AD3)
+        ws.merge_cells('V3:AD3')
+        ws['V3'] = "Risk evaluation"
+        ws['V3'].font = subheader_font
+        ws['V3'].fill = risk_eval_fill
+        ws['V3'].alignment = center_alignment
+        
+        # Apply borders to V3:AD3
+        for col_num in range(22, 31):  # V to AD
+            cell = ws.cell(row=3, column=col_num)
+            cell.border = border
+        
+        # Attack feasibility rating (X4:AA4)
+        ws.merge_cells('X4:AA4')
+        ws['X4'] = "Attack feasibility rating"
+        ws['X4'].font = subheader_font
+        ws['X4'].alignment = center_alignment
+        
+        # Attack feasibility values (X5:AA5)
+        feasibility_levels = ['Very low', 'Low', 'Medium', 'High']
+        for i, level in enumerate(feasibility_levels):
+            col_letter = get_column_letter(24 + i)  # X=24, Y=25, Z=26, AA=27
+            ws[f'{col_letter}5'] = level
+            ws[f'{col_letter}5'].font = regular_font
+            ws[f'{col_letter}5'].alignment = center_alignment
+        
+        # Impact rating (V6:V9)
+        ws.merge_cells('V6:V9')
+        ws['V6'] = "Impact rating"
+        ws['V6'].font = regular_font
+        ws['V6'].alignment = center_alignment
+        
+        # Impact levels in column W
+        impact_levels = ['Severe', 'Major', 'Moderate', 'Negligible']
+        for i, level in enumerate(impact_levels):
+            row = 6 + i
+            ws[f'W{row}'] = level
+            ws[f'W{row}'].font = regular_font
+            ws[f'W{row}'].alignment = left_alignment
+        
+        # Risk value mapping (AC4:AD4)
+        ws.merge_cells('AC4:AD4')
+        ws['AC4'] = "Risk value mapping"
+        ws['AC4'].font = subheader_font
+        ws['AC4'].fill = risk_eval_fill
+        ws['AC4'].alignment = center_alignment
+        
+        # Risk values and labels (AC5:AC9, AD5:AD9)
+        risk_values = ['1', '2', '3', '4', '5']
+        risk_labels = ['Very low', 'Low', 'Medium', 'High', 'Critical']
+        risk_fills = [None, low_risk_fill, medium_risk_fill, high_risk_fill, critical_risk_fill]
+        
+        for i, (value, label, fill) in enumerate(zip(risk_values, risk_labels, risk_fills)):
+            row = 5 + i
+            ws[f'AC{row}'] = value
+            ws[f'AC{row}'].font = regular_font
+            ws[f'AC{row}'].alignment = right_alignment
+            
+            ws[f'AD{row}'] = label
+            ws[f'AD{row}'].font = subheader_font
+            ws[f'AD{row}'].alignment = left_alignment
+            if fill:
+                ws[f'AD{row}'].fill = fill
+        
+        # Line 11: TARA header (V11:AA11)
+        ws.merge_cells('V11:AA11')
+        ws['V11'] = "Threat analysis and risk assessment"
+        ws['V11'].font = subheader_font
+        ws['V11'].fill = tara_header_fill
+        ws['V11'].alignment = center_alignment
+        
+        # Line 12: Risk threshold level (V12:AA12)
+        ws.merge_cells('V12:AA12')
+        ws['V12'] = "Risk threshold level"
+        ws['V12'].font = subheader_font
+        ws['V12'].fill = risk_eval_fill
+        ws['V12'].alignment = center_alignment
+        
+        # Lines 13-14: Empty merged cells (V13:W14)
+        ws.merge_cells('V13:W14')
+        ws['V13'].fill = risk_eval_fill
+        
+        # Line 13: Attack feasibility rating (X13:AA13)
+        ws.merge_cells('X13:AA13')
+        ws['X13'] = "Attack feasibility rating"
+        ws['X13'].font = subheader_font
+        ws['X13'].fill = risk_eval_fill
+        ws['X13'].alignment = center_alignment
+        
+        # Line 20: TARA header (V20:AA20)
+        ws.merge_cells('V20:AA20')
+        ws['V20'] = "Threat analysis and risk assessment"
+        ws['V20'].font = subheader_font
+        ws['V20'].fill = tara_header_fill
+        ws['V20'].alignment = center_alignment
+        
+        # Line 21: CAL determination (V21:AA21)
+        ws.merge_cells('V21:AA21')
+        ws['V21'] = "CAL determination"
+        ws['V21'].font = subheader_font
+        ws['V21'].fill = risk_eval_fill
+        ws['V21'].alignment = center_alignment
+        
+        # Lines 22-23: Empty merged cells (V22:W23)
+        ws.merge_cells('V22:W23')
+        ws['V22'].fill = risk_eval_fill
+        
+        # Impact rating for CAL (V24:V27)
+        ws.merge_cells('V24:V27')
+        ws['V24'] = "Impact rating"
+        ws['V24'].font = regular_font
+        ws['V24'].alignment = center_alignment
+        
+        # CAL impact levels in column W
+        cal_levels = ['Severe', 'Major', 'Moderate', 'Negligible']
+        for i, level in enumerate(cal_levels):
+            row = 24 + i
+            ws[f'W{row}'] = level
+            ws[f'W{row}'].font = regular_font
+            ws[f'W{row}'].alignment = left_alignment
