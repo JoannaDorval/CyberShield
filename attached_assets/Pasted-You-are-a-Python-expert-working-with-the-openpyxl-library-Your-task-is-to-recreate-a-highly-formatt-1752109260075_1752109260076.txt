@@ -1,0 +1,214 @@
+You are a Python expert working with the openpyxl library. Your task is to recreate a highly formatted Excel spreadsheet tab called "Matrices and Guidelines" using the specifications below. The output should be a .xlsx file that perfectly mirrors all column widths, merged cells, font styles, fills, borders, alignments, and data content as described.
+
+🧾 Sheet Name:
+"Matrices and Guidelines"
+
+📏 Column Widths:
+Set the following column widths:
+
+yaml
+Copy
+Edit
+A: 8.58, B: 47.42, C: 8.58, D: 17.42, E: 17.42, F: 8.58,
+G–I: 18.84, J: 8.58, K: 35, L: 8.84, M: 35, N: 8.84, O: 35,
+P: 8.84, Q: 35, R: 8.84, S: 35, T: 8.84, U: 8.84, V: 8.84,
+W: (same), X: 8.84, Y: 8.84, Z: 8.84, AA: 8.84, AB: 8.84,
+AC: 8.84, AD: 8.84, AE: 8.84
+🧱 Cell Content, Formatting, and Layout:
+Column B (Rows 2–5):
+B2: "Asset identification process"
+
+Font: Calibri, Bold, Black, Size 12
+
+Fill: #9BC2E6
+
+Alignment: Center
+
+B3: "Determination of security property loss"
+
+Font: Calibri, Bold, Size 11
+
+Fill: #E2EFDA
+
+Alignment: Center
+
+B4: "Negligible impact"
+
+Font: Calibri, Size 11
+
+Alignment: Left
+
+B5: "Non negligible impact"
+
+Font: Calibri, Size 11, Black
+
+Alignment: Left
+
+Borders:
+
+Outline around B2:B5
+
+Thick outline around B2 and B3
+
+Column C:
+Leave all cells white and borderless
+
+🔄 Merge and Header Blocks:
+Row 2 (D–AD):
+Merge D2:AD2
+
+Text: "Threat analysis and risk assessment"
+
+Font: Calibri, Bold, Size 12, Black
+
+Alignment: Center
+
+Fill: #FFD966
+
+📊 Impact Analysis Section (Rows 3–8):
+D3–E3: Merge — "Impact analysis - category values"
+
+Font: Calibri, Bold, Size 11, Center
+
+Fill: #F2F2F2
+
+D4: "Impact category", E4: "Impact value"
+
+Calibri, Bold, Size 11, Center, #F2F2F2
+
+D5–D8: Negligible, Moderate, Major, Severe
+
+E5–E8: 0, 1, 3, 5
+
+🧠 Attack Potential & Risk Analysis Matrix (Rows 11–18):
+Merge D11:K11
+"Threat analysis and risk assessment"
+
+Bold, Black, Center, Fill: #FFD966
+
+Merge D12:E12
+"Attack potential – attack vector"
+
+Font: Calibri, Bold, Size 11, Center
+
+Fill: #C6E0B4
+
+Border: Black outline (D12:E16)
+
+D13–D16: Physical, Local, Adjacent, Network
+
+E13–E16: blank
+
+Merge G12:I12
+"Attack feasibility"
+
+Font: Calibri, Bold, Size 11, Center, Fill: #C6E0B4
+
+G13–G17: High, Medium, Low, Very low
+
+H13–H17: 0, 14, 20, 25
+
+I13–I17: 13, 19, 24, 1000
+
+🎯 Cybersecurity Goals and Risk Treatment (Column K, Rows 12–17):
+K12: "Cybersecurity goals and claims"
+
+K13: "Risk treatment decision"
+
+Fill: #EDEDED, Font: Calibri, Bold, Center
+
+K14–K17: Avoid, Reduce, Share, Retain
+
+Calibri, Regular, Center
+
+Outline: Bold Black Border around K12:K17
+
+🛠️ Attack Potential – Category Values (K3–T9):
+Merge K3:T3
+
+Title: "Attack potential – category values"
+
+Fill: #C6E0B4, Bold, Center
+
+Row 4: K–T Titles:
+
+"Elapsed time", "Value", "Specialist expertise", "Value", ... (alternating)
+
+K5–K9: <=1 day, <=1 week, <=1 month, <=6 months, >6 months
+
+L5–L9: 0, 1, 4, 17, 19
+
+M5–M8: Layman, Proficient, Expert, Multiple experts
+
+N5–N8: 0, 3, 6, 8
+
+O5–O8: Public, Restricted, Confidential, Strictly confidential
+
+P5–P8: 0, 3, 7, 11
+
+Q5–Q8: Unlimited, Easy, Moderate, Difficult/None
+
+R5–R8: 0, 1, 4, 10
+
+S5–S8: Standard, Specialized, Bespoke, Multiple bespoke
+
+T5–T8: 0, 4, 7, 9
+
+Outline boxes for each pair: K&L, M&N, O&P, Q&R, S&T
+
+📉 Risk Evaluation Matrix (V–AA, Rows 3–9):
+Merge V3:AD3: "Risk evaluation" — Calibri, Bold, Center, Fill: #C6E0B4
+
+Merge X4:AA4: "Attack feasibility rating"
+
+X5–AA5: Very low, Low, Medium, High
+
+Merge V6:V9: "Impact rating"
+
+W6–W9: Severe, Major, Moderate, Negligible
+
+Fill: #C6E0B4, Bold, Center
+
+Matrix:
+
+makefile
+Copy
+Edit
+X6:2 (green), X7:1, X8:1, X9:1  
+Y6:3 (yellow), Y7:2, Y8:2, Y9:1  
+Z6:4 (orange), Z7:3, Z8:2, Z9:1  
+AA6:5 (red), AA7:4, AA8:3, AA9:1
+Font: Calibri, Bold, Center
+
+Color map:
+
+2 = #70AD47 (green)
+
+3 = #FFC000 (yellow)
+
+4 = #BF8F00 (orange)
+
+5 = #FF0000 (red)
+
+🗺 Risk Value Mapping (AC–AD, Rows 4–9):
+Merge AC4:AD4: "Risk value mapping"
+
+Fill: #C6E0B4
+
+AC5–AC9: 1–5, Right-aligned
+
+AD5–AD9: Very low, Low, Medium, High, Critical
+
+Font: Calibri, Bold, Left
+
+Color map same as above
+
+🔄 Additional Merged and Formatted Sections (Rows 11–27):
+Include all content and formatting from your description for:
+
+Lines 11–18 (Threat assessment and risk threshold)
+
+Lines 20–27 (CAL determination, impact vector matrix)
+
+Match merge, font, alignment, color, and boldness as described.
+
