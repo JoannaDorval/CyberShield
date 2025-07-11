@@ -1524,7 +1524,7 @@ class EnhancedTaraExcelGenerator:
         
         # Impact data
         impact_data = [
-            ('Negligible', '0'), ('Moderate', '1'), ('Major', '3'), ('Severe', '5')
+            ('Negligible', 0), ('Moderate', 1), ('Major', 3), ('Severe', 5)
         ]
         
         for i, (category, value) in enumerate(impact_data):
@@ -1532,10 +1532,67 @@ class EnhancedTaraExcelGenerator:
             ws[f'D{row}'] = category
             ws[f'D{row}'].font = regular_font
             ws[f'D{row}'].alignment = left_align
+            ws[f'D{row}'].border = thin_border
             
             ws[f'E{row}'] = value
             ws[f'E{row}'].font = regular_font
             ws[f'E{row}'].alignment = center_align
+            ws[f'E{row}'].border = thin_border
+            ws[f'E{row}'].number_format = '0'  # Numeric format
+        
+        # Apply borders to D3:E8 table
+        for row in range(3, 9):
+            for col in ['D', 'E']:
+                ws[f'{col}{row}'].border = thick_border
+        
+        # Impact analysis – impact level estimation (G3:I8)
+        ws.merge_cells('G3:I3')
+        ws['G3'] = "Impact analysis – impact level estimation"
+        ws['G3'].font = header_font
+        ws['G3'].fill = impact_fill
+        ws['G3'].alignment = center_align
+        
+        # Headers for G4:I4
+        ws['G4'] = "Impact level"
+        ws['G4'].font = header_font
+        ws['G4'].fill = impact_fill
+        ws['G4'].alignment = center_align
+        
+        ws['H4'] = "Values from"
+        ws['H4'].font = header_font
+        ws['H4'].fill = impact_fill
+        ws['H4'].alignment = center_align
+        
+        ws['I4'] = "Values to"
+        ws['I4'].font = header_font
+        ws['I4'].fill = impact_fill
+        ws['I4'].alignment = center_align
+        
+        # Impact level data G5:I8
+        impact_levels = ['Negligible', 'Moderate', 'Major', 'Severe']
+        values_from = [0, 3, 7, 11]
+        values_to = [2, 6, 10, 1000]
+        
+        for i, (level, from_val, to_val) in enumerate(zip(impact_levels, values_from, values_to)):
+            row = 5 + i
+            ws[f'G{row}'] = level
+            ws[f'G{row}'].font = regular_font
+            ws[f'G{row}'].alignment = center_align
+            
+            ws[f'H{row}'] = from_val
+            ws[f'H{row}'].font = regular_font
+            ws[f'H{row}'].alignment = center_align
+            ws[f'H{row}'].number_format = '0'
+            
+            ws[f'I{row}'] = to_val
+            ws[f'I{row}'].font = regular_font
+            ws[f'I{row}'].alignment = center_align
+            ws[f'I{row}'].number_format = '0'
+        
+        # Apply borders to G3:I8 table
+        for row in range(3, 9):
+            for col in ['G', 'H', 'I']:
+                ws[f'{col}{row}'].border = thick_border
         
         # Attack Potential Category Values (K3:T9)
         ws.merge_cells('K3:T3')
@@ -1560,19 +1617,19 @@ class EnhancedTaraExcelGenerator:
         
         # Attack potential data rows 5-9
         elapsed_time = ['<=1 day', '<=1 week', '<=1 month', '<=6 months', '>6 months']
-        elapsed_values = ['0', '1', '4', '17', '19']
+        elapsed_values = [0, 1, 4, 17, 19]
         
         expertise = ['Layman', 'Proficient', 'Expert', 'Multiple experts']
-        expertise_values = ['0', '3', '6', '8']
+        expertise_values = [0, 3, 6, 8]
         
         knowledge = ['Public', 'Restricted', 'Confidential', 'Strictly confidential']
-        knowledge_values = ['0', '3', '7', '11']
+        knowledge_values = [0, 3, 7, 11]
         
         opportunity = ['Unlimited', 'Easy', 'Moderate', 'Difficult/None']
-        opportunity_values = ['0', '1', '4', '10']
+        opportunity_values = [0, 1, 4, 10]
         
         equipment = ['Standard', 'Specialized', 'Bespoke', 'Multiple bespoke']
-        equipment_values = ['0', '4', '7', '9']
+        equipment_values = [0, 4, 7, 9]
         
         # Fill elapsed time data
         for i, (time, value) in enumerate(zip(elapsed_time, elapsed_values)):
@@ -1582,6 +1639,7 @@ class EnhancedTaraExcelGenerator:
             ws[f'L{row}'] = value
             ws[f'L{row}'].font = regular_font
             ws[f'L{row}'].alignment = center_align
+            ws[f'L{row}'].number_format = '0'
         
         # Fill other categories (only 4 rows for these)
         for i in range(4):
@@ -1591,24 +1649,35 @@ class EnhancedTaraExcelGenerator:
             ws[f'N{row}'] = expertise_values[i]
             ws[f'N{row}'].font = regular_font
             ws[f'N{row}'].alignment = center_align
+            ws[f'N{row}'].number_format = '0'
             
             ws[f'O{row}'] = knowledge[i]
             ws[f'O{row}'].font = regular_font
             ws[f'P{row}'] = knowledge_values[i]
             ws[f'P{row}'].font = regular_font
             ws[f'P{row}'].alignment = center_align
+            ws[f'P{row}'].number_format = '0'
             
             ws[f'Q{row}'] = opportunity[i]
             ws[f'Q{row}'].font = regular_font
             ws[f'R{row}'] = opportunity_values[i]
             ws[f'R{row}'].font = regular_font
             ws[f'R{row}'].alignment = center_align
+            ws[f'R{row}'].number_format = '0'
             
             ws[f'S{row}'] = equipment[i]
             ws[f'S{row}'].font = regular_font
             ws[f'T{row}'] = equipment_values[i]
             ws[f'T{row}'].font = regular_font
             ws[f'T{row}'].alignment = center_align
+            ws[f'T{row}'].number_format = '0'
+        
+        # Apply borders to each pair of columns K&L, M&N, O&P, Q&R, S&T
+        for start_col in ['K', 'M', 'O', 'Q', 'S']:
+            end_col = chr(ord(start_col) + 1)
+            for row in range(3, 10):
+                ws[f'{start_col}{row}'].border = thick_border
+                ws[f'{end_col}{row}'].border = thick_border
         
         # Attack Potential & Risk Analysis Matrix (Rows 11-18)
         ws.merge_cells('D11:K11')
@@ -1623,18 +1692,19 @@ class EnhancedTaraExcelGenerator:
         ws['D12'].fill = risk_fill
         ws['D12'].alignment = center_align
         
-        # Attack vectors
+        # Attack vectors with merged cells for each row
         vectors = ['Physical', 'Local', 'Adjacent', 'Network']
         for i, vector in enumerate(vectors):
             row = 13 + i
+            ws.merge_cells(f'D{row}:E{row}')
             ws[f'D{row}'] = vector
             ws[f'D{row}'].font = regular_font
-            ws[f'D{row}'].alignment = left_align
+            ws[f'D{row}'].alignment = center_align
         
         # Apply black outline to D12:E16
         for row in range(12, 17):
             for col in ['D', 'E']:
-                ws[f'{col}{row}'].border = thin_border
+                ws[f'{col}{row}'].border = thick_border
         
         # Attack feasibility section
         ws.merge_cells('G12:I12')
@@ -1643,21 +1713,45 @@ class EnhancedTaraExcelGenerator:
         ws['G12'].fill = risk_fill
         ws['G12'].alignment = center_align
         
+        # Headers for G13:I13
+        ws['G13'] = "Impact level"
+        ws['G13'].font = header_font
+        ws['G13'].fill = risk_fill
+        ws['G13'].alignment = center_align
+        
+        ws['H13'] = "Values from"
+        ws['H13'].font = header_font
+        ws['H13'].fill = risk_fill
+        ws['H13'].alignment = center_align
+        
+        ws['I13'] = "Values to"
+        ws['I13'].font = header_font
+        ws['I13'].fill = risk_fill
+        ws['I13'].alignment = center_align
+        
+        # Data for G14:I16 (shifted down from original)
         feasibility_levels = ['High', 'Medium', 'Low', 'Very low']
-        feasibility_min = ['0', '14', '20', '25']
-        feasibility_max = ['13', '19', '24', '1000']
+        feasibility_min = [0, 14, 20, 25]
+        feasibility_max = [13, 19, 24, 1000]
         
         for i, (level, min_val, max_val) in enumerate(zip(feasibility_levels, feasibility_min, feasibility_max)):
-            row = 13 + i
+            row = 14 + i
             ws[f'G{row}'] = level
             ws[f'G{row}'].font = regular_font
             ws[f'G{row}'].alignment = center_align
             ws[f'H{row}'] = min_val
             ws[f'H{row}'].font = regular_font
             ws[f'H{row}'].alignment = center_align
+            ws[f'H{row}'].number_format = '0'
             ws[f'I{row}'] = max_val
             ws[f'I{row}'].font = regular_font
             ws[f'I{row}'].alignment = center_align
+            ws[f'I{row}'].number_format = '0'
+        
+        # Apply borders to G12:I17
+        for row in range(12, 18):
+            for col in ['G', 'H', 'I']:
+                ws[f'{col}{row}'].border = thick_border
         
         # Cybersecurity Goals (K12:K17)
         ws['K12'] = "Cybersecurity goals and claims"
@@ -1670,7 +1764,7 @@ class EnhancedTaraExcelGenerator:
         ws['K13'].fill = goals_fill
         ws['K13'].alignment = center_align
         
-        treatments = ['Avoid', 'Reduce', 'Share', 'Retain']
+        treatments = ['Avoid the risk', 'Reduce the risk', 'Share the risk', 'Retain the risk']
         for i, treatment in enumerate(treatments):
             row = 14 + i
             ws[f'K{row}'] = treatment
@@ -1749,7 +1843,7 @@ class EnhancedTaraExcelGenerator:
         ws['AC4'].fill = risk_fill
         ws['AC4'].alignment = center_align
         
-        risk_values = ['1', '2', '3', '4', '5']
+        risk_values = [1, 2, 3, 4, 5]
         risk_labels = ['Very low', 'Low', 'Medium', 'High', 'Critical']
         
         for i, (value, label) in enumerate(zip(risk_values, risk_labels)):
@@ -1757,9 +1851,15 @@ class EnhancedTaraExcelGenerator:
             ws[f'AC{row}'] = value
             ws[f'AC{row}'].font = regular_font
             ws[f'AC{row}'].alignment = right_align
+            ws[f'AC{row}'].number_format = '0'
             
             ws[f'AD{row}'] = label
             ws[f'AD{row}'].font = header_font
             ws[f'AD{row}'].alignment = left_align
-            if color_map[value]:
-                ws[f'AD{row}'].fill = color_map[value]
+            if color_map[str(value)]:
+                ws[f'AD{row}'].fill = color_map[str(value)]
+        
+        # Apply borders to AC4:AD9
+        for row in range(4, 10):
+            for col in ['AC', 'AD']:
+                ws[f'{col}{row}'].border = thick_border
