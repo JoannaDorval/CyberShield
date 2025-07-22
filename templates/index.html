@@ -16,9 +16,9 @@
                 with MITRE ATT&CK framework integration.
             </p>
             <div class="d-grid gap-2 d-md-flex justify-content-md-center">
-                <a href="{{ url_for('upload_page') }}" class="btn btn-primary btn-lg px-4">
-                    <i data-feather="upload" class="me-2"></i>
-                    Start New Analysis
+                <a href="{{ url_for('mitre_embed_page') }}" class="btn btn-primary btn-lg px-4">
+                    <i data-feather="cpu" class="me-2"></i>
+                    Start MITRE EMBED Analysis
                 </a>
             </div>
         </div>
@@ -32,10 +32,10 @@
                     <div class="mb-3">
                         <i data-feather="file-text" class="feature-icon text-info"></i>
                     </div>
-                    <h5 class="card-title">Threat Model Processing</h5>
+                    <h5 class="card-title">MITRE EMBED Analysis</h5>
                     <p class="card-text text-muted">
-                        Parse and analyze JSON/YAML threat models to extract threats, assets, 
-                        risks, and mitigations with comprehensive data normalization.
+                        Complete MITRE EMB3D device property assessment or upload MITRE EMBED JSON 
+                        files for comprehensive IoT/embedded device security evaluation.
                     </p>
                 </div>
             </div>
@@ -47,10 +47,10 @@
                     <div class="mb-3">
                         <i data-feather="layers" class="feature-icon text-success"></i>
                     </div>
-                    <h5 class="card-title">Architecture Analysis</h5>
+                    <h5 class="card-title">Device Properties Quiz</h5>
                     <p class="card-text text-muted">
-                        Analyze system block diagrams to identify components, data flows, 
-                        and security boundaries from SVG and image formats.
+                        Interactive questionnaire covering hardware, system software, 
+                        application software, and network properties for complete assessment.
                     </p>
                 </div>
             </div>
@@ -81,21 +81,21 @@
                     <div class="process-step text-center">
                         <div class="process-number">1</div>
                         <h6 class="mt-2">Upload Files</h6>
-                        <small class="text-muted">Threat model, block diagram, cross-mapping data</small>
+                        <small class="text-muted">Complete MITRE EMBED quiz or upload MITRE EMBED JSON</small>
                     </div>
                 </div>
                 <div class="col-md-3">
                     <div class="process-step text-center">
                         <div class="process-number">2</div>
                         <h6 class="mt-2">Parse & Analyze</h6>
-                        <small class="text-muted">Extract threats, risks, and system components</small>
+                        <small class="text-muted">Analyze device properties and security characteristics</small>
                     </div>
                 </div>
                 <div class="col-md-3">
                     <div class="process-step text-center">
                         <div class="process-number">3</div>
                         <h6 class="mt-2">MITRE Mapping</h6>
-                        <small class="text-muted">Map to ATT&CK techniques and tactics</small>
+                        <small class="text-muted">Map to ATT&CK and EMBED security controls</small>
                     </div>
                 </div>
                 <div class="col-md-3">

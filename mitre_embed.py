@@ -71,7 +71,7 @@ class MitreEmbedIntegrator:
         """Return the complete device properties structure for form generation"""
         return self.DEVICE_PROPERTIES
     
-    def assess_device_properties(self, selected_properties: Dict[str, List[str]]) -> Dict[str, Any]:
+    def assess_device_properties(self, selected_properties: List[str]) -> Dict[str, Any]:
         """Assess device based on selected properties and return security implications"""
         assessment = {
             'selected_properties': selected_properties,
@@ -80,20 +80,39 @@ class MitreEmbedIntegrator:
             'recommended_controls': []
         }
         
+        # Categorize properties by type
+        categorized_props = self._categorize_properties(selected_properties)
+        
         # Analyze each category
-        for category, properties in selected_properties.items():
-            if category in self.DEVICE_PROPERTIES:
-                assessment['security_implications'][category] = self._analyze_category_security(
-                    category, properties
-                )
+        for category, properties in categorized_props.items():
+            assessment['security_implications'][category] = self._analyze_category_security(
+                category, properties
+            )
         
         # Generate threat vectors based on selected properties
-        assessment['threat_vectors'] = self._generate_threat_vectors(selected_properties)
+        assessment['threat_vectors'] = self._generate_threat_vectors(categorized_props)
         
         # Generate recommended controls
-        assessment['recommended_controls'] = self._generate_embed_controls(selected_properties)
+        assessment['recommended_controls'] = self._generate_embed_controls(categorized_props)
         
         return assessment
+    
+    def _categorize_properties(self, selected_properties: List[str]) -> Dict[str, List[str]]:
+        """Categorize properties by type"""
+        categorized = {
+            'hardware': [],
+            'system_software': [],
+            'application_software': [],
+            'networking': []
+        }
+        
+        for prop in selected_properties:
+            for category, props in self.DEVICE_PROPERTIES.items():
+                if prop in props:
+                    categorized[category].append(prop)
+                    break
+                    
+        return categorized
     
     def _analyze_category_security(self, category: str, selected_properties: List[str]) -> Dict[str, Any]:
         """Analyze security implications for a specific category"""
@@ -143,24 +162,24 @@ class MitreEmbedIntegrator:
         }
     
     def _analyze_system_software_security(self, properties: List[str]) -> Dict[str, Any]:
-        """Analyze system software security implications"""
+        """Analyze system software-specific security implications"""
         attack_surface = 'low'
         risk_factors = []
         vulnerabilities = []
         
         if 'PID-22' in properties:  # Debugging capabilities
             attack_surface = 'high'
-            risk_factors.append('Debug interface access')
-            vulnerabilities.append('System-level debugging exploitation')
-        
-        if 'PID-28' in properties:  # Update mechanisms
-            risk_factors.append('Update process vulnerabilities')
-            vulnerabilities.append('Malicious update injection')
+            risk_factors.append('Debug interface exploitation')
+            vulnerabilities.append('Memory dump attacks')
         
         if 'PID-23' in properties:  # Operating system
             attack_surface = 'medium'
-            risk_factors.append('OS-level vulnerabilities')
+            risk_factors.append('OS-level attacks')
             vulnerabilities.append('Privilege escalation')
+        
+        if 'PID-28' in properties:  # Update mechanisms
+            risk_factors.append('Update channel compromise')
+            vulnerabilities.append('Supply chain attacks')
         
         return {
             'attack_surface': attack_surface,
@@ -169,25 +188,20 @@ class MitreEmbedIntegrator:
         }
     
     def _analyze_application_security(self, properties: List[str]) -> Dict[str, Any]:
-        """Analyze application software security implications"""
+        """Analyze application software-specific security implications"""
         attack_surface = 'low'
         risk_factors = []
         vulnerabilities = []
         
-        if 'PID-311' in properties:  # Web/HTTP applications
+        if 'PID-311' in properties:  # Web applications
             attack_surface = 'high'
-            risk_factors.append('Web application vulnerabilities')
-            vulnerabilities.extend(['XSS', 'SQL Injection', 'CSRF'])
-        
-        if 'PID-313' in properties:  # Third-party components
-            attack_surface = 'medium'
-            risk_factors.append('Third-party vulnerability dependencies')
-            vulnerabilities.append('Supply chain attacks')
+            risk_factors.append('Web application attacks')
+            vulnerabilities.append('OWASP Top 10 vulnerabilities')
         
         if 'PID-319' in properties:  # API interfaces
-            attack_surface = 'high'
-            risk_factors.append('API security vulnerabilities')
-            vulnerabilities.extend(['API abuse', 'Authentication bypass'])
+            attack_surface = 'medium'
+            risk_factors.append('API security issues')
+            vulnerabilities.append('Broken authentication')
         
         return {
             'attack_surface': attack_surface,
@@ -196,25 +210,24 @@ class MitreEmbedIntegrator:
         }
     
     def _analyze_networking_security(self, properties: List[str]) -> Dict[str, Any]:
-        """Analyze networking security implications"""
+        """Analyze networking-specific security implications"""
         attack_surface = 'low'
         risk_factors = []
         vulnerabilities = []
         
         if 'PID-41' in properties:  # Remote network services
             attack_surface = 'high'
-            risk_factors.append('Remote attack vectors')
-            vulnerabilities.extend(['Network service exploitation', 'DDoS attacks'])
+            risk_factors.append('Remote exploitation')
+            vulnerabilities.append('Network service vulnerabilities')
         
         if 'PID-412' in properties:  # Wireless networking
-            attack_surface = 'high'
-            risk_factors.append('Wireless security vulnerabilities')
-            vulnerabilities.extend(['Man-in-the-middle', 'Eavesdropping'])
+            attack_surface = 'medium'
+            risk_factors.append('Wireless attacks')
+            vulnerabilities.append('Man-in-the-middle attacks')
         
         if 'PID-418' in properties:  # Cloud connectivity
-            attack_surface = 'medium'
-            risk_factors.append('Cloud security dependencies')
-            vulnerabilities.append('Cloud service vulnerabilities')
+            risk_factors.append('Cloud security issues')
+            vulnerabilities.append('Data exposure in cloud')
         
         return {
             'attack_surface': attack_surface,
@@ -222,83 +235,122 @@ class MitreEmbedIntegrator:
             'vulnerabilities': vulnerabilities
         }
     
-    def _generate_threat_vectors(self, selected_properties: Dict[str, List[str]]) -> List[Dict[str, Any]]:
-        """Generate threat vectors based on selected device properties"""
+    def _generate_threat_vectors(self, categorized_props: Dict[str, List[str]]) -> List[Dict[str, str]]:
+        """Generate threat vectors based on selected properties"""
         threat_vectors = []
         
-        # Physical threats
-        if any('PID-19' in props for props in selected_properties.values()):
-            threat_vectors.append({
-                'category': 'Physical',
-                'threat': 'Hardware Tampering',
-                'description': 'Unauthorized physical access to device interfaces',
-                'severity': 'High'
-            })
+        # Hardware threats
+        if categorized_props['hardware']:
+            if 'PID-19' in categorized_props['hardware']:
+                threat_vectors.append({
+                    'vector': 'Physical Access',
+                    'description': 'Attacker gains physical access to device interfaces',
+                    'impact': 'High'
+                })
+            if 'PID-110' in categorized_props['hardware']:
+                threat_vectors.append({
+                    'vector': 'RF Attacks',
+                    'description': 'Radio frequency interference or jamming attacks',
+                    'impact': 'Medium'
+                })
         
         # Network threats
-        network_props = selected_properties.get('networking', [])
-        if 'PID-41' in network_props:
-            threat_vectors.append({
-                'category': 'Network',
-                'threat': 'Remote Code Execution',
-                'description': 'Exploitation of network services',
-                'severity': 'Critical'
-            })
-        
-        # Application threats
-        app_props = selected_properties.get('application_software', [])
-        if 'PID-311' in app_props:
-            threat_vectors.append({
-                'category': 'Application',
-                'threat': 'Web Application Attacks',
-                'description': 'Common web vulnerabilities exploitation',
-                'severity': 'High'
-            })
+        if categorized_props['networking']:
+            if 'PID-41' in categorized_props['networking']:
+                threat_vectors.append({
+                    'vector': 'Remote Exploitation',
+                    'description': 'Remote attacks through network services',
+                    'impact': 'Critical'
+                })
+            if 'PID-412' in categorized_props['networking']:
+                threat_vectors.append({
+                    'vector': 'Wireless Interception',
+                    'description': 'Wireless communication interception',
+                    'impact': 'High'
+                })
         
         return threat_vectors
     
-    def _generate_embed_controls(self, selected_properties: Dict[str, List[str]]) -> List[Dict[str, Any]]:
-        """Generate recommended cybersecurity controls based on MITRE EMBED"""
+    def _generate_embed_controls(self, categorized_props: Dict[str, List[str]]) -> List[Dict[str, str]]:
+        """Generate recommended EMBED security controls"""
         controls = []
         
         # Hardware controls
-        hardware_props = selected_properties.get('hardware', [])
-        if 'PID-19' in hardware_props:  # Physical interfaces
+        if categorized_props['hardware']:
             controls.append({
-                'id': 'EMBED-HW-01',
-                'control': 'Physical Access Control',
-                'description': 'Implement physical security measures for device interfaces',
+                'control_id': 'EMB3D-HW-01',
+                'control_name': 'Hardware Security Module',
+                'description': 'Implement hardware-based cryptographic protection',
                 'category': 'Hardware'
             })
+            
+            if 'PID-17' not in categorized_props['hardware']:
+                controls.append({
+                    'control_id': 'EMB3D-HW-02',
+                    'control_name': 'Tamper Detection',
+                    'description': 'Implement tamper detection and response mechanisms',
+                    'category': 'Hardware'
+                })
         
         # System software controls
-        system_props = selected_properties.get('system_software', [])
-        if 'PID-22' in system_props:  # Debugging capabilities
+        if categorized_props['system_software']:
             controls.append({
-                'id': 'EMBED-SW-01',
-                'control': 'Debug Interface Security',
-                'description': 'Secure or disable debug interfaces in production',
+                'control_id': 'EMB3D-SYS-01',
+                'control_name': 'Secure Boot',
+                'description': 'Implement secure boot chain verification',
                 'category': 'System Software'
             })
-        
-        # Application controls
-        app_props = selected_properties.get('application_software', [])
-        if 'PID-311' in app_props:  # Web applications
-            controls.append({
-                'id': 'EMBED-APP-01',
-                'control': 'Web Application Security',
-                'description': 'Implement secure coding practices and input validation',
-                'category': 'Application Software'
-            })
+            
+            if 'PID-28' in categorized_props['system_software']:
+                controls.append({
+                    'control_id': 'EMB3D-SYS-02',
+                    'control_name': 'Secure Update',
+                    'description': 'Implement secure software update mechanisms',
+                    'category': 'System Software'
+                })
         
         # Network controls
-        network_props = selected_properties.get('networking', [])
-        if 'PID-41' in network_props:  # Network services
+        if categorized_props['networking']:
             controls.append({
-                'id': 'EMBED-NET-01',
-                'control': 'Network Service Hardening',
-                'description': 'Secure configuration and monitoring of network services',
-                'category': 'Networking'
+                'control_id': 'EMB3D-NET-01',
+                'control_name': 'Network Encryption',
+                'description': 'Implement end-to-end network encryption',
+                'category': 'Network'
             })
+            
+            if 'PID-415' not in categorized_props['networking']:
+                controls.append({
+                    'control_id': 'EMB3D-NET-02',
+                    'control_name': 'Network Authentication',
+                    'description': 'Implement strong network authentication',
+                    'category': 'Network'
+                })
         
         return controls
+    
+    def process_embed_json(self, embed_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Process a MITRE EMBED JSON file and extract assessment data"""
+        assessment = {
+            'selected_properties': [],
+            'security_implications': {},
+            'threat_vectors': [],
+            'recommended_controls': [],
+            'assets': []
+        }
+        
+        # Extract properties from JSON structure
+        if 'properties' in embed_data:
+            assessment['selected_properties'] = embed_data['properties']
+        elif 'selected_properties' in embed_data:
+            assessment['selected_properties'] = embed_data['selected_properties']
+        
+        # Extract assets if present
+        if 'assets' in embed_data:
+            assessment['assets'] = embed_data['assets']
+        
+        # If we have properties, run the assessment
+        if assessment['selected_properties']:
+            property_assessment = self.assess_device_properties(assessment['selected_properties'])
+            assessment.update(property_assessment)
+        
+        return assessment

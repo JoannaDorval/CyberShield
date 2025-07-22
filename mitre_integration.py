@@ -372,3 +372,85 @@ class MitreIntegrator:
             'low': 1
         }
         return priority_scores.get(priority.lower(), 0)
+    
+    def map_embed_to_attack(self, embed_assessment: Dict[str, Any]) -> Dict[str, Any]:
+        """Map MITRE EMBED assessment to MITRE ATT&CK techniques"""
+        mappings = {
+            'technique_mappings': [],
+            'tactic_coverage': {},
+            'embed_controls': embed_assessment.get('recommended_controls', [])
+        }
+        
+        # Extract properties and threat vectors from EMBED assessment
+        selected_properties = embed_assessment.get('selected_properties', [])
+        threat_vectors = embed_assessment.get('threat_vectors', [])
+        
+        # Map common IoT/embedded threat patterns to MITRE ATT&CK
+        property_to_attack_mapping = {
+            # Hardware properties to ATT&CK techniques
+            'PID-19': ['T1200'],  # Physical interfaces -> Hardware Additions
+            'PID-110': ['T1557', 'T1040'],  # Wireless hardware -> Adversary-in-the-Middle
+            
+            # System software properties  
+            'PID-22': ['T1611'],  # Debugging capabilities -> Escape to Host
+            'PID-28': ['T1195.002'],  # Update mechanisms -> Supply Chain Compromise
+            
+            # Application software properties
+            'PID-311': ['T1190'],  # Web applications -> Exploit Public-Facing Application
+            'PID-319': ['T1190'],  # API interfaces -> Exploit Public-Facing Application
+            
+            # Network properties
+            'PID-41': ['T1190', 'T1133'],  # Remote services -> External Remote Services
+            'PID-412': ['T1557'],  # Wireless networking -> Adversary-in-the-Middle
+            'PID-418': ['T1199']   # Cloud connectivity -> Trusted Relationship
+        }
+        
+        # Map selected properties to ATT&CK techniques
+        for prop in selected_properties:
+            if prop in property_to_attack_mapping:
+                for technique_id in property_to_attack_mapping[prop]:
+                    technique_info = self._get_technique_info(technique_id)
+                    if technique_info:
+                        mapping = {
+                            'embed_property': prop,
+                            'technique_id': technique_id,
+                            'technique_name': technique_info.get('name', ''),
+                            'tactic': technique_info.get('tactic', ''),
+                            'description': technique_info.get('description', ''),
+                            'mapping_confidence': 'high'
+                        }
+                        mappings['technique_mappings'].append(mapping)
+                        
+                        # Update tactic coverage
+                        tactic = technique_info.get('tactic', 'Unknown')
+                        mappings['tactic_coverage'][tactic] = mappings['tactic_coverage'].get(tactic, 0) + 1
+        
+        return mappings
+    
+    def _get_technique_info(self, technique_id: str) -> Optional[Dict[str, str]]:
+        """Get basic technique information"""
+        # Simplified technique database for common IoT/embedded techniques
+        technique_db = {
+            'T1200': {
+                'name': 'Hardware Additions',
+                'tactic': 'Initial Access',
+                'description': 'Hardware additions introduce computer accessories, computers, or networking hardware'
+            },
+            'T1557': {
+                'name': 'Adversary-in-the-Middle',
+                'tactic': 'Credential Access',
+                'description': 'Position between two or more networked devices to intercept communications'
+            },
+            'T1190': {
+                'name': 'Exploit Public-Facing Application',
+                'tactic': 'Initial Access',
+                'description': 'Take advantage of a weakness in an Internet-facing computer or program'
+            },
+            'T1133': {
+                'name': 'External Remote Services',
+                'tactic': 'Persistence',
+                'description': 'Leverage legitimate external remote services to access internal resources'
+            }
+        }
+        
+        return technique_db.get(technique_id)
