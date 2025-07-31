@@ -65,7 +65,7 @@ class EnhancedTaraExcelGenerator:
         
         # Define section headers and their columns
         sections = {
-            'Assets': ['Asset ID', 'Asset Name', 'Security Property Loss'],
+            'Assets': ['Asset ID', 'Asset Name', 'Type', 'Confidentiality', 'Integrity', 'Availability'],
             'Damage Scenario': ['Stakeholder', 'Damage Scenario Description'],
             'Impact Analysis': ['Impact Category', 'Impact Level', 'Impact Description'],
             'Cybersecurity Controls': ['Control ID', 'Control Name', 'Control Description'],
@@ -154,7 +154,7 @@ class EnhancedTaraExcelGenerator:
     
     def _fill_section_data(self, ws, section_name, analysis_data, start_col, fill_color, embed_assessment):
         """Fill data for each section"""
-        from openpyxl.styles import PatternFill, Alignment, Border, Side
+        from openpyxl.styles import PatternFill, Font, Alignment, Border, Side
         
         fill = PatternFill(start_color=fill_color, end_color=fill_color, fill_type='solid')
         border = Border(
@@ -169,15 +169,33 @@ class EnhancedTaraExcelGenerator:
         if section_name == 'Assets':
             assets = analysis_data.get('assets', [])
             for i, asset in enumerate(assets):
-                ws.cell(row=row + i, column=start_col).value = f"A{i+1:03d}"
-                ws.cell(row=row + i, column=start_col + 1).value = asset.get('name', 'Unknown')
-                ws.cell(row=row + i, column=start_col + 2).value = asset.get('criticality', 'Medium')
+                ws.cell(row=row + i, column=start_col).value = asset.get('asset_id', f"A{i+1:03d}")
+                ws.cell(row=row + i, column=start_col + 1).value = asset.get('name', 'Unknown Asset')
+                ws.cell(row=row + i, column=start_col + 2).value = asset.get('type', asset.get('category', 'Unknown'))
+                ws.cell(row=row + i, column=start_col + 3).value = asset.get('confidentiality_loss', 'Medium')
+                ws.cell(row=row + i, column=start_col + 4).value = asset.get('integrity_loss', 'Medium')
+                ws.cell(row=row + i, column=start_col + 5).value = asset.get('availability_loss', 'Medium')
                 
-                for col in range(3):
+                for col in range(6):
                     cell = ws.cell(row=row + i, column=start_col + col)
-                    cell.fill = fill
                     cell.border = border
                     cell.alignment = Alignment(vertical='center')
+                    
+                    # Apply conditional formatting for C/I/A columns (columns 3, 4, 5)
+                    if col >= 3:  # C/I/A columns
+                        cia_value = cell.value
+                        if cia_value == 'High':
+                            cell.fill = PatternFill(start_color='FF0000', end_color='FF0000', fill_type='solid')
+                            cell.font = Font(bold=True, color='FFFFFF')
+                        elif cia_value == 'Low':
+                            cell.fill = PatternFill(start_color='70AD47', end_color='70AD47', fill_type='solid')
+                            cell.font = Font(bold=True, color='FFFFFF')
+                        else:  # Medium
+                            cell.fill = PatternFill(start_color='FFC000', end_color='FFC000', fill_type='solid')
+                            cell.font = Font(bold=True, color='000000')
+                    else:
+                        # Standard fill for non-C/I/A columns
+                        cell.fill = fill
         
         elif section_name == 'Damage Scenario':
             threats = analysis_data.get('threats', [])
