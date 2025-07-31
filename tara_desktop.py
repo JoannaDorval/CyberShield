@@ -24,7 +24,7 @@ from parsers import ThreatModelParser, BlockDiagramParser, CrossMapParser, Asset
 from mitre_integration import MitreIntegrator
 from mitre_embed import MitreEmbedIntegrator
 # PDF generator removed - Excel reports only
-from enhanced_excel_generator_fixed import EnhancedTaraExcelGenerator
+from enhanced_excel_generator import EnhancedTaraExcelGenerator
 
 
 class TaraDesktopApp:
@@ -437,8 +437,7 @@ class TaraDesktopApp:
                 
                 wb = Workbook()
                 ws = wb.active
-                if ws is not None:
-                    ws.title = "TARA Template"
+                ws.title = "TARA Template"
                 
                 # Set column widths exactly as specified in your format
                 column_widths = {
@@ -447,8 +446,7 @@ class TaraDesktopApp:
                     'K': 11.57, 'L': 11.0, 'M': 10.57, 'N': 9.57
                 }
                 for col, width in column_widths.items():
-                    if ws is not None:
-                        ws.column_dimensions[col].width = width
+                    ws.column_dimensions[col].width = width
                 
                 # Add project information header (rows 3-4) exactly as specified
                 project_data = {
@@ -474,25 +472,22 @@ class TaraDesktopApp:
                 for row_num, cells in project_data.items():
                     for cell_info in cells:
                         col = cell_info['column']
-                        if ws is not None:
-                            cell = ws[f"{col}{row_num}"]
-                            if cell_info['value'] is not None:
-                                cell.value = cell_info['value']
-                            cell.font = cell_info['font']
-                            if 'alignment' in cell_info:
-                                cell.alignment = cell_info['alignment']
-                            if 'number_format' in cell_info:
-                                cell.number_format = cell_info['number_format']
-                            cell.border = Border()
+                        cell = ws[f"{col}{row_num}"]
+                        cell.value = cell_info['value']
+                        cell.font = cell_info['font']
+                        if 'alignment' in cell_info:
+                            cell.alignment = cell_info['alignment']
+                        if 'number_format' in cell_info:
+                            cell.number_format = cell_info['number_format']
+                        cell.border = Border()
                 
                 # Add section headers for TARA analysis starting from row 6
                 section_row = 6
                 
                 # Add main TARA analysis header
-                if ws is not None:
-                    ws[f"A{section_row}"].value = "TARA Analysis - Asset Information"
-                    ws[f"A{section_row}"].font = Font(bold=True, size=14)
-                    ws[f"A{section_row}"].fill = PatternFill(start_color="D9E1F2", end_color="D9E1F2", fill_type="solid")
+                ws[f"A{section_row}"].value = "TARA Analysis - Asset Information"
+                ws[f"A{section_row}"].font = Font(bold=True, size=14)
+                ws[f"A{section_row}"].fill = PatternFill(start_color="D9E1F2", end_color="D9E1F2", fill_type="solid")
                 
                 # Add column headers for analysis (row 8)
                 headers_row = section_row + 2
@@ -506,11 +501,10 @@ class TaraDesktopApp:
                 header_fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
                 
                 for col, header in enumerate(analysis_headers, 1):
-                    if ws is not None:
-                        cell = ws.cell(row=headers_row, column=col, value=header)
-                        cell.font = header_font
-                        cell.fill = header_fill
-                        cell.alignment = Alignment(horizontal="center", vertical="center")
+                    cell = ws.cell(row=headers_row, column=col, value=header)
+                    cell.font = header_font
+                    cell.fill = header_fill
+                    cell.alignment = Alignment(horizontal="center", vertical="center")
                 
                 # Add sample data rows for demonstration
                 sample_data = [
@@ -522,8 +516,7 @@ class TaraDesktopApp:
                 # Add sample data to demonstrate the format
                 for row_idx, row_data in enumerate(sample_data, headers_row + 1):
                     for col_idx, value in enumerate(row_data, 1):
-                        if ws is not None:
-                            ws.cell(row=row_idx, column=col_idx, value=value)
+                        ws.cell(row=row_idx, column=col_idx, value=value)
                 
                 # Save the template
                 wb.save(filename)
@@ -653,11 +646,7 @@ class TaraDesktopApp:
             ]
         
         # Generate assessment from properties
-        # Flatten the properties list for the EMBED integrator
-        flat_properties = []
-        for category_props in selected_properties.values():
-            flat_properties.extend(category_props)
-        embed_assessment = self.embed_integrator.assess_device_properties(flat_properties)
+        embed_assessment = self.embed_integrator.assess_device_properties(selected_properties)
         
         # Extract generated threats and assets
         threats = embed_assessment.get('threat_vectors', [])
@@ -830,14 +819,15 @@ class TaraDesktopApp:
         
         # Perform EMBED assessment with inferred properties
         if any(inferred_properties.values()):
-            # Flatten the properties list for the EMBED integrator
-            flat_properties = []
-            for category_props in inferred_properties.values():
-                flat_properties.extend(category_props)
-            return self.embed_integrator.assess_device_properties(flat_properties)
+            return self.embed_integrator.assess_device_properties(inferred_properties)
         else:
             # Default assessment for generic assets
-            default_properties = ['PID-11', 'PID-12', 'PID-23', 'PID-25', 'PID-31', 'PID-41']
+            default_properties = {
+                'hardware': ['PID-11', 'PID-12'],
+                'system_software': ['PID-23', 'PID-25'],
+                'application_software': ['PID-31'],
+                'networking': ['PID-41']
+            }
             return self.embed_integrator.assess_device_properties(default_properties)
     
     def _finalize_analysis(self, analysis_data: Dict[str, Any]):
@@ -890,11 +880,7 @@ class TaraDesktopApp:
                     ]
                 
                 if any(selected_properties.values()):
-                    # Flatten the properties list for the EMBED integrator
-                    flat_properties = []
-                    for category_props in selected_properties.values():
-                        flat_properties.extend(category_props)
-                    embed_assessment = self.embed_integrator.assess_device_properties(flat_properties)
+                    embed_assessment = self.embed_integrator.assess_device_properties(selected_properties)
                 
                 # Determine input type based on workflow
                 input_type = "threat_model" if self.workflow_mode.get() == "threat_model" else "questionnaire"
@@ -946,11 +932,7 @@ class TaraDesktopApp:
                 ]
             
             if any(selected_properties.values()):
-                # Flatten the properties list for the EMBED integrator
-                flat_properties = []
-                for category_props in selected_properties.values():
-                    flat_properties.extend(category_props)
-                embed_assessment = self.embed_integrator.assess_device_properties(flat_properties)
+                embed_assessment = self.embed_integrator.assess_device_properties(selected_properties)
             
             # Determine input type based on workflow
             input_type = "threat_model" if self.workflow_mode.get() == "threat_model" else "questionnaire"
@@ -1109,11 +1091,7 @@ class TaraDesktopApp:
                 ]
             
             if any(selected_properties.values()):
-                # Flatten the properties list for the EMBED integrator
-                flat_properties = []
-                for category_props in selected_properties.values():
-                    flat_properties.extend(category_props)
-                embed_assessment = self.embed_integrator.assess_device_properties(flat_properties)
+                embed_assessment = self.embed_integrator.assess_device_properties(selected_properties)
             
             # Determine input type based on workflow
             input_type = "threat_model" if self.workflow_mode.get() == "threat_model" else "questionnaire"

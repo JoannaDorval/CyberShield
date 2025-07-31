@@ -12,7 +12,6 @@ class Analysis(db.Model):
     threat_model_filename = db.Column(db.String(255))
     block_diagram_filename = db.Column(db.String(255))
     crossmap_filename = db.Column(db.String(255))
-    embed_properties_filename = db.Column(db.String(255))
     
     # Analysis results stored as JSON
     threats = db.Column(JSON)
@@ -21,8 +20,6 @@ class Analysis(db.Model):
     mitigations = db.Column(JSON)
     mitre_mappings = db.Column(JSON)
     recommendations = db.Column(JSON)
-    embed_assessment = db.Column(JSON)
-    embed_properties = db.Column(JSON)
     
     # Status and processing info
     status = db.Column(db.String(50), default='pending')

@@ -43,15 +43,108 @@ class EnhancedTaraExcelGenerator:
     
     def _create_consolidated_sheet(self, writer, analysis_data: Dict, input_type: str, cross_ref_source: str, embed_assessment: Optional[Dict]):
         from openpyxl.styles import PatternFill, Font, Alignment, Border, Side
-        from openpyxl.utils import get_column_letter
         
-        # Create all required worksheets with precise formatting
-        self._create_general_information_sheet(writer.book, analysis_data)
-        self._create_item_definition_sheet(writer.book, analysis_data)
-        self._create_item_definition_threat_model_sheet(writer.book, analysis_data)
-        self._create_asset_identification_sheet(writer.book, analysis_data)
-        self._create_tara_sheet(writer.book, analysis_data)
-        self._create_matrices_guidelines_sheet(writer.book, analysis_data)
+        # Create all required worksheets as specified
+        self._create_required_worksheets(writer.book)
+        
+        # Create the main worksheet
+        ws = writer.book.create_sheet('TARA Analysis Report')
+        writer.book.active = ws
+        
+        # Define color schemes for each section
+        colors = {
+            'assets': 'E7E6E6',
+            'damage_scenario': 'E2EFDA', 
+            'impact_analysis': 'FFF2CC',
+            'cybersecurity_controls': 'F2F2F2',
+            'threat_scenarios': 'DEEAF6',
+            'attack_path': 'FCE4D6',
+            'attack_feasibility': 'EDEDED',
+            'cybersecurity_goals': 'E1D5E7'
+        }
+        
+        # Define section headers and their columns
+        sections = {
+            'Assets': ['Asset ID', 'Asset Name', 'Security Property Loss'],
+            'Damage Scenario': ['Stakeholder', 'Damage Scenario Description'],
+            'Impact Analysis': ['Impact Category', 'Impact Level', 'Impact Description'],
+            'Cybersecurity Controls': ['Control ID', 'Control Name', 'Control Description'],
+            'Threat Scenarios': ['Threat ID', 'Threat Name', 'STRIDE Category'],
+            'Attack Path': ['Attack Vector', 'Attack Steps', 'Prerequisites'],
+            'Attack Feasibility Assessment': ['Feasibility Factor', 'Rating', 'Justification'],
+            'Cybersecurity Goals and Claims': ['Goal ID', 'Security Goal', 'Claim Statement']
+        }
+        
+        # Start position
+        current_col = 1
+        
+        # Create each section
+        for section_name, columns in sections.items():
+            color_key = section_name.lower().replace(' ', '_').replace('_and_', '_')
+            if color_key not in colors:
+                color_key = 'assets'  # Default color
+            
+            fill_color = colors[color_key]
+            
+            # Create section header
+            self._create_section_header(ws, section_name, current_col, len(columns), fill_color)
+            
+            # Create column headers
+            for i, col_name in enumerate(columns):
+                cell = ws.cell(row=2, column=current_col + i)
+                cell.value = col_name
+                cell.fill = PatternFill(start_color=fill_color, end_color=fill_color, fill_type='solid')
+                cell.font = Font(bold=True, size=10)
+                cell.alignment = Alignment(horizontal='center', vertical='center')
+                cell.border = Border(
+                    left=Side(style='thin'),
+                    right=Side(style='thin'),
+                    top=Side(style='thin'),
+                    bottom=Side(style='thin')
+                )
+            
+            # Fill section data
+            self._fill_section_data(ws, section_name, analysis_data, current_col, fill_color, embed_assessment)
+            
+            # Move to next section
+            current_col += len(columns) + 1  # Add gap between sections
+        
+        # Auto-fit column widths
+        from openpyxl.utils import get_column_letter
+        from openpyxl.cell.cell import MergedCell
+        
+        for col_idx in range(1, ws.max_column + 1):
+            max_length = 0
+            column_letter = get_column_letter(col_idx)
+            
+            for row_idx in range(1, ws.max_row + 1):
+                cell = ws.cell(row=row_idx, column=col_idx)
+                try:
+                    # Skip merged cells and check for actual content
+                    if not isinstance(cell, MergedCell) and cell.value is not None:
+                        cell_length = len(str(cell.value))
+                        if cell_length > max_length:
+                            max_length = cell_length
+                except:
+                    pass
+            
+            adjusted_width = min(max(max_length + 2, 12), 50)  # Min 12, max 50
+            ws.column_dimensions[column_letter].width = adjusted_width
+    
+    def _create_section_header(self, ws, section_name, start_col, num_cols, fill_color):
+        """Create merged header for section"""
+        from openpyxl.styles import PatternFill, Font, Alignment, Border, Side
+        
+        # Merge cells for header
+        if num_cols > 1:
+            ws.merge_cells(start_row=1, start_column=start_col, end_row=1, end_column=start_col + num_cols - 1)
+        
+        # Style the header
+        header_cell = ws.cell(row=1, column=start_col)
+        header_cell.value = section_name
+        header_cell.fill = PatternFill(start_color=fill_color, end_color=fill_color, fill_type='solid')
+        header_cell.font = Font(bold=True, size=12)
+        header_cell.alignment = Alignment(horizontal='center', vertical='center')
         header_cell.border = Border(
             left=Side(style='thick'),
             right=Side(style='thick'),

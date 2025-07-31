@@ -9,7 +9,7 @@ from parsers import ThreatModelParser, BlockDiagramParser, CrossMapParser
 from mitre_integration import MitreIntegrator
 from mitre_embed import MitreEmbedIntegrator
 from pdf_generator import TaraReportGenerator
-from enhanced_excel_generator_fixed import EnhancedTaraExcelGenerator
+from enhanced_excel_generator import EnhancedTaraExcelGenerator
 import logging
 
 # Allowed file extensions
@@ -48,139 +48,175 @@ def index():
     log_action('page_visit', 'Accessed main page')
     return render_template('index.html')
 
-@app.route('/mitre_embed')
-def mitre_embed_page():
-    """MITRE EMBED analysis page"""
+@app.route('/upload')
+def upload_page():
+    """File upload page"""
     if 'session_id' not in session:
         session['session_id'] = str(uuid.uuid4())
     
-    log_action('page_visit', 'Accessed MITRE EMBED analysis page')
-    return render_template('mitre_embed.html')
+    log_action('page_visit', 'Accessed upload page')
+    return render_template('upload.html')
 
-@app.route('/analyze_embed', methods=['POST'])
-def analyze_embed():
-    """Handle MITRE EMBED analysis requests"""
+@app.route('/upload_files', methods=['POST'])
+def upload_files():
+    """Handle enhanced file uploads and process analysis"""
     session_id = session.get('session_id', str(uuid.uuid4()))
     session['session_id'] = session_id
     
     try:
-        # Check if file upload or properties were provided
-        embed_file = request.files.get('embed_file')
-        embed_properties = request.form.getlist('properties')
+        # Get configuration from form
+        input_type = request.form.get('selected_input_type', 'threat_model')
+        cross_ref_source = request.form.get('selected_cross_ref_source', 'mitre_attack')
+        embed_properties = request.form.get('embed_properties', '{}')
         
+        # Parse EMBED properties if provided
         embed_assessment = None
-        embed_data = {}
-        
-        if embed_file and embed_file.filename != '':
-            # Handle JSON file upload
-            if not embed_file.filename or not embed_file.filename.endswith('.json'):
-                flash('Please upload a valid JSON file', 'error')
-                return redirect(url_for('mitre_embed_page'))
-            
+        if embed_properties and embed_properties != '{}':
             try:
-                embed_data = json.load(embed_file)
-                log_action('file_upload', f'MITRE EMBED JSON file: {embed_file.filename}')
-            except json.JSONDecodeError as e:
-                flash(f'Invalid JSON file: {str(e)}', 'error')
-                return redirect(url_for('mitre_embed_page'))
-                
-        elif embed_properties:
-            # Handle properties from quiz
-            embed_data = {'selected_properties': embed_properties}
-            log_action('properties_selection', f'Selected {len(embed_properties)} MITRE EMBED properties')
-        else:
-            flash('Please either upload a MITRE EMBED JSON file or complete the properties quiz', 'error')
-            return redirect(url_for('mitre_embed_page'))
+                selected_properties = json.loads(embed_properties)
+                embed_integrator = MitreEmbedIntegrator()
+                embed_assessment = embed_integrator.assess_device_properties(selected_properties)
+            except Exception as e:
+                app.logger.error(f"EMBED assessment error: {e}")
         
-        # Process EMBED assessment
-        embed_integrator = MitreEmbedIntegrator()
-        if 'selected_properties' in embed_data:
-            embed_assessment = embed_integrator.assess_device_properties(embed_data['selected_properties'])
-        else:
-            embed_assessment = embed_integrator.process_embed_json(embed_data)
+        # Determine required files based on input type
+        required_files = ['crossmap']  # Always required
+        if input_type == 'threat_model' or input_type == 'both':
+            required_files.append('threat_model')
+        if input_type == 'block_diagram' or input_type == 'both':
+            required_files.append('block_diagram')
         
-        # Create analysis record for MITRE EMBED
-        analysis = Analysis()
-        analysis.session_id = session_id
-        analysis.status = 'processing'
-        analysis.embed_properties_filename = secure_filename(embed_file.filename) if embed_file and embed_file.filename else 'properties_quiz'
+        # Check if required files are present
+        files = {}
+        for file_type in required_files:
+            if file_type not in request.files:
+                flash(f'{file_type.replace("_", " ").title()} file is required for selected analysis type', 'error')
+                return redirect(url_for('upload_page'))
+            
+            file = request.files[file_type]
+            if file.filename == '':
+                flash(f'{file_type.replace("_", " ").title()} file is required', 'error')
+                return redirect(url_for('upload_page'))
+            
+            if not allowed_file(file.filename, file_type):
+                flash(f'Invalid file type for {file_type.replace("_", " ").title()}', 'error')
+                return redirect(url_for('upload_page'))
+            
+            files[file_type] = file
+        
+        # Create analysis record with dynamic filenames
+        analysis = Analysis(
+            session_id=session_id,
+            threat_model_filename=secure_filename(files['threat_model'].filename) if 'threat_model' in files else None,
+            block_diagram_filename=secure_filename(files['block_diagram'].filename) if 'block_diagram' in files else None,
+            crossmap_filename=secure_filename(files['crossmap'].filename) if 'crossmap' in files else None,
+            status='processing'
+        )
         db.session.add(analysis)
         db.session.commit()
         
-        log_action('analysis_started', f'Analysis ID: {analysis.id}')
+        # Save files temporarily
+        saved_files = {}
+        for file_type, file in files.items():
+            filename = f"{session_id}_{file_type}_{secure_filename(file.filename)}"
+            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(filepath)
+            saved_files[file_type] = filepath
         
-        # Store the EMBED assessment results
-        analysis.embed_assessment = embed_assessment
-        analysis.embed_properties = embed_data
+        log_action('files_uploaded', f'Analysis ID: {analysis.id}')
         
-        # Process with MITRE ATT&CK integration
-        mitre_integrator = MitreIntegrator()
-        
-        # Generate fake assets for EMBED analysis if none provided
-        assets = embed_assessment.get('assets', [])
-        if not assets:
-            assets = [{
-                'id': 'device_001',
-                'name': 'IoT Device',
-                'type': 'Embedded Device',
-                'description': 'Device being assessed with MITRE EMBED framework',
-                'properties': embed_data.get('selected_properties', [])
-            }]
-        
-        # Map EMBED controls to MITRE ATT&CK
-        mitre_mappings = mitre_integrator.map_embed_to_attack(embed_assessment)
-        
-        # Store final results
-        analysis.assets = assets
-        analysis.mitre_mappings = mitre_mappings
-        analysis.status = 'completed'
-        
-        db.session.commit()
-        
-        # Generate reports
+        # Process the files based on input type
         try:
-            # Generate Excel report with enhanced error handling
-            excel_generator = EnhancedTaraExcelGenerator()
-            app.logger.info("Starting Excel report generation...")
+            threat_data = {'threats': [], 'assets': [], 'risks': [], 'mitigations': []}
+            diagram_data = {'components': [], 'connections': [], 'data_flows': []}
+            crossmap_data = {}
             
-            excel_path = excel_generator.generate_excel_report(
-                analysis_data={'assets': assets, 'threats': [], 'mitre_mappings': mitre_mappings},
-                input_type='mitre_embed',
-                cross_ref_source='embed_assessment',
-                embed_assessment=embed_assessment
-            )
+            # Parse files based on input type selection
+            if 'threat_model' in saved_files:
+                threat_parser = ThreatModelParser()
+                threat_data = threat_parser.parse(saved_files['threat_model'])
             
-            app.logger.info(f"Excel report generated successfully: {excel_path}")
+            if 'block_diagram' in saved_files:
+                diagram_parser = BlockDiagramParser()
+                diagram_data = diagram_parser.parse(saved_files['block_diagram'])
             
-            # Generate PDF report
-            try:
-                pdf_generator = TaraReportGenerator()
-                pdf_path = pdf_generator.generate_report(analysis=analysis)
-                app.logger.info(f"PDF report generated successfully: {pdf_path}")
+            if 'crossmap' in saved_files:
+                crossmap_parser = CrossMapParser()
+                crossmap_data = crossmap_parser.parse(saved_files['crossmap'])
+            
+            # Choose integration approach based on cross-reference source
+            mitre_mappings = {}
+            recommendations = []
+            
+            if cross_ref_source == 'mitre_attack' or cross_ref_source == 'both':
+                mitre_integrator = MitreIntegrator()
+                mitre_mappings = mitre_integrator.map_threats_to_mitre(
+                    threat_data.get('threats', []),
+                    crossmap_data
+                )
                 
-                log_action('reports_generated', f'Excel: {excel_path}, PDF: {pdf_path}')
-            except Exception as pdf_error:
-                app.logger.warning(f"PDF generation failed but Excel succeeded: {pdf_error}")
-                # Continue with Excel only
-                log_action('excel_report_generated', f'Excel: {excel_path}')
+                recommendations.extend(mitre_integrator.generate_recommendations(
+                    threat_data.get('threats', []),
+                    mitre_mappings,
+                    threat_data.get('mitigations', [])
+                ))
+            
+            # Add EMBED recommendations if selected
+            if embed_assessment and (cross_ref_source == 'mitre_embed' or cross_ref_source == 'both'):
+                recommendations.extend(embed_assessment.get('recommended_controls', []))
+            
+            # Store configuration and assessment data
+            analysis_metadata = {
+                'input_type': input_type,
+                'cross_ref_source': cross_ref_source,
+                'embed_assessment': embed_assessment,
+                'diagram_data': diagram_data
+            }
+            
+            # Update analysis with results
+            analysis.threats = threat_data.get('threats', [])
+            analysis.assets = threat_data.get('assets', [])
+            analysis.risks = threat_data.get('risks', [])
+            analysis.mitigations = threat_data.get('mitigations', [])
+            analysis.mitre_mappings = mitre_mappings
+            analysis.recommendations = recommendations
+            analysis.status = 'completed'
+            
+            # Store metadata as JSON in a new column (you may need to add this to the model)
+            if hasattr(analysis, 'metadata'):
+                analysis.metadata = analysis_metadata
+            
+            db.session.commit()
+            
+            log_action('analysis_completed', f'Analysis ID: {analysis.id}')
+            
+            flash('Enhanced TARA analysis completed successfully!', 'success')
+            return redirect(url_for('results', analysis_id=analysis.id))
             
         except Exception as e:
-            analysis.error_message = str(e)
+            app.logger.error(f"Processing error: {e}")
             analysis.status = 'failed'
+            analysis.error_message = str(e)
             db.session.commit()
-            app.logger.error(f"Excel report generation failed: {e}")
-            import traceback
-            app.logger.error(f"Full traceback: {traceback.format_exc()}")
-            flash(f'Analysis completed but Excel report generation failed: {str(e)}', 'error')
-            return redirect(url_for('mitre_embed_page'))
+            
+            log_action('analysis_failed', f'Analysis ID: {analysis.id}, Error: {str(e)}')
+            flash(f'Analysis failed: {str(e)}', 'error')
+            return redirect(url_for('upload_page'))
         
-        # Redirect to results page
-        return redirect(url_for('results', analysis_id=analysis.id))
-        
+        finally:
+            # Clean up temporary files
+            for filepath in saved_files.values():
+                try:
+                    if os.path.exists(filepath):
+                        os.remove(filepath)
+                except Exception as e:
+                    app.logger.error(f"Failed to remove file {filepath}: {e}")
+    
     except Exception as e:
-        app.logger.error(f"Analysis failed: {e}")
-        flash(f'Analysis failed: {str(e)}', 'error')
-        return redirect(url_for('mitre_embed_page'))
+        app.logger.error(f"Upload error: {e}")
+        log_action('upload_error', f'Error: {str(e)}')
+        flash(f'Upload failed: {str(e)}', 'error')
+        return redirect(url_for('upload_page'))
 
 @app.route('/results/<int:analysis_id>')
 def results(analysis_id):
@@ -282,7 +318,7 @@ def too_large(e):
     """Handle file too large error"""
     log_action('file_too_large', 'File exceeded maximum size limit')
     flash('File too large. Maximum size is 50MB.', 'error')
-    return redirect(url_for('mitre_embed_page'))
+    return redirect(url_for('upload_page'))
 
 @app.errorhandler(404)
 def not_found(e):
