@@ -686,19 +686,26 @@ class EnhancedTaraExcelGenerator:
         
         # Define styles
         header_fill = PatternFill(start_color="BF8F00", end_color="BF8F00", fill_type="solid")
-        border = Border(
-            left=Side(style='thin', color='000000'),
-            right=Side(style='thin', color='000000'),
-            top=Side(style='thin', color='000000'),
-            bottom=Side(style='thin', color='000000')
+        bold_border = Border(
+            left=Side(style='thick', color='000000'),
+            right=Side(style='thick', color='000000'),
+            top=Side(style='thick', color='000000'),
+            bottom=Side(style='thick', color='000000')
         )
+        
+        # Set row heights
+        ws.row_dimensions[1].height = 49.5
+        ws.row_dimensions[2].height = 29.3
+        ws.row_dimensions[3].height = 29.3
+        for row in range(6, 20):
+            ws.row_dimensions[row].height = 22.5
         
         # Title font styles
         title_font = Font(name='Calibri', size=20, bold=True, color='000000')
-        project_font = Font(name='Calibri', size=14, color='000000')
-        responsible_font = Font(name='Calibri', size=14, color='000000')
-        revision_font = Font(name='Calibri', size=11, color='000000')
-        header_font = Font(name='Calibri', size=11, color='000000')
+        project_font = Font(name='Calibri', size=14, bold=True, color='000000')
+        responsible_font = Font(name='Calibri', size=14, bold=True, color='000000')
+        revision_font = Font(name='Calibri', size=11, bold=True, color='000000')
+        header_font = Font(name='Calibri', size=11, bold=True, color='000000')
         
         center_alignment = Alignment(horizontal='center', vertical='center')
         left_alignment = Alignment(horizontal='left', vertical='center')
@@ -722,13 +729,11 @@ class EnhancedTaraExcelGenerator:
         ws['B3'].alignment = center_alignment
         ws['B3'].fill = header_fill
         
-        # Apply borders to merged cells B1:H3
+        # Apply bold borders to header box B1:H3
         for row in range(1, 4):
             for col in range(2, 9):  # B to H
                 cell = ws.cell(row=row, column=col)
-                cell.border = border
-        
-        # Line 4: blank (no content needed)
+                cell.border = bold_border
         
         # Line 5: "Revision history" in column B
         ws['B5'] = "Revision history"
@@ -757,13 +762,13 @@ class EnhancedTaraExcelGenerator:
             cell.font = header_font
             cell.alignment = left_alignment
             cell.fill = header_fill
-            cell.border = border
+            cell.border = bold_border
         
-        # Rows 7-19: Empty data rows with borders
+        # Rows 7-19: Empty data rows with bold borders
         for row in range(7, 20):
             for col in range(2, 9):  # B to H
                 cell = ws.cell(row=row, column=col)
-                cell.border = border
+                cell.border = bold_border
     
     def _format_item_definition_sheet(self, ws):
         """Format the Item Definition sheet with exact specifications"""
@@ -1199,6 +1204,15 @@ class EnhancedTaraExcelGenerator:
         for col, width in column_widths.items():
             ws.column_dimensions[col].width = width
         
+        # Set row heights as specified
+        ws.row_dimensions[1].height = 36
+        ws.row_dimensions[3].height = 23.3
+        ws.row_dimensions[4].height = 21.8
+        
+        # Odd rows 7-51 have height 57.8
+        for row in range(7, 52, 2):  # Every odd row from 7 to 51
+            ws.row_dimensions[row].height = 57.8
+        
         # Line 1: Main title B-AT merged
         ws.merge_cells('B1:AT1')
         ws['B1'] = "Threat analysis and risk assessment"
@@ -1213,15 +1227,15 @@ class EnhancedTaraExcelGenerator:
         
         # Line 3: Section headers with proper merging and colors
         section_headers = [
-            ('B3:D3', 'Assets', assets_fill),
-            ('E3:F3', 'Damage Scenario', damage_fill),
-            ('G3:Q3', 'Impact analysis', impact_fill),
+            ('B3:E3', 'Assets', assets_fill),
+            ('F3:Q3', 'Impact analysis', impact_fill),
             ('R3:S3', 'Cybersecurity control', cyber_control_fill),
-            ('T3:Y3', 'Attack method – STRIDE', stride_fill),
-            ('AA3:AK3', 'Attack potential evaluation', potential_fill),
-            ('AL3:AN3', 'Risk evaluation', risk_eval_fill),
-            ('AO3:AT3', 'Risk treatment', risk_treatment_fill)
+            ('T3:Y3', 'Threat scenario', threat_scenario_fill),
+            ('AA3:AN3', 'Attack feasibility assessment', attack_feasibility_fill),
+            ('AO3:AT3', 'Cybersecurity goals and claims', cyber_goals_fill)
         ]
+        
+
         
         for cell_range, text, fill in section_headers:
             ws.merge_cells(cell_range)
@@ -1243,14 +1257,13 @@ class EnhancedTaraExcelGenerator:
             cell = ws.cell(row=3, column=col_num)
             cell.border = border
         
-        # Lines 4-5: Detailed headers with proper merging
-        # Asset headers (A-F)
+        # Lines 4-5: Detailed headers with proper merging and corrected titles
+        # Asset headers (B-E as specified)
         asset_headers = [
-            ('A4:A5', 'Asset ID'),
-            ('B4:B5', 'Asset'),
-            ('C4:C5', 'Security Property loss'),
-            ('D4:D5', 'Stakeholder'),
-            ('E4:F5', 'Damage Scenario')
+            ('B4:B5', 'Asset ID'),
+            ('C4:C5', 'Asset'),
+            ('D4:D5', 'Security property loss'),
+            ('E4:E5', 'Stakeholder')
         ]
         
         for cell_range, text in asset_headers:
@@ -1389,26 +1402,36 @@ class EnhancedTaraExcelGenerator:
         
         # Apply background colors and borders to data area (rows 6-52)
         for row in range(6, 53):
-            # Even rows: merge B-AT with special background
+            # Even rows: bold black outline
             if row % 2 == 0:
-                ws.merge_cells(f'B{row}:AT{row}')
-                ws[f'B{row}'].fill = even_row_fill
-                for col in range(2, 47):
-                    ws.cell(row=row, column=col).border = border
-            else:
-                # Odd rows: apply borders to all cells and special background to specific columns
                 for col_num in range(2, 47):  # B to AT
                     cell = ws.cell(row=row, column=col_num)
-                    cell.border = border
+                    cell.border = bold_border
+            else:
+                # Odd rows: apply section background colors and bold borders
+                for col_num in range(2, 47):  # B to AT
+                    cell = ws.cell(row=row, column=col_num)
+                    cell.border = bold_border
                     
-                    # Special background for specific columns in odd rows
                     col_letter = get_column_letter(col_num)
-                    if col_letter in ['H', 'J', 'L', 'N', 'O', 'AB', 'AD', 'AF', 'AH', 'AJ']:
-                        cell.fill = even_row_fill
+                    # T-Y: Threat scenario background (#FFF2CC)
+                    if col_letter in ['T', 'U', 'V', 'W', 'X', 'Y']:
+                        cell.fill = threat_scenario_fill
+                    # AA-AN: Attack feasibility assessment background (#C6E0B4)
+                    elif col_letter in ['AA', 'AB', 'AC', 'AD', 'AE', 'AF', 'AG', 'AH', 'AI', 'AJ', 'AK', 'AL', 'AM', 'AN']:
+                        cell.fill = attack_feasibility_fill
+                    # AO-AT: Cybersecurity goals and claims background (#EDEDED)
+                    elif col_letter in ['AO', 'AP', 'AQ', 'AR', 'AS', 'AT']:
+                        cell.fill = cyber_goals_fill
         
-        # Apply borders to the Z column (Attack Path) for all rows
-        for row in range(3, 53):
-            ws[f'Z{row}'].border = border
+        # Apply bold borders where color changes in the header
+        for row in [3, 4, 5]:
+            for col_num in range(2, 47):  # B to AT
+                cell = ws.cell(row=row, column=col_num)
+                cell.border = bold_border
+        
+        # Make header rows 1-5 frozen for scrolling
+        ws.freeze_panes = 'A6'
     
     def _format_matrices_guidelines_sheet(self, ws):
         """Format the Matrices and guidelines sheet with exact specifications"""
@@ -1863,3 +1886,227 @@ class EnhancedTaraExcelGenerator:
         for row in range(4, 10):
             for col in ['AC', 'AD']:
                 ws[f'{col}{row}'].border = thick_border
+        
+        # Additional comprehensive formatting for Matrices and Guidelines sheet
+        # Columns B rows 2-5 should be outlined in bold 
+        for row in range(2, 6):
+            ws[f'B{row}'].border = thick_border
+        
+        # Column D lines 5-8 should be center justified 
+        for row in range(5, 9):
+            ws[f'D{row}'].alignment = center_align
+        
+        # Columns K M O Q and S should be center justified 
+        for col in ['K', 'M', 'O', 'Q', 'S']:
+            for row in range(5, 10):
+                ws[f'{col}{row}'].alignment = center_align
+        
+        # Replace <= with ≤ symbol in column K
+        for row in range(5, 10):
+            if ws[f'K{row}'].value and '<=' in str(ws[f'K{row}'].value):
+                ws[f'K{row}'].value = str(ws[f'K{row}'].value).replace('<=', '≤')
+        
+        # Rows 4 and 5 columns V-AA should all have a background of #C6E0B4
+        green_fill = PatternFill(start_color="C6E0B4", end_color="C6E0B4", fill_type="solid")
+        for row in [4, 5]:
+            for col_num in range(22, 27):  # V to AA
+                col_letter = get_column_letter(col_num)
+                ws[f'{col_letter}{row}'].fill = green_fill
+                ws[f'{col_letter}{row}'].border = thick_border
+        
+        # All the headers and labels in columns V and W should have a bold black outline
+        for row in [4, 5, 13, 14, 15, 16, 17, 18, 22, 23, 24, 25, 26, 27]:
+            for col in ['V', 'W']:
+                ws[f'{col}{row}'].border = thick_border
+                ws[f'{col}{row}'].font = bold_font
+                ws[f'{col}{row}'].alignment = center_align
+        
+        # Row 11 and 20 columns V-AA should be merged and labeled
+        yellow_fill = PatternFill(start_color="FFD966", end_color="FFD966", fill_type="solid")
+        ws.merge_cells('V11:AA11')
+        ws['V11'] = "Threat analysis and risk assessment"
+        ws['V11'].font = bold_font
+        ws['V11'].alignment = center_align
+        ws['V11'].fill = yellow_fill
+        ws['V11'].border = thick_border
+        
+        ws.merge_cells('V20:AA20')
+        ws['V20'] = "Threat analysis and risk assessment"
+        ws['V20'].font = bold_font
+        ws['V20'].alignment = center_align
+        ws['V20'].fill = yellow_fill
+        ws['V20'].border = thick_border
+        
+        # Column 13 V-AA merge cells and label Risk threshold level
+        ws.merge_cells('V13:AA13')
+        ws['V13'] = "Risk threshold level"
+        ws['V13'].font = bold_font
+        ws['V13'].alignment = center_align
+        ws['V13'].fill = green_fill
+        ws['V13'].border = thick_border
+        
+        # Column V and W lines 13 and 14 and 22 and 23 should be merged
+        ws.merge_cells('V13:W13')
+        ws.merge_cells('V14:W14')
+        ws.merge_cells('V22:W22')
+        ws.merge_cells('V23:W23')
+        
+        # Columns X-AA line 13 should be merged and labeled Attack feasibility rating
+        ws.merge_cells('X13:AA13')
+        ws['X13'] = "Attack feasibility rating"
+        ws['X13'].font = bold_font
+        ws['X13'].alignment = center_align
+        ws['X13'].fill = green_fill
+        ws['X13'].border = thick_border
+        
+        # Line 14 column X should be labeled Very low, Y Low, Z Medium and AA High
+        ws['X14'] = "Very low"
+        ws['Y14'] = "Low"
+        ws['Z14'] = "Medium"
+        ws['AA14'] = "High"
+        for col in ['X', 'Y', 'Z', 'AA']:
+            ws[f'{col}14'].font = bold_font
+            ws[f'{col}14'].alignment = center_align
+            ws[f'{col}14'].fill = green_fill
+            ws[f'{col}14'].border = thick_border
+        
+        # Column W line 15 should be labeled Severe 16 Major 17 Moderate and 18 Negligible
+        ws['W15'] = "Severe"
+        ws['W16'] = "Major"
+        ws['W17'] = "Moderate"
+        ws['W18'] = "Negligible"
+        for row in [15, 16, 17, 18]:
+            ws[f'W{row}'].font = bold_font
+            ws[f'W{row}'].alignment = center_align
+            ws[f'W{row}'].fill = green_fill
+            ws[f'W{row}'].border = thick_border
+        
+        # Line 15-18 column X should have a background of #70AD47 and be labeled Below
+        green_high = PatternFill(start_color="70AD47", end_color="70AD47", fill_type="solid")
+        for row in [15, 16, 17, 18]:
+            ws[f'X{row}'] = "Below"
+            ws[f'X{row}'].font = bold_font
+            ws[f'X{row}'].alignment = center_align
+            ws[f'X{row}'].fill = green_high
+            ws[f'X{row}'].border = thick_border
+        
+        # Row 18 columns Y, Z, and AA should also have a background of #70AD47 and be labeled Below
+        for col in ['Y', 'Z', 'AA']:
+            ws[f'{col}18'] = "Below"
+            ws[f'{col}18'].font = bold_font
+            ws[f'{col}18'].alignment = center_align
+            ws[f'{col}18'].fill = green_high
+            ws[f'{col}18'].border = thick_border
+        
+        # Columns Y-AA lines 15-17 should be labeled Above with a #FFC000 background
+        orange_fill = PatternFill(start_color="FFC000", end_color="FFC000", fill_type="solid")
+        for row in [15, 16, 17]:
+            for col in ['Y', 'Z', 'AA']:
+                ws[f'{col}{row}'] = "Above"
+                ws[f'{col}{row}'].font = bold_font
+                ws[f'{col}{row}'].alignment = center_align
+                ws[f'{col}{row}'].fill = orange_fill
+                ws[f'{col}{row}'].border = thick_border
+        
+        # Line 21 columns V-AA should be merged and labeled CAL determination
+        ws.merge_cells('V21:AA21')
+        ws['V21'] = "CAL determination"
+        ws['V21'].font = bold_font
+        ws['V21'].alignment = center_align
+        ws['V21'].fill = green_fill
+        ws['V21'].border = thick_border
+        
+        # Line 22 X-AA should be merged and labeled Attack vector
+        ws.merge_cells('X22:AA22')
+        ws['X22'] = "Attack vector"
+        ws['X22'].font = bold_font
+        ws['X22'].alignment = center_align
+        ws['X22'].fill = green_fill
+        ws['X22'].border = thick_border
+        
+        # Line 23 attack vectors
+        ws['X23'] = "Physical"
+        ws['Y23'] = "Local"
+        ws['Z23'] = "Adjacent"
+        ws['AA23'] = "Network"
+        for col in ['X', 'Y', 'Z', 'AA']:
+            ws[f'{col}23'].font = bold_font
+            ws[f'{col}23'].alignment = center_align
+            ws[f'{col}23'].fill = green_fill
+            ws[f'{col}23'].border = thick_border
+        
+        # Column V lines 24-27 should be merged and labeled Impact rating
+        ws.merge_cells('V24:V27')
+        ws['V24'] = "Impact rating"
+        ws['V24'].font = bold_font
+        ws['V24'].alignment = center_align
+        ws['V24'].fill = green_fill
+        ws['V24'].border = thick_border
+        
+        # W column impact levels
+        ws['W24'] = "Severe"
+        ws['W25'] = "Major"
+        ws['W26'] = "Moderate"
+        ws['W27'] = "Negligible"
+        for row in [24, 25, 26, 27]:
+            ws[f'W{row}'].font = bold_font
+            ws[f'W{row}'].alignment = center_align
+            ws[f'W{row}'].fill = green_fill
+            ws[f'W{row}'].border = thick_border
+        
+        # X24 Y25 and Z26 should all have the value 2 with a background color of #70AD47
+        for cell in ['X24', 'Y25', 'Z26']:
+            ws[cell] = 2
+            ws[cell].font = bold_font
+            ws[cell].alignment = center_align
+            ws[cell].fill = green_high
+            ws[cell].border = thick_border
+            ws[cell].number_format = '0'
+        
+        # Y24, Z25 and AA26 should have a value of 3 and a background color of #FFC000
+        for cell in ['Y24', 'Z25', 'AA26']:
+            ws[cell] = 3
+            ws[cell].font = bold_font
+            ws[cell].alignment = center_align
+            ws[cell].fill = orange_fill
+            ws[cell].border = thick_border
+            ws[cell].number_format = '0'
+        
+        # Z24 AA24 and AA25 should have a value of 4 and a background color of #FF0000
+        red_fill = PatternFill(start_color="FF0000", end_color="FF0000", fill_type="solid")
+        for cell in ['Z24', 'AA24', 'AA25']:
+            ws[cell] = 4
+            ws[cell].font = bold_font
+            ws[cell].alignment = center_align
+            ws[cell].fill = red_fill
+            ws[cell].border = thick_border
+            ws[cell].number_format = '0'
+        
+        # X25, X26 and Y26 should all have a value of 1
+        for cell in ['X25', 'X26', 'Y26']:
+            ws[cell] = 1
+            ws[cell].font = bold_font
+            ws[cell].alignment = center_align
+            ws[cell].fill = green_high
+            ws[cell].border = thick_border
+            ws[cell].number_format = '0'
+        
+        # Line 27 columns X-AA should have a value of "-"
+        for col in ['X', 'Y', 'Z', 'AA']:
+            ws[f'{col}27'] = "-"
+            ws[f'{col}27'].font = bold_font
+            ws[f'{col}27'].alignment = center_align
+            ws[f'{col}27'].fill = green_fill
+            ws[f'{col}27'].border = thick_border
+        
+        # Lines 13 and 14 and 21, 22, and 23 columns V – AA should all have a background #C6E0B4
+        for row in [13, 14, 21, 22, 23]:
+            for col_num in range(22, 27):  # V to AA
+                col_letter = get_column_letter(col_num)
+                ws[f'{col_letter}{row}'].fill = green_fill
+                ws[f'{col_letter}{row}'].font = bold_font
+                ws[f'{col_letter}{row}'].alignment = center_align
+                ws[f'{col_letter}{row}'].border = thick_border
+        
+        # In column V the text should be wrapped for Impact Rating
+        ws['V24'].alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
