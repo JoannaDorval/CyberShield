@@ -25,8 +25,6 @@ from mitre_integration import MitreIntegrator
 from mitre_embed import MitreEmbedIntegrator
 # PDF generator removed - Excel reports only
 from enhanced_excel_generator import EnhancedTaraExcelGenerator
-# AI-powered security inference
-from ai_security_inference import AISecurityInferenceService, extract_assets_from_questionnaire
 
 
 class TaraDesktopApp:
@@ -66,12 +64,6 @@ class TaraDesktopApp:
         self.embed_integrator = MitreEmbedIntegrator()
         # PDF report generator removed - Excel reports only
         self.excel_generator = EnhancedTaraExcelGenerator()
-        # AI-powered security inference service
-        try:
-            self.ai_inference_service = AISecurityInferenceService()
-        except ValueError as e:
-            self.logger.warning(f"AI inference service initialization failed: {e}")
-            self.ai_inference_service = None
         
         # Create GUI
         self.create_widgets()
@@ -642,7 +634,7 @@ class TaraDesktopApp:
             self.root.after(0, self._analysis_complete)
     
     def _process_questionnaire_mode(self) -> Dict[str, Any]:
-        """Process MITRE EMBED questionnaire responses with AI-powered security inference"""
+        """Process MITRE EMBED questionnaire responses"""
         self.update_status("Processing MITRE EMBED questionnaire...")
         self.log_message("Processing device properties from questionnaire...")
         
@@ -660,42 +652,6 @@ class TaraDesktopApp:
         threats = embed_assessment.get('threat_vectors', [])
         assets = self._generate_assets_from_properties(selected_properties)
         
-        # AI-powered security property inference for enhanced analysis
-        if self.ai_inference_service and assets:
-            self.update_status("Analyzing security properties with AI...")
-            self.log_message("Performing AI-powered security property loss inference...")
-            
-            try:
-                # Get MITRE context for enhanced analysis
-                mitre_context = {
-                    'embed_assessment': embed_assessment,
-                    'selected_properties': selected_properties
-                }
-                
-                # Perform AI inference for security properties
-                enhanced_assets = self.ai_inference_service.infer_security_properties(assets, mitre_context)
-                assets = enhanced_assets
-                
-                self.log_message(f"AI analysis completed for {len(assets)} assets")
-                
-            except Exception as e:
-                self.log_message(f"AI inference failed, using default values: {str(e)}")
-                # Add default security property values if AI fails
-                for asset in assets:
-                    asset.update({
-                        'asset_id': asset.get('name', asset.get('id', 'Unknown Asset')),
-                        'confidentiality_loss': 'Medium',
-                        'integrity_loss': 'Medium', 
-                        'availability_loss': 'Medium',
-                        'analysis_reasoning': 'Default values (AI analysis unavailable)'
-                    })
-        else:
-            # Fallback when AI service is not available
-            self.log_message("AI service not available, using rule-based security property inference")
-            for asset in assets:
-                cia_analysis = self._fallback_security_analysis(asset)
-                asset.update(cia_analysis)
-        
         analysis_data = {
             'threats': threats,
             'assets': assets,
@@ -711,58 +667,7 @@ class TaraDesktopApp:
         }
         
         self.log_message(f"Generated {len(threats)} threats from {analysis_data['metadata']['properties_count']} device properties")
-        self.log_message(f"Enhanced {len(assets)} assets with C/I/A security property analysis")
         return analysis_data
-    
-    def _fallback_security_analysis(self, asset: Dict[str, Any]) -> Dict[str, str]:
-        """Rule-based fallback security property analysis when AI is unavailable"""
-        asset_type = asset.get('type', '').lower()
-        asset_name = asset.get('name', '').lower()
-        asset_category = asset.get('category', '').lower()
-        
-        # Default values
-        confidentiality = 'Medium'
-        integrity = 'Medium'
-        availability = 'Medium'
-        
-        # Rule-based analysis based on asset characteristics
-        if 'network' in asset_type or 'network' in asset_category:
-            # Network assets typically have high availability concerns
-            availability = 'High'
-            confidentiality = 'Medium'
-            integrity = 'Medium'
-        
-        elif 'database' in asset_name or 'data' in asset_type:
-            # Data assets have high confidentiality and integrity concerns
-            confidentiality = 'High'
-            integrity = 'High'
-            availability = 'Medium'
-        
-        elif 'server' in asset_name or 'application' in asset_type:
-            # Server/application assets have balanced concerns
-            confidentiality = 'Medium'
-            integrity = 'High'
-            availability = 'High'
-        
-        elif 'hardware' in asset_category or 'embedded' in asset_type:
-            # Hardware/embedded devices often have physical security concerns
-            confidentiality = 'Low'
-            integrity = 'High'
-            availability = 'High'
-        
-        elif 'software' in asset_category:
-            # Software components have integrity concerns
-            confidentiality = 'Medium'
-            integrity = 'High'
-            availability = 'Medium'
-        
-        return {
-            'asset_id': asset.get('name', asset.get('id', 'Unknown Asset')),
-            'confidentiality_loss': confidentiality,
-            'integrity_loss': integrity,
-            'availability_loss': availability,
-            'analysis_reasoning': 'Rule-based analysis (AI service not available)'
-        }
     
     def _process_threat_model_mode(self) -> Dict[str, Any]:
         """Process threat model file analysis"""
@@ -797,34 +702,6 @@ class TaraDesktopApp:
             # Ensure we have some data for analysis
             if not analysis_data['assets'] and not analysis_data['threats']:
                 raise ValueError("No valid data found in threat model file")
-            
-            # AI-powered security property inference for threat model assets
-            if self.ai_inference_service and analysis_data.get('assets'):
-                self.update_status("Analyzing threat model assets with AI...")
-                self.log_message("Performing AI-powered security property analysis for threat model assets...")
-                
-                try:
-                    # Perform AI inference for security properties
-                    enhanced_assets = self.ai_inference_service.infer_security_properties(
-                        analysis_data['assets'], 
-                        {'analysis_type': 'threat_model'}
-                    )
-                    analysis_data['assets'] = enhanced_assets
-                    
-                    self.log_message(f"AI analysis completed for {len(enhanced_assets)} threat model assets")
-                    
-                except Exception as e:
-                    self.log_message(f"AI inference failed for threat model assets, using fallback: {str(e)}")
-                    # Add fallback security property values
-                    for asset in analysis_data['assets']:
-                        cia_analysis = self._fallback_security_analysis(asset)
-                        asset.update(cia_analysis)
-            else:
-                # Fallback analysis for threat model assets when AI is not available
-                self.log_message("Adding rule-based security property analysis for threat model assets")
-                for asset in analysis_data.get('assets', []):
-                    cia_analysis = self._fallback_security_analysis(asset)
-                    asset.update(cia_analysis)
             
             return analysis_data
             

@@ -25,9 +25,8 @@ TARA is a comprehensive cybersecurity threat analysis application that processes
 1. **parsers.py**: Multi-format file parsing (JSON, YAML, TM7, SVG, PNG, Excel)
 2. **mitre_integration.py**: MITRE ATT&CK framework integration and threat mapping
 3. **mitre_embed.py**: MITRE EMBED framework for IoT/embedded device security assessment
-4. **ai_security_inference.py**: AI-powered security property loss inference using Anthropic Claude
-5. **enhanced_excel_generator.py**: Comprehensive Excel report generation with C/I/A conditional formatting
-6. **pdf_generator.py**: Professional PDF report generation using ReportLab
+4. **pdf_generator.py**: Professional PDF report generation using ReportLab
+5. **enhanced_excel_generator.py**: Comprehensive Excel report generation with formatting
 
 ### Data Models
 - **Analysis Model**: Stores analysis results, metadata, and processing status
@@ -67,9 +66,6 @@ TARA is a comprehensive cybersecurity threat analysis application that processes
 - **ReportLab**: PDF generation with professional formatting
 - **requests**: HTTP client for MITRE framework data fetching
 
-### AI & Analysis
-- **anthropic**: AI-powered security property inference using Claude models
-
 ### Security & Validation
 - **email-validator**: Input validation for security
 - **psycopg2-binary**: PostgreSQL database adapter (optional)
@@ -93,15 +89,6 @@ TARA is a comprehensive cybersecurity threat analysis application that processes
 - **Cross-platform Compatibility**: Windows, macOS, and Linux support
 
 ## Changelog
-
-### July 31, 2025 - AI-Powered Security Property Inference Implementation
-- **AI-Powered C/I/A Analysis**: Integrated Anthropic AI to automatically determine Confidentiality, Integrity, and Availability compromise likelihood for each asset
-- **Enhanced TARA Worksheet**: Updated Excel output to include dedicated C/I/A columns with color-coded risk levels (Red=High, Orange=Medium, Green=Low)
-- **Dual Analysis Modes**: Both questionnaire-based and threat model workflows now include AI-powered security property inference
-- **Fallback Analysis**: Implemented rule-based security analysis when AI service is unavailable for continuity
-- **MITRE Context Integration**: AI analysis incorporates MITRE ATT&CK and EMBED framework data for enhanced accuracy
-- **Modular AI Service**: Created reusable AISecurityInferenceService that can be extended or replaced as needed
-- **Comprehensive Testing**: Added test suite validating AI integration, asset extraction, and Excel generation
 
 ### June 17, 2025 - Major Application Restructuring
 - **Two-Path Toggle Implementation**: Replaced complex multi-file input system with streamlined approach
