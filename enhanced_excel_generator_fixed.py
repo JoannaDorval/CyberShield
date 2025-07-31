@@ -43,10 +43,6 @@ class EnhancedTaraExcelGenerator:
     
     def _create_all_worksheets(self, workbook, analysis_data, embed_assessment):
         """Create all required worksheets with precise formatting"""
-        # Remove default sheet if it exists
-        if 'Sheet' in workbook.sheetnames:
-            workbook.remove(workbook['Sheet'])
-        
         # Create all worksheets with precise formatting as specified
         self._create_general_information_sheet(workbook, analysis_data)
         self._create_item_definition_sheet(workbook, analysis_data)
@@ -54,6 +50,13 @@ class EnhancedTaraExcelGenerator:
         self._create_asset_identification_sheet(workbook, analysis_data)
         self._create_tara_sheet(workbook, analysis_data)
         self._create_matrices_guidelines_sheet(workbook, analysis_data)
+        
+        # Remove default sheet after creating all others to ensure at least one sheet is visible
+        if 'Sheet' in workbook.sheetnames:
+            workbook.remove(workbook['Sheet'])
+        
+        # Set the General Information sheet as the active sheet
+        workbook.active = workbook['General Information']
     
     def _create_general_information_sheet(self, workbook, analysis_data):
         """Create General Information sheet with precise formatting"""

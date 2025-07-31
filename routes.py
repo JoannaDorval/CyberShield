@@ -73,7 +73,7 @@ def analyze_embed():
         
         if embed_file and embed_file.filename != '':
             # Handle JSON file upload
-            if not embed_file.filename.endswith('.json'):
+            if not embed_file.filename or not embed_file.filename.endswith('.json'):
                 flash('Please upload a valid JSON file', 'error')
                 return redirect(url_for('mitre_embed_page'))
             
@@ -103,7 +103,7 @@ def analyze_embed():
         analysis = Analysis()
         analysis.session_id = session_id
         analysis.status = 'processing'
-        analysis.embed_properties_filename = secure_filename(embed_file.filename) if embed_file else 'properties_quiz'
+        analysis.embed_properties_filename = secure_filename(embed_file.filename) if embed_file and embed_file.filename else 'properties_quiz'
         db.session.add(analysis)
         db.session.commit()
         
@@ -141,22 +141,17 @@ def analyze_embed():
         try:
             # Generate Excel report
             excel_generator = EnhancedTaraExcelGenerator()
-            excel_path = excel_generator.generate_report(
-                analysis_id=analysis.id,
-                session_id=session_id,
-                assets=assets,
-                mitre_mappings=mitre_mappings,
+            excel_path = excel_generator.generate_excel_report(
+                analysis_data={'assets': assets, 'threats': [], 'mitre_mappings': mitre_mappings},
+                input_type='mitre_embed',
+                cross_ref_source='embed_assessment',
                 embed_assessment=embed_assessment
             )
             
             # Generate PDF report
             pdf_generator = TaraReportGenerator()
             pdf_path = pdf_generator.generate_report(
-                analysis_id=analysis.id,
-                session_id=session_id,
-                assets=assets,
-                mitre_mappings=mitre_mappings,
-                embed_assessment=embed_assessment
+                analysis=analysis
             )
             
             log_action('reports_generated', f'Excel: {excel_path}, PDF: {pdf_path}')
