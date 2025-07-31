@@ -1225,6 +1225,18 @@ class EnhancedTaraExcelGenerator:
             cell = ws.cell(row=1, column=col_num)
             cell.border = border
         
+        # Define specific TARA section colors and bold border
+        threat_scenario_fill = PatternFill(start_color="FFF2CC", end_color="FFF2CC", fill_type="solid")
+        attack_feasibility_fill = PatternFill(start_color="C6E0B4", end_color="C6E0B4", fill_type="solid")
+        cyber_goals_fill = PatternFill(start_color="EDEDED", end_color="EDEDED", fill_type="solid")
+        
+        bold_border = Border(
+            left=Side(style='thick', color='000000'),
+            right=Side(style='thick', color='000000'),
+            top=Side(style='thick', color='000000'),
+            bottom=Side(style='thick', color='000000')
+        )
+        
         # Line 3: Section headers with proper merging and colors
         section_headers = [
             ('B3:E3', 'Assets', assets_fill),
@@ -1888,6 +1900,9 @@ class EnhancedTaraExcelGenerator:
                 ws[f'{col}{row}'].border = thick_border
         
         # Additional comprehensive formatting for Matrices and Guidelines sheet
+        # Define bold_font for matrices sheet
+        bold_font = Font(name='Calibri', size=11, bold=True, color='000000')
+        
         # Columns B rows 2-5 should be outlined in bold 
         for row in range(2, 6):
             ws[f'B{row}'].border = thick_border
@@ -1921,43 +1936,43 @@ class EnhancedTaraExcelGenerator:
                 ws[f'{col}{row}'].font = bold_font
                 ws[f'{col}{row}'].alignment = center_align
         
-        # Row 11 and 20 columns V-AA should be merged and labeled
+        # Set values first, then merge cells for Threat analysis rows
         yellow_fill = PatternFill(start_color="FFD966", end_color="FFD966", fill_type="solid")
-        ws.merge_cells('V11:AA11')
         ws['V11'] = "Threat analysis and risk assessment"
         ws['V11'].font = bold_font
         ws['V11'].alignment = center_align
         ws['V11'].fill = yellow_fill
         ws['V11'].border = thick_border
+        ws.merge_cells('V11:AA11')
         
-        ws.merge_cells('V20:AA20')
         ws['V20'] = "Threat analysis and risk assessment"
         ws['V20'].font = bold_font
         ws['V20'].alignment = center_align
         ws['V20'].fill = yellow_fill
         ws['V20'].border = thick_border
+        ws.merge_cells('V20:AA20')
         
-        # Column 13 V-AA merge cells and label Risk threshold level
-        ws.merge_cells('V13:AA13')
+        # Set values first, then merge cells for separate sections
+        # Risk threshold level spans V13:W13 only (not to AA)
         ws['V13'] = "Risk threshold level"
         ws['V13'].font = bold_font
         ws['V13'].alignment = center_align
         ws['V13'].fill = green_fill
         ws['V13'].border = thick_border
-        
-        # Column V and W lines 13 and 14 and 22 and 23 should be merged
         ws.merge_cells('V13:W13')
-        ws.merge_cells('V14:W14')
-        ws.merge_cells('V22:W22')
-        ws.merge_cells('V23:W23')
         
-        # Columns X-AA line 13 should be merged and labeled Attack feasibility rating
-        ws.merge_cells('X13:AA13')
+        # Attack feasibility rating spans X13:AA13
         ws['X13'] = "Attack feasibility rating"
         ws['X13'].font = bold_font
         ws['X13'].alignment = center_align
         ws['X13'].fill = green_fill
         ws['X13'].border = thick_border
+        ws.merge_cells('X13:AA13')
+        
+        # Column V and W lines 14, 22 and 23 should be merged
+        ws.merge_cells('V14:W14')
+        ws.merge_cells('V22:W22')
+        ws.merge_cells('V23:W23')
         
         # Line 14 column X should be labeled Very low, Y Low, Z Medium and AA High
         ws['X14'] = "Very low"
@@ -2008,21 +2023,21 @@ class EnhancedTaraExcelGenerator:
                 ws[f'{col}{row}'].fill = orange_fill
                 ws[f'{col}{row}'].border = thick_border
         
-        # Line 21 columns V-AA should be merged and labeled CAL determination
-        ws.merge_cells('V21:AA21')
+        # Set value first, then merge cells for CAL determination
         ws['V21'] = "CAL determination"
         ws['V21'].font = bold_font
         ws['V21'].alignment = center_align
         ws['V21'].fill = green_fill
         ws['V21'].border = thick_border
+        ws.merge_cells('V21:AA21')
         
-        # Line 22 X-AA should be merged and labeled Attack vector
-        ws.merge_cells('X22:AA22')
+        # Set value first, then merge cells for Attack vector
         ws['X22'] = "Attack vector"
         ws['X22'].font = bold_font
         ws['X22'].alignment = center_align
         ws['X22'].fill = green_fill
         ws['X22'].border = thick_border
+        ws.merge_cells('X22:AA22')
         
         # Line 23 attack vectors
         ws['X23'] = "Physical"
@@ -2035,13 +2050,13 @@ class EnhancedTaraExcelGenerator:
             ws[f'{col}23'].fill = green_fill
             ws[f'{col}23'].border = thick_border
         
-        # Column V lines 24-27 should be merged and labeled Impact rating
-        ws.merge_cells('V24:V27')
+        # Set value first, then merge cells for Impact rating
         ws['V24'] = "Impact rating"
         ws['V24'].font = bold_font
-        ws['V24'].alignment = center_align
+        ws['V24'].alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
         ws['V24'].fill = green_fill
         ws['V24'].border = thick_border
+        ws.merge_cells('V24:V27')
         
         # W column impact levels
         ws['W24'] = "Severe"
