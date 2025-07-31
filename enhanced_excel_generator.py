@@ -1918,8 +1918,8 @@ class EnhancedTaraExcelGenerator:
                 col = chr(86 + col_num - 22)
             ws[f'{col}11'].border = thick_border
         
-        # Row 13: Risk Threshold Level
-        ws.merge_cells('V13:AA13')
+        # Row 13: Risk Threshold Level (V-W only, since X-AA will be separate)
+        ws.merge_cells('V13:W13')
         ws['V13'] = "Risk Threshold Level"
         ws['V13'].font = header_font
         ws['V13'].fill = risk_fill  # #C6E0B4
@@ -1932,12 +1932,7 @@ class EnhancedTaraExcelGenerator:
         ws['X13'].fill = risk_fill
         ws['X13'].alignment = center_align
         
-        # Row 14 headers
-        headers_14 = [('X', 'Very Low'), ('Y', 'Low'), ('Z', 'Medium'), ('AA', 'High')]
-        for col, header in headers_14:
-            ws[f'{col}14'] = header
-            ws[f'{col}14'].font = header_font
-            ws[f'{col}14'].alignment = center_align
+        # Row 14 headers - will be set in individual_cells section below
         
         # Row 15 W column labels
         ws['W15'] = "Severe 1"
@@ -1979,8 +1974,8 @@ class EnhancedTaraExcelGenerator:
         ws['V20'].fill = tara_fill  # #FFD966
         ws['V20'].alignment = center_align
         
-        # Row 21: CAL Determination
-        ws.merge_cells('V21:AA21')
+        # Row 21: CAL Determination (V-W only, since X-AA will be separate)
+        ws.merge_cells('V21:W21')
         ws['V21'] = "CAL Determination"
         ws['V21'].font = header_font
         ws['V21'].fill = risk_fill  # #C6E0B4
@@ -1993,12 +1988,7 @@ class EnhancedTaraExcelGenerator:
         ws['X22'].fill = risk_fill
         ws['X22'].alignment = center_align
         
-        # Row 23 attack vector labels
-        attack_vectors = [('X', 'Physical'), ('Y', 'Local'), ('Z', 'Adjacent'), ('AA', 'Network')]
-        for col, vector in attack_vectors:
-            ws[f'{col}23'] = vector
-            ws[f'{col}23'].font = header_font
-            ws[f'{col}23'].alignment = center_align
+        # Row 23 attack vector labels - will be set in individual_cells section below
         
         # Row 24-27: V merged for Impact Rating with wrapped text
         ws.merge_cells('V24:V27')
@@ -2007,13 +1997,7 @@ class EnhancedTaraExcelGenerator:
         ws['V24'].fill = risk_fill
         ws['V24'].alignment = center_align
         
-        # W24-W27 labels
-        impact_labels = [('W24', 'Severe'), ('W25', 'Major'), ('W26', 'Moderate'), ('W27', 'Negligible')]
-        for cell, label in impact_labels:
-            ws[cell] = label
-            ws[cell].font = header_font
-            ws[cell].fill = risk_fill
-            ws[cell].alignment = center_align
+        # W24-W27 labels - will be set in individual_cells section below
         
         # Risk value matrix with colors
         # X24/Y25/Z26: value 2, background #70AD47
@@ -2037,28 +2021,35 @@ class EnhancedTaraExcelGenerator:
             ws[f'{col}27'].font = header_font
             ws[f'{col}27'].alignment = center_align
         
-        # Apply background #C6E0B4 to specified ranges and bold black borders
-        bg_ranges = [
-            (range(13, 15), range(22, 28)),  # Rows 13-14, V-AA
-            (range(21, 24), range(22, 28)),  # Rows 21-23, V-AA
-            (range(15, 19), [22, 23]),       # Rows 15-18, V-W
-            (range(24, 28), [22, 23])        # Rows 24-27, V-W
+        # Apply borders to all the additional sections - avoid setting properties on merged cells
+        border_ranges = [
+            ('V11', 'AA11'),  # Row 11 merged section
+            ('V13', 'W13'),   # Row 13 left section  
+            ('X13', 'AA13'),  # Row 13 right section
+            ('V20', 'AA20'),  # Row 20 merged section
+            ('V21', 'W21'),   # Row 21 left section
+            ('X22', 'AA22'),  # Row 22 merged section
+            ('V24', 'V27')    # Impact rating merged section
         ]
         
-        for row_range, col_range in bg_ranges:
-            for row in row_range:
-                for col_num in col_range:
-                    if col_num == 27:
-                        col = 'AA'
-                    elif col_num == 22:
-                        col = 'V'
-                    elif col_num == 23:
-                        col = 'W'
-                    else:
-                        col = chr(86 + col_num - 22)
-                    
-                    if not ws[f'{col}{row}'].fill or ws[f'{col}{row}'].fill.start_color.rgb != 'FFC6E0B4':
-                        ws[f'{col}{row}'].fill = risk_fill
-                    ws[f'{col}{row}'].border = thick_border
-                    ws[f'{col}{row}'].font = header_font
-                    ws[f'{col}{row}'].alignment = center_align
+        for start_cell, end_cell in border_ranges:
+            # Only apply border to the top-left cell of merged ranges
+            ws[start_cell].border = thick_border
+        
+        # Apply borders and formatting to individual cells that aren't merged
+        individual_cells = [
+            # Row 14 headers
+            ('X14', 'Very Low'), ('Y14', 'Low'), ('Z14', 'Medium'), ('AA14', 'High'),
+            # Row 23 attack vectors  
+            ('X23', 'Physical'), ('Y23', 'Local'), ('Z23', 'Adjacent'), ('AA23', 'Network'),
+            # Impact labels
+            ('W24', 'Severe'), ('W25', 'Major'), ('W26', 'Moderate'), ('W27', 'Negligible')
+        ]
+        
+        for cell, value in individual_cells:
+            if ws[cell].value != value:  # Only set if not already set
+                ws[cell].value = value
+            ws[cell].font = header_font
+            ws[cell].alignment = center_align
+            ws[cell].border = thick_border
+            ws[cell].fill = risk_fill
