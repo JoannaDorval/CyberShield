@@ -9,7 +9,7 @@ from parsers import ThreatModelParser, BlockDiagramParser, CrossMapParser
 from mitre_integration import MitreIntegrator
 from mitre_embed import MitreEmbedIntegrator
 from pdf_generator import TaraReportGenerator
-from enhanced_excel_generator import EnhancedTaraExcelGenerator
+from enhanced_excel_generator_fixed import EnhancedTaraExcelGenerator
 import logging
 
 # Allowed file extensions
