@@ -393,41 +393,47 @@ class EnhancedTaraExcelGenerator:
         
         # Row 11 and 20 V-AA merged - "Threat analysis and risk assessment" with #FFD966 background
         for row in [11, 20]:
-            ws.merge_cells(f'V{row}:AA{row}')
+            # Set value and formatting BEFORE merging
             cell = ws[f'V{row}']
             cell.value = 'Threat analysis and risk assessment'
             cell.font = bold_font
             cell.fill = yellow_fill
             cell.alignment = center_alignment
             cell.border = bold_border
+            ws.merge_cells(f'V{row}:AA{row}')
         
-        # Row 13 V-AA merged - "Risk threshold level" with #C6E0B4 background
-        ws.merge_cells('V13:AA13')
-        cell = ws['V13']
-        cell.value = 'Risk threshold level'
-        cell.font = bold_font
-        cell.fill = green_fill
-        cell.alignment = center_alignment
-        cell.border = bold_border
+        # Set individual cell values and formatting first, then handle merging
         
-        # V and W merged for rows 13, 14, 22, 23 with #C6E0B4 background
-        merge_rows = [13, 14, 22, 23]
+        # Set "Risk threshold level" in V13 BEFORE any merging
+        ws['V13'].value = 'Risk threshold level'
+        ws['V13'].font = bold_font
+        ws['V13'].fill = green_fill
+        ws['V13'].alignment = center_alignment
+        ws['V13'].border = bold_border
+        
+        # Set "Attack feasibility rating" in X13 BEFORE any merging  
+        ws['X13'].value = 'Attack feasibility rating'
+        ws['X13'].font = bold_font
+        ws['X13'].fill = green_fill
+        ws['X13'].alignment = center_alignment
+        ws['X13'].border = bold_border
+        
+        # Now perform merging operations
+        # Note: We skip V13:AA13 merge since it conflicts with X13:AA13
+        # Instead we'll merge V13:W13 only
+        ws.merge_cells('V13:W13')
+        ws.merge_cells('X13:AA13')
+        
+        # V and W merged for rows 14, 22, 23 with #C6E0B4 background (skip 13 as already done)
+        merge_rows = [14, 22, 23]
         for row in merge_rows:
-            ws.merge_cells(f'V{row}:W{row}')
+            # Set formatting BEFORE merging
             cell = ws[f'V{row}']
             cell.fill = green_fill
             cell.font = bold_font
             cell.alignment = center_alignment
             cell.border = bold_border
-        
-        # X-AA line 13 merged - "Attack feasibility rating" with #C6E0B4 background
-        ws.merge_cells('X13:AA13')
-        cell = ws['X13']
-        cell.value = 'Attack feasibility rating'
-        cell.font = bold_font
-        cell.fill = green_fill
-        cell.alignment = center_alignment
-        cell.border = bold_border
+            ws.merge_cells(f'V{row}:W{row}')
         
         # Line 14 attack feasibility labels with #C6E0B4 background
         feasibility_labels = [('X14', 'Very low'), ('Y14', 'Low'), ('Z14', 'Medium'), ('AA14', 'High')]
@@ -470,22 +476,24 @@ class EnhancedTaraExcelGenerator:
             cell.border = bold_border
         
         # Row 21 V-AA merged - "CAL determination" with #C6E0B4 background
-        ws.merge_cells('V21:AA21')
+        # Set value and formatting BEFORE merging
         cell = ws['V21']
         cell.value = 'CAL determination'
         cell.font = bold_font
         cell.fill = green_fill
         cell.alignment = center_alignment
         cell.border = bold_border
+        ws.merge_cells('V21:AA21')
         
         # Row 22 X-AA merged - "Attack vector" with #C6E0B4 background  
-        ws.merge_cells('X22:AA22')
+        # Set value and formatting BEFORE merging
         cell = ws['X22']
         cell.value = 'Attack vector'
         cell.font = bold_font
         cell.fill = green_fill
         cell.alignment = center_alignment
         cell.border = bold_border
+        ws.merge_cells('X22:AA22')
         
         # Row 23 attack vector labels with #C6E0B4 background
         vector_labels = [('X23', 'Physical'), ('Y23', 'Local'), ('Z23', 'Adjacent'), ('AA23', 'Network')]
@@ -498,13 +506,14 @@ class EnhancedTaraExcelGenerator:
             cell.border = bold_border
         
         # V24-V27 merged - "Impact Rating" with #C6E0B4 background and text wrap
-        ws.merge_cells('V24:V27')
+        # Set value and formatting BEFORE merging
         cell = ws['V24']
         cell.value = 'Impact Rating'
         cell.font = bold_font
         cell.fill = green_fill
         cell.alignment = center_wrap_alignment
         cell.border = bold_border
+        ws.merge_cells('V24:V27')
         
         # Impact severity labels in column W (24-27) with #C6E0B4 background
         impact_w_labels = [('W24', 'Severe'), ('W25', 'Major'), ('W26', 'Moderate'), ('W27', 'Negligible')]
