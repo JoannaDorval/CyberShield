@@ -686,24 +686,49 @@ class EnhancedTaraExcelGenerator:
         
         # Define styles
         header_fill = PatternFill(start_color="BF8F00", end_color="BF8F00", fill_type="solid")
-        border = Border(
+        
+        thin_border = Border(
             left=Side(style='thin', color='000000'),
             right=Side(style='thin', color='000000'),
             top=Side(style='thin', color='000000'),
             bottom=Side(style='thin', color='000000')
         )
         
-        # Title font styles
+        bold_border = Border(
+            left=Side(style='thick', color='000000'),
+            right=Side(style='thick', color='000000'),
+            top=Side(style='thick', color='000000'),
+            bottom=Side(style='thick', color='000000')
+        )
+        
+        # Title font styles - all titles and headers should be bold
         title_font = Font(name='Calibri', size=20, bold=True, color='000000')
-        project_font = Font(name='Calibri', size=14, color='000000')
-        responsible_font = Font(name='Calibri', size=14, color='000000')
-        revision_font = Font(name='Calibri', size=11, color='000000')
-        header_font = Font(name='Calibri', size=11, color='000000')
+        project_font = Font(name='Calibri', size=14, bold=True, color='000000')  # Made bold
+        responsible_font = Font(name='Calibri', size=14, bold=True, color='000000')  # Made bold
+        revision_font = Font(name='Calibri', size=11, bold=True, color='000000')  # Made bold
+        header_font = Font(name='Calibri', size=11, bold=True, color='000000')  # Made bold
         
         center_alignment = Alignment(horizontal='center', vertical='center')
         left_alignment = Alignment(horizontal='left', vertical='center')
         
-        # Lines 1-3: Merge cells B-H and add content with styling
+        # Set row heights as specified
+        ws.row_dimensions[1].height = 49.5
+        ws.row_dimensions[2].height = 29.3
+        ws.row_dimensions[3].height = 29.3
+        for row in range(6, 20):
+            ws.row_dimensions[row].height = 22.5
+        
+        # Set column widths as specified
+        ws.column_dimensions['B'].width = 18.26  # Revision number
+        ws.column_dimensions['C'].width = 16.11  # Revision reason
+        ws.column_dimensions['D'].width = 26.26  # Author(s)
+        ws.column_dimensions['E'].width = 51.11  # Description
+        ws.column_dimensions['F'].width = 15.11  # Date
+        ws.column_dimensions['G'].width = 26.26  # Approver(s)
+        ws.column_dimensions['H'].width = 18.26  # Approval date
+        ws.column_dimensions['I'].width = 12     # Limit to column I as specified
+        
+        # Lines 1-3: Merge cells B-H and add content with styling and bold black outlines
         ws.merge_cells('B1:H1')
         ws['B1'] = "Threat analysis and risk assessment (TARA)"
         ws['B1'].font = title_font
@@ -722,30 +747,18 @@ class EnhancedTaraExcelGenerator:
         ws['B3'].alignment = center_alignment
         ws['B3'].fill = header_fill
         
-        # Apply borders to merged cells B1:H3
+        # Apply bold borders to header box (B1:H3)
         for row in range(1, 4):
             for col in range(2, 9):  # B to H
                 cell = ws.cell(row=row, column=col)
-                cell.border = border
-        
-        # Line 4: blank (no content needed)
+                cell.border = bold_border
         
         # Line 5: "Revision history" in column B
         ws['B5'] = "Revision history"
         ws['B5'].font = revision_font
         ws['B5'].alignment = left_alignment
         
-        # Lines 6-19: Revision history table
-        # Set column widths as specified
-        ws.column_dimensions['B'].width = 18.26  # Revision number
-        ws.column_dimensions['C'].width = 16.11  # Revision reason
-        ws.column_dimensions['D'].width = 26.26  # Author(s)
-        ws.column_dimensions['E'].width = 51.11  # Description
-        ws.column_dimensions['F'].width = 15.11  # Date
-        ws.column_dimensions['G'].width = 26.26  # Approver(s)
-        ws.column_dimensions['H'].width = 18.26  # Approval date
-        
-        # Row 6: Headers with formatting
+        # Row 6: Headers with bold formatting and bold black outline
         headers = [
             "Revision number", "Revision reason", "Author(s)", 
             "Description", "Date", "Approver(s)", "Approval date"
@@ -757,13 +770,15 @@ class EnhancedTaraExcelGenerator:
             cell.font = header_font
             cell.alignment = left_alignment
             cell.fill = header_fill
-            cell.border = border
+            cell.border = bold_border  # Bold outline for table headers
         
-        # Rows 7-19: Empty data rows with borders
+        # Rows 7-19: Empty data rows with borders only in columns B-H, rows 6-19 as specified
         for row in range(7, 20):
             for col in range(2, 9):  # B to H
                 cell = ws.cell(row=row, column=col)
-                cell.border = border
+                cell.border = thin_border
+        
+        # Sheet ends after row 20 and column I as specified - no additional content needed
     
     def _format_item_definition_sheet(self, ws):
         """Format the Item Definition sheet with exact specifications"""
@@ -1466,7 +1481,7 @@ class EnhancedTaraExcelGenerator:
         for col, width in column_widths.items():
             ws.column_dimensions[col].width = width
         
-        # Column B (Rows 2-5)
+        # Column B (Rows 2-5) - bold outline as specified
         ws['B2'] = "Asset identification process"
         ws['B2'].font = title_font
         ws['B2'].fill = asset_fill
@@ -1485,13 +1500,10 @@ class EnhancedTaraExcelGenerator:
         ws['B5'].font = regular_font
         ws['B5'].alignment = left_align
         
-        # Apply borders to B2:B5 with thick outline on B2 and B3
+        # Apply bold borders to entire B2:B5 section as specified
         for row in range(2, 6):
             cell = ws[f'B{row}']
-            if row in [2, 3]:
-                cell.border = thick_border
-            else:
-                cell.border = thin_border
+            cell.border = thick_border
         
         # Row 2: Main TARA header (D2:AD2)
         ws.merge_cells('D2:AD2')
@@ -1522,7 +1534,7 @@ class EnhancedTaraExcelGenerator:
         ws['E4'].fill = impact_fill
         ws['E4'].alignment = center_align
         
-        # Impact data
+        # Impact data - Column D rows 5-8 should be center justified
         impact_data = [
             ('Negligible', 0), ('Moderate', 1), ('Major', 3), ('Severe', 5)
         ]
@@ -1531,7 +1543,7 @@ class EnhancedTaraExcelGenerator:
             row = 5 + i
             ws[f'D{row}'] = category
             ws[f'D{row}'].font = regular_font
-            ws[f'D{row}'].alignment = left_align
+            ws[f'D{row}'].alignment = center_align  # Center justified as specified
             ws[f'D{row}'].border = thin_border
             
             ws[f'E{row}'] = value
@@ -1631,21 +1643,24 @@ class EnhancedTaraExcelGenerator:
         equipment = ['Standard', 'Specialized', 'Bespoke', 'Multiple bespoke']
         equipment_values = [0, 4, 7, 9]
         
-        # Fill elapsed time data
+        # Fill elapsed time data - replace "<=" with "≤" symbol
         for i, (time, value) in enumerate(zip(elapsed_time, elapsed_values)):
             row = 5 + i
-            ws[f'K{row}'] = time
+            time_text = time.replace('<=', '≤')
+            ws[f'K{row}'] = time_text
             ws[f'K{row}'].font = regular_font
+            ws[f'K{row}'].alignment = center_align  # Center justified for column K
             ws[f'L{row}'] = value
             ws[f'L{row}'].font = regular_font
             ws[f'L{row}'].alignment = center_align
             ws[f'L{row}'].number_format = '0'
         
-        # Fill other categories (only 4 rows for these)
+        # Fill other categories (only 4 rows for these) - columns M, O, Q, S center justified
         for i in range(4):
             row = 5 + i
             ws[f'M{row}'] = expertise[i]
             ws[f'M{row}'].font = regular_font
+            ws[f'M{row}'].alignment = center_align  # Center justified for column M
             ws[f'N{row}'] = expertise_values[i]
             ws[f'N{row}'].font = regular_font
             ws[f'N{row}'].alignment = center_align
@@ -1653,6 +1668,7 @@ class EnhancedTaraExcelGenerator:
             
             ws[f'O{row}'] = knowledge[i]
             ws[f'O{row}'].font = regular_font
+            ws[f'O{row}'].alignment = center_align  # Center justified for column O
             ws[f'P{row}'] = knowledge_values[i]
             ws[f'P{row}'].font = regular_font
             ws[f'P{row}'].alignment = center_align
@@ -1660,6 +1676,7 @@ class EnhancedTaraExcelGenerator:
             
             ws[f'Q{row}'] = opportunity[i]
             ws[f'Q{row}'].font = regular_font
+            ws[f'Q{row}'].alignment = center_align  # Center justified for column Q
             ws[f'R{row}'] = opportunity_values[i]
             ws[f'R{row}'].font = regular_font
             ws[f'R{row}'].alignment = center_align
@@ -1667,15 +1684,19 @@ class EnhancedTaraExcelGenerator:
             
             ws[f'S{row}'] = equipment[i]
             ws[f'S{row}'].font = regular_font
+            ws[f'S{row}'].alignment = center_align  # Center justified for column S
             ws[f'T{row}'] = equipment_values[i]
             ws[f'T{row}'].font = regular_font
             ws[f'T{row}'].alignment = center_align
             ws[f'T{row}'].number_format = '0'
         
         # Apply borders to each pair of columns K&L, M&N, O&P, Q&R, S&T
+        # Table ends at line 8 for columns M-T (row 9 should not be outlined)
         for start_col in ['K', 'M', 'O', 'Q', 'S']:
             end_col = chr(ord(start_col) + 1)
-            for row in range(3, 10):
+            # K column goes to row 9, others only to row 8
+            max_row = 10 if start_col == 'K' else 9
+            for row in range(3, max_row):
                 ws[f'{start_col}{row}'].border = thick_border
                 ws[f'{end_col}{row}'].border = thick_border
         
@@ -1787,7 +1808,7 @@ class EnhancedTaraExcelGenerator:
         ws['X4'].font = header_font
         ws['X4'].alignment = center_align
         
-        # Feasibility rating headers
+        # Feasibility rating headers with background #C6E0B4 for V-AA rows 4-5
         feasibility_headers = ['Very low', 'Low', 'Medium', 'High']
         for i, header in enumerate(feasibility_headers):
             col = chr(88 + i)  # X, Y, Z, AA
@@ -1796,6 +1817,18 @@ class EnhancedTaraExcelGenerator:
             ws[f'{col}5'] = header
             ws[f'{col}5'].font = header_font
             ws[f'{col}5'].alignment = center_align
+            ws[f'{col}5'].fill = risk_fill  # Background #C6E0B4
+        
+        # Apply background to V4:AA5 range
+        for row in [4, 5]:
+            for col_num in range(22, 28):  # V to AA
+                if col_num == 27:  # AA column
+                    col = 'AA'
+                else:
+                    col = chr(86 + col_num - 22)  # V, W, X, Y, Z
+                cell = ws[f'{col}{row}']
+                if not cell.fill or cell.fill.start_color.rgb != 'FFC6E0B4':
+                    cell.fill = risk_fill
         
         ws.merge_cells('V6:V9')
         ws['V6'] = "Impact rating"
@@ -1863,3 +1896,169 @@ class EnhancedTaraExcelGenerator:
         for row in range(4, 10):
             for col in ['AC', 'AD']:
                 ws[f'{col}{row}'].border = thick_border
+        
+        # Apply bold black outlines to V-W columns as specified
+        for row in range(3, 10):
+            for col in ['V', 'W']:
+                ws[f'{col}{row}'].border = thick_border
+        
+        # Additional sections as specified in requirements
+        
+        # Row 11 and 20: V-AA merged labels
+        ws.merge_cells('V11:AA11')
+        ws['V11'] = "Threat Analysis and Risk Assessment"
+        ws['V11'].font = header_font
+        ws['V11'].fill = tara_fill  # #FFD966
+        ws['V11'].alignment = center_align
+        
+        for col_num in range(22, 28):  # V to AA
+            if col_num == 27:
+                col = 'AA'
+            else:
+                col = chr(86 + col_num - 22)
+            ws[f'{col}11'].border = thick_border
+        
+        # Row 13: Risk Threshold Level
+        ws.merge_cells('V13:AA13')
+        ws['V13'] = "Risk Threshold Level"
+        ws['V13'].font = header_font
+        ws['V13'].fill = risk_fill  # #C6E0B4
+        ws['V13'].alignment = center_align
+        
+        # Row 13: X-AA merged for Attack Feasibility Rating
+        ws.merge_cells('X13:AA13')
+        ws['X13'] = "Attack Feasibility Rating"
+        ws['X13'].font = header_font
+        ws['X13'].fill = risk_fill
+        ws['X13'].alignment = center_align
+        
+        # Row 14 headers
+        headers_14 = [('X', 'Very Low'), ('Y', 'Low'), ('Z', 'Medium'), ('AA', 'High')]
+        for col, header in headers_14:
+            ws[f'{col}14'] = header
+            ws[f'{col}14'].font = header_font
+            ws[f'{col}14'].alignment = center_align
+        
+        # Row 15 W column labels
+        ws['W15'] = "Severe 1"
+        ws['W16'] = "Major 17"
+        ws['W17'] = "Moderate 18"
+        ws['W18'] = "Negligible"
+        
+        for row in range(15, 19):
+            ws[f'W{row}'].font = header_font
+            ws[f'W{row}'].alignment = center_align
+        
+        # Rows 15-18 color coding
+        # Column X: All cells → #70AD47, label "Below"
+        for row in range(15, 19):
+            ws[f'X{row}'] = "Below"
+            ws[f'X{row}'].font = header_font
+            ws[f'X{row}'].fill = green_fill  # #70AD47
+            ws[f'X{row}'].alignment = center_align
+        
+        # Row 18, Y/Z/AA → #70AD47, label "Below"
+        for col in ['Y', 'Z', 'AA']:
+            ws[f'{col}18'] = "Below"
+            ws[f'{col}18'].font = header_font
+            ws[f'{col}18'].fill = green_fill
+            ws[f'{col}18'].alignment = center_align
+        
+        # Rows 15-17, Columns Y-AA: background #FFC000, label "Above"
+        for row in range(15, 18):
+            for col in ['Y', 'Z', 'AA']:
+                ws[f'{col}{row}'] = "Above"
+                ws[f'{col}{row}'].font = header_font
+                ws[f'{col}{row}'].fill = yellow_fill  # #FFC000
+                ws[f'{col}{row}'].alignment = center_align
+        
+        # Row 20: V-AA merged
+        ws.merge_cells('V20:AA20')
+        ws['V20'] = "Threat Analysis and Risk Assessment"
+        ws['V20'].font = header_font
+        ws['V20'].fill = tara_fill  # #FFD966
+        ws['V20'].alignment = center_align
+        
+        # Row 21: CAL Determination
+        ws.merge_cells('V21:AA21')
+        ws['V21'] = "CAL Determination"
+        ws['V21'].font = header_font
+        ws['V21'].fill = risk_fill  # #C6E0B4
+        ws['V21'].alignment = center_align
+        
+        # Row 22: X-AA merged for Attack Vector
+        ws.merge_cells('X22:AA22')
+        ws['X22'] = "Attack Vector"
+        ws['X22'].font = header_font
+        ws['X22'].fill = risk_fill
+        ws['X22'].alignment = center_align
+        
+        # Row 23 attack vector labels
+        attack_vectors = [('X', 'Physical'), ('Y', 'Local'), ('Z', 'Adjacent'), ('AA', 'Network')]
+        for col, vector in attack_vectors:
+            ws[f'{col}23'] = vector
+            ws[f'{col}23'].font = header_font
+            ws[f'{col}23'].alignment = center_align
+        
+        # Row 24-27: V merged for Impact Rating with wrapped text
+        ws.merge_cells('V24:V27')
+        ws['V24'] = "Impact Rating"
+        ws['V24'].font = header_font
+        ws['V24'].fill = risk_fill
+        ws['V24'].alignment = center_align
+        
+        # W24-W27 labels
+        impact_labels = [('W24', 'Severe'), ('W25', 'Major'), ('W26', 'Moderate'), ('W27', 'Negligible')]
+        for cell, label in impact_labels:
+            ws[cell] = label
+            ws[cell].font = header_font
+            ws[cell].fill = risk_fill
+            ws[cell].alignment = center_align
+        
+        # Risk value matrix with colors
+        # X24/Y25/Z26: value 2, background #70AD47
+        risk_assignments = [
+            ('X24', 2, green_fill), ('Y25', 2, green_fill), ('Z26', 2, green_fill),
+            ('Y24', 3, yellow_fill), ('Z25', 3, yellow_fill), ('AA26', 3, yellow_fill),
+            ('Z24', 4, red_fill), ('AA24', 4, red_fill), ('AA25', 4, red_fill),
+            ('X25', 1, None), ('X26', 1, None), ('Y26', 1, None)
+        ]
+        
+        for cell, value, fill in risk_assignments:
+            ws[cell] = value
+            ws[cell].font = header_font
+            ws[cell].alignment = center_align
+            if fill:
+                ws[cell].fill = fill
+        
+        # Row 27, X-AA: value "-"
+        for col in ['X', 'Y', 'Z', 'AA']:
+            ws[f'{col}27'] = "-"
+            ws[f'{col}27'].font = header_font
+            ws[f'{col}27'].alignment = center_align
+        
+        # Apply background #C6E0B4 to specified ranges and bold black borders
+        bg_ranges = [
+            (range(13, 15), range(22, 28)),  # Rows 13-14, V-AA
+            (range(21, 24), range(22, 28)),  # Rows 21-23, V-AA
+            (range(15, 19), [22, 23]),       # Rows 15-18, V-W
+            (range(24, 28), [22, 23])        # Rows 24-27, V-W
+        ]
+        
+        for row_range, col_range in bg_ranges:
+            for row in row_range:
+                for col_num in col_range:
+                    if col_num == 27:
+                        col = 'AA'
+                    elif col_num == 22:
+                        col = 'V'
+                    elif col_num == 23:
+                        col = 'W'
+                    else:
+                        col = chr(86 + col_num - 22)
+                    
+                    if not ws[f'{col}{row}'].fill or ws[f'{col}{row}'].fill.start_color.rgb != 'FFC6E0B4':
+                        ws[f'{col}{row}'].fill = risk_fill
+                    ws[f'{col}{row}'].border = thick_border
+                    ws[f'{col}{row}'].font = header_font
+                    ws[f'{col}{row}'].alignment = center_align

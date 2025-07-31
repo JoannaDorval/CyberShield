@@ -1,0 +1,186 @@
+🟦 General Information Sheet
+Row Heights:
+
+Row 1: 49.5
+
+Row 2–3: 29.3
+
+Rows 6–19: 22.5
+
+Unlined Cells: Everything except columns B–H, rows 6–19 should be unlined.
+
+Styling: All titles and headers should be bold.
+
+Borders: The header box and table should have bold black outlines.
+
+Limits: The sheet should end after row 20 and after column I.
+
+🟦 Item Definition Sheet
+Row Heights:
+
+Rows 4–25, 27–34, 36–43, and 45: 23.3
+
+Unlined Areas:
+
+"Preliminary Architecture" section → Columns E, rows 5–25
+
+"Module Overview" section → Columns E, rows 28–43
+
+Styling: All sections and headers should have bold outlines, and all titles should be bold.
+
+Limits: Sheet should end after row 66 in column F.
+
+🟦 Item Definition – Threat Model Sheet
+Column Widths:
+
+Column B and Column D: 137
+
+Styling:
+
+Headers should be outlined in bold black.
+
+Titles should be bold.
+
+Everything else should be unlined.
+
+Limits: Sheet ends at column E and after line 33.
+
+🟦 Asset Identification Sheet
+Row Heights:
+
+Row 1: 25.5
+
+Row 3: 21
+
+Row 4: 29.1
+
+Rows 5 and 16: 14.7
+
+Rows 6–15 and 17–26: 14.4
+
+Styling:
+
+Titles, column headers, and table: bold outlines
+
+Row 5 and Row 16 titles should also be bold and outlined
+
+Limits: Sheet ends after column I and row 27.
+
+🟦 TARA Sheet
+Row Heights:
+
+Row 1: 36
+
+Row 3: 23.3
+
+Row 4: 21.8
+
+Rows 7–51: every odd row → 57.8
+
+Row Styling:
+
+Odd rows (7–51): apply the same background color as the section header
+
+Column Labels:
+
+B: Asset ID
+
+C: Asset
+
+D: Security Property Loss
+
+E: Stakeholder
+
+T–Y, Row 3: "Threat Scenario" with background #FFF2CC
+
+AA–AN, Rows 3–5 and all odd rows after: background #C6E0B4, label: "Attack Feasibility Assessment"
+
+AO–AT, Rows 3–5 and all odd rows after: background #EDEDED, label: "Cybersecurity Goals and Claims"
+
+Borders:
+
+All headers, tables, and all even rows: bold black outlines
+
+Header section changes (e.g., between T–Y, AA–AN): bold black outline
+
+Freeze: Freeze rows 1–5 so they are always visible
+
+Limits: Sheet ends at column AU and row 53
+
+🟦 Matrices and Guidelines Sheet
+Borders:
+
+Column B, Rows 2–5: bold outline
+
+Text Alignment:
+
+Column D, Rows 5–8: center justified
+
+Columns K, M, O, Q, S: center justified
+
+Formatting:
+
+Anywhere in Column K, replace "<=" with the "≤" symbol
+
+Columns M–T, Row 9: should not be outlined, table ends at line 8
+
+Cell Backgrounds:
+
+Columns V–AA, Rows 4–5: background #C6E0B4
+
+Columns V–W: bold black outlines on all headers/labels
+
+Row 11 and 20, V–AA: merged, label "Threat Analysis and Risk Assessment", background #FFD966, bold + center
+
+Row 13, V–AA: merged, label "Risk Threshold Level", bold + center + background #C6E0B4
+
+Row 13: Merge X–AA, label: "Attack Feasibility Rating"
+
+Row 14:
+
+X: "Very Low", Y: "Low", Z: "Medium", AA: "High"
+
+Row 15:
+
+W: "Severe 1", "Major 17", "Moderate 18", "Negligible"
+
+Rows 15–18:
+
+Column X: All cells → #70AD47, label "Below"
+
+Row 18, Y/Z/AA → #70AD47, label "Below"
+
+Rows 15–17, Columns Y–AA: background #FFC000, label "Above"
+
+Row 21, V–AA: merged, label "CAL Determination"
+
+Row 22, X–AA: merged, label "Attack Vector"
+
+Row 23:
+
+X: "Physical", Y: "Local", Z: "Adjacent", AA: "Network"
+
+Row 24–27:
+
+V: merged, label "Impact Rating" (with wrapped text)
+
+W24: Severe, W25: Major, W26: Moderate, W27: Negligible
+
+X24/Y25/Z26: value 2, background #70AD47
+
+Y24/Z25/AA26: value 3, background #FFC000
+
+Z24/AA24/AA25: value 4, background #FF0000
+
+X25/X26/Y26: value 1
+
+Row 27, X–AA: value "-"
+
+Additional Styling:
+
+Rows 13–14 and 21–23, V–AA: background #C6E0B4, bold black borders, black bold centered text
+
+V/W, rows 15–18 and 24–27: background #C6E0B4, bold, black, centered text
+
+Please preserve all existing content unless instructed to change it. Format using openpyxl or equivalent Excel automation, ensuring pixel-perfect matching of colors, borders, and merged cells.
+
