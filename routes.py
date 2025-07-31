@@ -139,8 +139,10 @@ def analyze_embed():
         
         # Generate reports
         try:
-            # Generate Excel report
+            # Generate Excel report with enhanced error handling
             excel_generator = EnhancedTaraExcelGenerator()
+            app.logger.info("Starting Excel report generation...")
+            
             excel_path = excel_generator.generate_excel_report(
                 analysis_data={'assets': assets, 'threats': [], 'mitre_mappings': mitre_mappings},
                 input_type='mitre_embed',
@@ -148,20 +150,28 @@ def analyze_embed():
                 embed_assessment=embed_assessment
             )
             
-            # Generate PDF report
-            pdf_generator = TaraReportGenerator()
-            pdf_path = pdf_generator.generate_report(
-                analysis=analysis
-            )
+            app.logger.info(f"Excel report generated successfully: {excel_path}")
             
-            log_action('reports_generated', f'Excel: {excel_path}, PDF: {pdf_path}')
+            # Generate PDF report
+            try:
+                pdf_generator = TaraReportGenerator()
+                pdf_path = pdf_generator.generate_report(analysis=analysis)
+                app.logger.info(f"PDF report generated successfully: {pdf_path}")
+                
+                log_action('reports_generated', f'Excel: {excel_path}, PDF: {pdf_path}')
+            except Exception as pdf_error:
+                app.logger.warning(f"PDF generation failed but Excel succeeded: {pdf_error}")
+                # Continue with Excel only
+                log_action('excel_report_generated', f'Excel: {excel_path}')
             
         except Exception as e:
             analysis.error_message = str(e)
             analysis.status = 'failed'
             db.session.commit()
-            app.logger.error(f"Report generation failed: {e}")
-            flash(f'Analysis completed but report generation failed: {str(e)}', 'error')
+            app.logger.error(f"Excel report generation failed: {e}")
+            import traceback
+            app.logger.error(f"Full traceback: {traceback.format_exc()}")
+            flash(f'Analysis completed but Excel report generation failed: {str(e)}', 'error')
             return redirect(url_for('mitre_embed_page'))
         
         # Redirect to results page
