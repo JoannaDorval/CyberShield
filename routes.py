@@ -5,18 +5,15 @@ from flask import render_template, request, jsonify, send_file, flash, redirect,
 from werkzeug.utils import secure_filename
 from app import app, db
 from models import Analysis, AuditLog
-from parsers import ThreatModelParser, BlockDiagramParser, CrossMapParser
+from parsers import Embed3dJsonParser
 from mitre_integration import MitreIntegrator
 from mitre_embed import MitreEmbedIntegrator
-from pdf_generator import TaraReportGenerator
 from enhanced_excel_generator import EnhancedTaraExcelGenerator
 import logging
 
-# Allowed file extensions
+# Allowed file extensions - EMB3D focused only
 ALLOWED_EXTENSIONS = {
-    'threat_model': {'json', 'yaml', 'yml'},
-    'block_diagram': {'svg', 'png', 'jpg', 'jpeg'},
-    'crossmap': {'json'}
+    'embed3d_json': {'json'}
 }
 
 def allowed_file(filename, file_type):
@@ -27,13 +24,12 @@ def allowed_file(filename, file_type):
 def log_action(action, details=None):
     """Log security audit information"""
     try:
-        audit_log = AuditLog(
-            session_id=session.get('session_id', 'unknown'),
-            action=action,
-            details=details,
-            ip_address=request.remote_addr,
-            user_agent=request.headers.get('User-Agent', '')
-        )
+        audit_log = AuditLog()
+        audit_log.session_id = session.get('session_id', 'unknown')
+        audit_log.action = action
+        audit_log.details = details
+        audit_log.ip_address = request.remote_addr
+        audit_log.user_agent = request.headers.get('User-Agent', '')
         db.session.add(audit_log)
         db.session.commit()
     except Exception as e:
@@ -59,14 +55,13 @@ def upload_page():
 
 @app.route('/upload_files', methods=['POST'])
 def upload_files():
-    """Handle enhanced file uploads and process analysis"""
+    """Handle EMB3D JSON heatmap uploads and questionnaire processing"""
     session_id = session.get('session_id', str(uuid.uuid4()))
     session['session_id'] = session_id
     
     try:
-        # Get configuration from form
-        input_type = request.form.get('selected_input_type', 'threat_model')
-        cross_ref_source = request.form.get('selected_cross_ref_source', 'mitre_attack')
+        # Get configuration from form - EMB3D focused only
+        input_type = request.form.get('selected_input_type', 'embed3d_questionnaire')
         embed_properties = request.form.get('embed_properties', '{}')
         
         # Parse EMBED properties if provided
@@ -79,39 +74,20 @@ def upload_files():
             except Exception as e:
                 app.logger.error(f"EMBED assessment error: {e}")
         
-        # Determine required files based on input type
-        required_files = ['crossmap']  # Always required
-        if input_type == 'threat_model' or input_type == 'both':
-            required_files.append('threat_model')
-        if input_type == 'block_diagram' or input_type == 'both':
-            required_files.append('block_diagram')
-        
-        # Check if required files are present
+        # Handle EMB3D-only file uploads
         files = {}
-        for file_type in required_files:
-            if file_type not in request.files:
-                flash(f'{file_type.replace("_", " ").title()} file is required for selected analysis type', 'error')
+        if 'embed3d_json' in request.files:
+            file = request.files['embed3d_json']
+            if file.filename != '' and allowed_file(file.filename, 'embed3d_json'):
+                files['embed3d_json'] = file
+            elif file.filename != '':
+                flash('Invalid file type for EMB3D JSON heatmap', 'error')
                 return redirect(url_for('upload_page'))
-            
-            file = request.files[file_type]
-            if file.filename == '':
-                flash(f'{file_type.replace("_", " ").title()} file is required', 'error')
-                return redirect(url_for('upload_page'))
-            
-            if not allowed_file(file.filename, file_type):
-                flash(f'Invalid file type for {file_type.replace("_", " ").title()}', 'error')
-                return redirect(url_for('upload_page'))
-            
-            files[file_type] = file
         
-        # Create analysis record with dynamic filenames
-        analysis = Analysis(
-            session_id=session_id,
-            threat_model_filename=secure_filename(files['threat_model'].filename) if 'threat_model' in files else None,
-            block_diagram_filename=secure_filename(files['block_diagram'].filename) if 'block_diagram' in files else None,
-            crossmap_filename=secure_filename(files['crossmap'].filename) if 'crossmap' in files else None,
-            status='processing'
-        )
+        # Create analysis record for EMB3D
+        analysis = Analysis()
+        analysis.session_id = session_id
+        analysis.status = 'processing'
         db.session.add(analysis)
         db.session.commit()
         
@@ -131,46 +107,40 @@ def upload_files():
             diagram_data = {'components': [], 'connections': [], 'data_flows': []}
             crossmap_data = {}
             
-            # Parse files based on input type selection
-            if 'threat_model' in saved_files:
-                threat_parser = ThreatModelParser()
-                threat_data = threat_parser.parse(saved_files['threat_model'])
+            # Parse EMB3D JSON heatmap if provided
+            if 'embed3d_json' in saved_files:
+                json_parser = Embed3dJsonParser()
+                json_data = json_parser.parse(saved_files['embed3d_json'])
+                
+                # Extract device properties and generate assessment
+                embed_integrator = MitreEmbedIntegrator()
+                selected_properties = json_data.get('selected_properties', {})
+                embed_assessment = embed_integrator.assess_device_properties(selected_properties)
+                
+                # Generate threat and asset data
+                threat_data['threats'] = embed_assessment.get('threat_vectors', [])
+                threat_data['mitigations'] = embed_assessment.get('recommended_controls', [])
             
-            if 'block_diagram' in saved_files:
-                diagram_parser = BlockDiagramParser()
-                diagram_data = diagram_parser.parse(saved_files['block_diagram'])
-            
-            if 'crossmap' in saved_files:
-                crossmap_parser = CrossMapParser()
-                crossmap_data = crossmap_parser.parse(saved_files['crossmap'])
-            
-            # Choose integration approach based on cross-reference source
+            # EMB3D-focused threat mapping and recommendations
             mitre_mappings = {}
             recommendations = []
             
-            if cross_ref_source == 'mitre_attack' or cross_ref_source == 'both':
+            # Always use MITRE EMBED for EMB3D-focused analysis
+            if embed_assessment:
+                recommendations.extend(embed_assessment.get('recommended_controls', []))
+            
+            # Optional MITRE ATT&CK mapping for additional context
+            if threat_data.get('threats'):
                 mitre_integrator = MitreIntegrator()
                 mitre_mappings = mitre_integrator.map_threats_to_mitre(
                     threat_data.get('threats', []),
-                    crossmap_data
+                    {}  # No crossmap data needed for EMB3D
                 )
-                
-                recommendations.extend(mitre_integrator.generate_recommendations(
-                    threat_data.get('threats', []),
-                    mitre_mappings,
-                    threat_data.get('mitigations', [])
-                ))
-            
-            # Add EMBED recommendations if selected
-            if embed_assessment and (cross_ref_source == 'mitre_embed' or cross_ref_source == 'both'):
-                recommendations.extend(embed_assessment.get('recommended_controls', []))
             
             # Store configuration and assessment data
             analysis_metadata = {
                 'input_type': input_type,
-                'cross_ref_source': cross_ref_source,
-                'embed_assessment': embed_assessment,
-                'diagram_data': diagram_data
+                'embed_assessment': embed_assessment
             }
             
             # Update analysis with results
@@ -182,9 +152,10 @@ def upload_files():
             analysis.recommendations = recommendations
             analysis.status = 'completed'
             
-            # Store metadata as JSON in a new column (you may need to add this to the model)
+            # Store metadata as JSON string for compatibility
             if hasattr(analysis, 'metadata'):
-                analysis.metadata = analysis_metadata
+                import json as json_lib
+                analysis.metadata = json_lib.dumps(analysis_metadata)
             
             db.session.commit()
             
@@ -244,18 +215,9 @@ def download_report(analysis_id):
         return redirect(url_for('index'))
     
     try:
-        # Generate PDF report
-        report_generator = TaraReportGenerator()
-        pdf_path = report_generator.generate_report(analysis)
-        
-        log_action('report_downloaded', f'Analysis ID: {analysis_id}')
-        
-        return send_file(
-            pdf_path,
-            as_attachment=True,
-            download_name=f'TARA_Report_{analysis_id}_{analysis.timestamp.strftime("%Y%m%d_%H%M%S")}.pdf',
-            mimetype='application/pdf'
-        )
+        # PDF generation removed - redirect to Excel download instead
+        flash('PDF reports have been replaced with enhanced Excel reports', 'info')
+        return redirect(url_for('download_excel_report', analysis_id=analysis_id))
     
     except Exception as e:
         app.logger.error(f"Report generation error: {e}")

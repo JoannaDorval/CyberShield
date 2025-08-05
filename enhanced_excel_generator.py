@@ -748,10 +748,10 @@ class EnhancedTaraExcelGenerator:
         ws['B3'].fill = header_fill
         
         # Apply bold borders to header box (B1:H3)
-        for row in range(1, 4):
-            for col in range(2, 9):  # B to H
-                cell = ws.cell(row=row, column=col)
-                cell.border = bold_border
+        #for row in range(1, 4):
+         #   for col in range(2, 9):  # B to H
+          #      cell = ws.cell(row=row, column=col)
+           #     cell.border = bold_border
         
         # Line 5: "Revision history" in column B
         ws['B5'] = "Revision history"
@@ -842,10 +842,28 @@ class EnhancedTaraExcelGenerator:
         ws['E4'].alignment = center_alignment
         ws['E4'].fill = section_fill
         ws['E4'].border = border
+
+        # Apply outer borders only to rows 25 for columns E (no internal lines)
+        # Top border for row 5
+        ws['E5'].boarder = Border(top=Side(style='thin', color='000000'))
+      
+        # Bottom border for row 25
+        ws['E25'].border = Border(bottom=Side(style='thin', color='000000'))
+
+        # Right border for column E (rows 5-25)
+        for row in range(5, 26):
+            cell = ws.cell(row=row, column=5)  # Column E
+            current_border = cell.border
+            cell.border = Border(
+                left=Side(style='thin', color='000000'),
+                right=Side(style='thin', color='000000'),
+                top=current_border.top,
+                bottom=current_border.bottom
+            )
         
         # Apply borders to data rows 5-25 for columns B, C, E
         for row in range(5, 26):
-            for col in [2, 3, 5]:  # B, C, E
+            for col in [2, 3]:  # B, C, E
                 cell = ws.cell(row=row, column=col)
                 cell.border = border
         
@@ -895,9 +913,9 @@ class EnhancedTaraExcelGenerator:
                 cell.border = border
         
         # Apply borders to column E for rows 28-43 (Module overview section)
-        for row in range(28, 44):
-            cell = ws.cell(row=row, column=5)  # Column E
-            cell.border = border
+        #for row in range(28, 44):
+           # cell = ws.cell(row=row, column=5)  # Column E
+            #cell.border = border
         
         # Row 45-65: Item Boundary section
         ws.merge_cells('B45:E45')
