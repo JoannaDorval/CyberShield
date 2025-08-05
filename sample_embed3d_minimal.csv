@@ -1,0 +1,7 @@
+Property ID,Property Name,Category,Selected,Risk Level,Description
+HW.1,Hardware Debug Features,Hardware Platform,TRUE,High,JTAG/debugging interfaces available
+HW.2,Hardware Tampering Detection,Hardware Platform,TRUE,Medium,Physical tamper detection mechanisms
+SW.3,Software Update Authentication,Software Platform,TRUE,High,Cryptographic verification of updates
+SW.5,Cryptographic Key Storage,Software Platform,TRUE,High,Secure storage of cryptographic keys
+C.1,Communication Authentication,Communication,TRUE,High,Authentication of communication endpoints
+C.3,Communication Encryption,Communication,TRUE,High,Encryption of data in transit

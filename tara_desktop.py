@@ -20,7 +20,7 @@ import sys
 from typing import Dict, List, Any
 
 # Import the streamlined processing modules - EMB3D focused only
-from parsers import Embed3dJsonParser
+from parsers import Embed3dCsvParser
 from mitre_integration import MitreIntegrator
 from mitre_embed import MitreEmbedIntegrator
 # PDF generator removed - Excel reports only
@@ -43,7 +43,7 @@ class TaraDesktopApp:
         self.setup_logging()
 
         # Initialize variables for EMB3D-only two-path approach
-        self.json_heatmap_file = tk.StringVar()
+        self.csv_heatmap_file = tk.StringVar()
         self.analysis_data = None
 
         # Two-path workflow: json_heatmap OR questionnaire
@@ -265,7 +265,7 @@ class TaraDesktopApp:
 
         # File selection
         ttk.Label(self.upload_frame,
-                  text="Select EMB3D JSON File:",
+                  text="Select EMB3D CSV File:",
                   font=('Arial', 10, 'bold')).grid(row=0,
                                                    column=0,
                                                    sticky=tk.W,
@@ -288,7 +288,7 @@ class TaraDesktopApp:
 
         self.browse_button = ttk.Button(file_frame,
                                         text="Browse",
-                                        command=self.browse_json_heatmap)
+                                        command=self.browse_csv_heatmap)
         self.browse_button.grid(row=0, column=1)
 
         # Demo buttons for easy testing
@@ -303,7 +303,7 @@ class TaraDesktopApp:
         info_label = ttk.Label(
             self.upload_frame,
             text=
-            "Supported formats: .json (EMB3D JSON heatmap exported from MITRE EMB3D website)",
+            "Supported formats: .csv (EMB3D CSV heatmap exported from MITRE EMB3D website)",
             font=('Arial', 9),
             foreground='gray')
         info_label.grid(row=3, column=0, columnspan=2, sticky=tk.W)
@@ -688,33 +688,33 @@ class TaraDesktopApp:
             self.log_message(error_msg)
             messagebox.showerror("Error", error_msg)
 
-    def browse_json_heatmap(self):
-        """Open file dialog for EMB3D JSON heatmap file"""
+    def browse_csv_heatmap(self):
+        """Open file dialog for EMB3D CSV heatmap file"""
         filename = filedialog.askopenfilename(
-            title="Select EMB3D JSON Heatmap File",
-            filetypes=[("JSON files", "*.json"), ("All files", "*.*")])
+            title="Select EMB3D CSV Heatmap File",
+            filetypes=[("CSV files", "*.csv"), ("All files", "*.*")])
         if filename:
             self.file_path_var.set(filename)
-            self.json_heatmap_file.set(filename)
+            self.csv_heatmap_file.set(filename)
             self.log_message(
-                f"EMB3D JSON heatmap file selected: {Path(filename).name}")
+                f"EMB3D CSV heatmap file selected: {Path(filename).name}")
     
     def load_sample_camera(self):
-        """Load sample security camera JSON heatmap for testing"""
-        sample_file = "sample_embed3d_heatmap.json"
+        """Load sample security camera CSV heatmap for testing"""
+        sample_file = "sample_embed3d_heatmap.csv"
         if os.path.exists(sample_file):
             self.file_path_var.set(sample_file)
-            self.json_heatmap_file.set(sample_file)
+            self.csv_heatmap_file.set(sample_file)
             self.log_message("Loaded sample security camera EMB3D data")
         else:
             self.log_message("Sample camera file not found")
     
     def load_sample_sensor(self):
-        """Load sample IoT sensor JSON heatmap for testing"""
-        sample_file = "sample_embed3d_minimal.json"
+        """Load sample IoT sensor CSV heatmap for testing"""
+        sample_file = "sample_embed3d_minimal.csv"
         if os.path.exists(sample_file):
             self.file_path_var.set(sample_file)
-            self.json_heatmap_file.set(sample_file)
+            self.csv_heatmap_file.set(sample_file)
             self.log_message("Loaded sample IoT sensor EMB3D data")
         else:
             self.log_message("Sample sensor file not found")
@@ -739,17 +739,17 @@ class TaraDesktopApp:
                 return False
 
         else:  # json_heatmap mode
-            # Check JSON heatmap file
-            if not self.json_heatmap_file.get():
+            # Check CSV heatmap file
+            if not self.csv_heatmap_file.get():
                 messagebox.showerror(
                     "Validation Error",
-                    "Please select an EMB3D JSON heatmap file.")
+                    "Please select an EMB3D CSV heatmap file.")
                 return False
 
-            if not os.path.exists(self.json_heatmap_file.get()):
+            if not os.path.exists(self.csv_heatmap_file.get()):
                 messagebox.showerror(
                     "Validation Error",
-                    "The selected JSON heatmap file does not exist.")
+                    "The selected CSV heatmap file does not exist.")
                 return False
 
         return True
@@ -867,12 +867,12 @@ class TaraDesktopApp:
                 }
             }
 
-            # Process JSON heatmap file
+            # Process CSV heatmap file
             try:
-                json_data = self.json_parser.parse(self.json_heatmap_file.get())
-                if json_data:
-                    # Extract device properties from JSON
-                    selected_properties = json_data.get('selected_properties', {})
+                csv_data = self.csv_parser.parse(self.csv_heatmap_file.get())
+                if csv_data:
+                    # Extract device properties from CSV
+                    selected_properties = csv_data.get('selected_properties', {})
                     
                     # Generate assessment from properties using EMB3D integrator
                     embed_assessment = self.embed_integrator.assess_device_properties(selected_properties)
@@ -887,9 +887,9 @@ class TaraDesktopApp:
                         f"Found {len(selected_properties)} property categories with {len(analysis_data['threats'])} threats"
                     )
                 else:
-                    self.log_message("No data extracted from JSON heatmap file")
+                    self.log_message("No data extracted from CSV heatmap file")
             except Exception as e:
-                self.log_message(f"Error parsing JSON heatmap: {str(e)}")
+                self.log_message(f"Error parsing CSV heatmap: {str(e)}")
                 raise
 
             # Ensure we have some data for analysis

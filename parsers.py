@@ -1,51 +1,61 @@
 """
-EMB3D JSON Heatmap Parser
-Simplified parser for MITRE EMB3D JSON heatmap files only
+EMB3D CSV Heatmap Parser
+Simplified parser for MITRE EMB3D CSV heatmap files only
 """
 
-import json
+import csv
 import logging
 from typing import Dict, List, Any, Optional
 
 
-class Embed3dJsonParser:
-    """Parser for MITRE EMB3D JSON heatmap files exported from the EMB3D website"""
+class Embed3dCsvParser:
+    """Parser for EMB3D CSV heatmap files exported from MITRE EMB3D website"""
     
     def __init__(self):
         self.logger = logging.getLogger(__name__)
     
     def parse(self, filepath: str) -> Dict[str, Any]:
-        """Parse EMB3D JSON heatmap file and extract device properties and assessment data"""
+        """Parse EMB3D CSV heatmap file and extract device properties and assessment data"""
         try:
             with open(filepath, 'r', encoding='utf-8') as file:
-                data = json.load(file)
+                reader = csv.DictReader(file)
+                rows = list(reader)
             
-            return self._normalize_embed3d_data(data)
+            return self._normalize_embed3d_data(rows)
         
         except Exception as e:
-            self.logger.error(f"Failed to parse EMB3D JSON heatmap: {e}")
+            self.logger.error(f"Failed to parse EMB3D CSV heatmap: {e}")
             raise
     
-    def _normalize_embed3d_data(self, data: Dict[str, Any]) -> Dict[str, Any]:
-        """Normalize EMB3D JSON data to standard format"""
+    def _normalize_embed3d_data(self, rows: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """Normalize EMB3D CSV data to standard format"""
         normalized = {
             'selected_properties': {},
             'assessment_data': {},
             'threat_vectors': [],
             'recommended_controls': [],
             'metadata': {
-                'source': 'embed3d_json_heatmap',
-                'input_type': 'mitre_embed_json'
+                'source': 'embed3d_csv_heatmap',
+                'input_type': 'mitre_embed_csv'
             }
         }
         
-        # Extract device properties from EMB3D JSON structure
-        if 'properties' in data:
-            normalized['selected_properties'] = self._extract_device_properties(data['properties'])
-        elif 'device_properties' in data:
-            normalized['selected_properties'] = self._extract_device_properties(data['device_properties'])
-        elif 'embed_properties' in data:
-            normalized['selected_properties'] = self._extract_device_properties(data['embed_properties'])
+        # Extract device properties from EMB3D CSV structure
+        selected_properties = {}
+        
+        for row in rows:
+            # Check if property is selected (TRUE in CSV)
+            if str(row.get('Selected', '')).upper() == 'TRUE':
+                category = row.get('Category', 'Unknown')
+                prop_id = row.get('Property ID', '')
+                prop_name = row.get('Property Name', '')
+                
+                if category not in selected_properties:
+                    selected_properties[category] = {}
+                
+                selected_properties[category][prop_id] = prop_name
+        
+        normalized['selected_properties'] = selected_properties
         
         # Extract assessment data if present
         if 'assessment' in data:
@@ -71,7 +81,7 @@ class Embed3dJsonParser:
         if 'metadata' in data:
             normalized['metadata'].update(data['metadata'])
         
-        self.logger.info(f"Parsed EMB3D JSON with {len(normalized['selected_properties'])} property categories")
+        self.logger.info(f"Parsed EMB3D CSV with {len(normalized['selected_properties'])} property categories")
         return normalized
     
     def _extract_device_properties(self, properties_data: Dict[str, Any]) -> Dict[str, List[str]]:

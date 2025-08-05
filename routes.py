@@ -5,7 +5,7 @@ from flask import render_template, request, jsonify, send_file, flash, redirect,
 from werkzeug.utils import secure_filename
 from app import app, db
 from models import Analysis, AuditLog
-from parsers import Embed3dJsonParser
+from parsers import Embed3dCsvParser
 from mitre_integration import MitreIntegrator
 from mitre_embed import MitreEmbedIntegrator
 from enhanced_excel_generator import EnhancedTaraExcelGenerator
@@ -76,12 +76,12 @@ def upload_files():
         
         # Handle EMB3D-only file uploads
         files = {}
-        if 'embed3d_json' in request.files:
-            file = request.files['embed3d_json']
-            if file.filename != '' and allowed_file(file.filename, 'embed3d_json'):
-                files['embed3d_json'] = file
+        if 'embed3d_csv' in request.files:
+            file = request.files['embed3d_csv']
+            if file.filename != '' and allowed_file(file.filename, 'embed3d_csv'):
+                files['embed3d_csv'] = file
             elif file.filename != '':
-                flash('Invalid file type for EMB3D JSON heatmap', 'error')
+                flash('Invalid file type for EMB3D CSV heatmap', 'error')
                 return redirect(url_for('upload_page'))
         
         # Create analysis record for EMB3D
@@ -107,14 +107,14 @@ def upload_files():
             diagram_data = {'components': [], 'connections': [], 'data_flows': []}
             crossmap_data = {}
             
-            # Parse EMB3D JSON heatmap if provided
-            if 'embed3d_json' in saved_files:
-                json_parser = Embed3dJsonParser()
-                json_data = json_parser.parse(saved_files['embed3d_json'])
+            # Parse EMB3D CSV heatmap if provided
+            if 'embed3d_csv' in saved_files:
+                csv_parser = Embed3dCsvParser()
+                csv_data = csv_parser.parse(saved_files['embed3d_csv'])
                 
                 # Extract device properties and generate assessment
                 embed_integrator = MitreEmbedIntegrator()
-                selected_properties = json_data.get('selected_properties', {})
+                selected_properties = csv_data.get('selected_properties', {})
                 embed_assessment = embed_integrator.assess_device_properties(selected_properties)
                 
                 # Generate threat and asset data
