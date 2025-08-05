@@ -1,0 +1,41 @@
+{
+  "selected_properties": {
+    "Hardware Platform": {
+      "Hardware Debug Features": ["HW.1"],
+      "Hardware Tampering and Reverse Engineering": ["HW.2", "HW.3"],
+      "Hardware System Configuration": ["HW.4"]
+    },
+    "Software Platform": {
+      "Software Tampering and Reverse Engineering": ["SW.1", "SW.2"],
+      "Software Update Mechanisms": ["SW.3", "SW.4"],
+      "Software Cryptography": ["SW.5"]
+    },
+    "Data": {
+      "Data Cryptography": ["DAT.1", "DAT.2"],
+      "Data Integrity and Authenticity": ["DAT.3"],
+      "Data Backup and Recovery": ["DAT.4"]
+    },
+    "Communication": {
+      "Communication Authentication": ["C.1", "C.2"],
+      "Communication Encryption": ["C.3"],
+      "Communication Protocols": ["C.4"]
+    },
+    "Lifecycle": {
+      "Manufacturing and Production": ["LC.1"],
+      "Device Configuration and Provisioning": ["LC.2", "LC.3"],
+      "Device Disposal": ["LC.4"]
+    }
+  },
+  "device_info": {
+    "name": "Sample IoT Security Camera",
+    "type": "Security Camera",
+    "manufacturer": "Demo Corp",
+    "model": "SC-2024",
+    "description": "A sample IoT security camera for testing EMB3D assessment"
+  },
+  "assessment_metadata": {
+    "created_date": "2025-01-20",
+    "version": "1.0",
+    "assessment_type": "comprehensive"
+  }
+}

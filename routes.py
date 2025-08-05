@@ -225,6 +225,38 @@ def download_report(analysis_id):
         flash(f'Failed to generate report: {str(e)}', 'error')
         return redirect(url_for('results', analysis_id=analysis_id))
 
+@app.route('/demo')
+def demo():
+    """Load demo data for easy testing"""
+    session_id = session.get('session_id', str(uuid.uuid4()))
+    session['session_id'] = session_id
+    
+    # Create demo analysis with sample EMB3D data
+    analysis = Analysis()
+    analysis.session_id = session_id
+    analysis.status = 'completed'
+    analysis.threats = [
+        {"id": "T1", "name": "Hardware Debug Access", "severity": "High"},
+        {"id": "T2", "name": "Firmware Tampering", "severity": "Medium"},
+        {"id": "T3", "name": "Communication Interception", "severity": "High"}
+    ]
+    analysis.assets = [
+        {"id": "A1", "name": "IoT Device", "type": "Hardware"},
+        {"id": "A2", "name": "Firmware", "type": "Software"},
+        {"id": "A3", "name": "Communication Channel", "type": "Network"}
+    ]
+    analysis.mitigations = [
+        {"id": "M1", "name": "Disable Debug Interfaces", "category": "Hardware"},
+        {"id": "M2", "name": "Code Signing", "category": "Software"},
+        {"id": "M3", "name": "Encryption", "category": "Communication"}
+    ]
+    
+    db.session.add(analysis)
+    db.session.commit()
+    
+    flash('Demo analysis created successfully!', 'success')
+    return redirect(url_for('results', analysis_id=analysis.id))
+
 @app.route('/download_excel/<int:analysis_id>')
 def download_excel_report(analysis_id):
     """Generate and download enhanced TARA report as Excel"""

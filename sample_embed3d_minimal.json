@@ -1,0 +1,22 @@
+{
+  "selected_properties": {
+    "Hardware Platform": {
+      "Hardware Debug Features": ["HW.1"],
+      "Hardware Tampering and Reverse Engineering": ["HW.2"]
+    },
+    "Software Platform": {
+      "Software Update Mechanisms": ["SW.3"],
+      "Software Cryptography": ["SW.5"]
+    },
+    "Communication": {
+      "Communication Authentication": ["C.1"],
+      "Communication Encryption": ["C.3"]
+    }
+  },
+  "device_info": {
+    "name": "Simple IoT Sensor",
+    "type": "Temperature Sensor",
+    "manufacturer": "Test Inc",
+    "model": "TS-100"
+  }
+}

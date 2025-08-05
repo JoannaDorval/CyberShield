@@ -291,6 +291,14 @@ class TaraDesktopApp:
                                         command=self.browse_json_heatmap)
         self.browse_button.grid(row=0, column=1)
 
+        # Demo buttons for easy testing
+        demo_frame = ttk.Frame(self.upload_frame)
+        demo_frame.grid(row=2, column=0, columnspan=2, sticky="ew", pady=10)
+        
+        ttk.Label(demo_frame, text="Quick Test:", font=('Arial', 9, 'bold')).grid(row=0, column=0, sticky="w")
+        ttk.Button(demo_frame, text="Sample Camera", command=self.load_sample_camera).grid(row=0, column=1, padx=5)
+        ttk.Button(demo_frame, text="Sample Sensor", command=self.load_sample_sensor).grid(row=0, column=2, padx=5)
+        
         # File format info
         info_label = ttk.Label(
             self.upload_frame,
@@ -298,7 +306,7 @@ class TaraDesktopApp:
             "Supported formats: .json (EMB3D JSON heatmap exported from MITRE EMB3D website)",
             font=('Arial', 9),
             foreground='gray')
-        info_label.grid(row=2, column=0, columnspan=2, sticky=tk.W)
+        info_label.grid(row=3, column=0, columnspan=2, sticky=tk.W)
 
         # Initially hidden
         self.upload_frame.grid_remove()
@@ -326,10 +334,19 @@ class TaraDesktopApp:
             font=('Arial', 10, 'bold'))
         instruction_label.grid(row=0, column=0, sticky=tk.W)
 
-        self.clear_button = ttk.Button(header_frame,
-                                       text="Clear All Fields",
+        # Buttons frame for demo and clear
+        buttons_frame = ttk.Frame(header_frame)
+        buttons_frame.grid(row=0, column=1, sticky=tk.E)
+        
+        self.demo_button = ttk.Button(buttons_frame,
+                                      text="Demo Data",
+                                      command=self.load_demo_questionnaire)
+        self.demo_button.grid(row=0, column=0, padx=(0, 5))
+        
+        self.clear_button = ttk.Button(buttons_frame,
+                                       text="Clear All",
                                        command=self.clear_all_fields)
-        self.clear_button.grid(row=0, column=1, sticky=tk.E)
+        self.clear_button.grid(row=0, column=1)
 
         # Create notebook for categories
         self.embed_notebook = ttk.Notebook(self.embed_frame)
@@ -397,6 +414,27 @@ class TaraDesktopApp:
         for category in self.embed_checkboxes:
             for prop_id in self.embed_checkboxes[category]:
                 self.embed_checkboxes[category][prop_id].set(False)
+    
+    def load_demo_questionnaire(self):
+        """Load demo questionnaire responses for testing"""
+        # Clear all first
+        self.clear_all_fields()
+        
+        # Set some demo responses
+        demo_selections = {
+            "Hardware Platform": ["HW.1", "HW.2"],
+            "Software Platform": ["SW.3", "SW.5"],
+            "Communication": ["C.1", "C.3"],
+            "Data": ["DAT.1", "DAT.3"]
+        }
+        
+        for category, properties in demo_selections.items():
+            if category in self.embed_checkboxes:
+                for prop_id in properties:
+                    if prop_id in self.embed_checkboxes[category]:
+                        self.embed_checkboxes[category][prop_id].set(True)
+        
+        self.log_message("Demo questionnaire responses loaded")
 
     def create_progress_section(self, parent):
         """Create progress and status widgets"""
@@ -660,6 +698,26 @@ class TaraDesktopApp:
             self.json_heatmap_file.set(filename)
             self.log_message(
                 f"EMB3D JSON heatmap file selected: {Path(filename).name}")
+    
+    def load_sample_camera(self):
+        """Load sample security camera JSON heatmap for testing"""
+        sample_file = "sample_embed3d_heatmap.json"
+        if os.path.exists(sample_file):
+            self.file_path_var.set(sample_file)
+            self.json_heatmap_file.set(sample_file)
+            self.log_message("Loaded sample security camera EMB3D data")
+        else:
+            self.log_message("Sample camera file not found")
+    
+    def load_sample_sensor(self):
+        """Load sample IoT sensor JSON heatmap for testing"""
+        sample_file = "sample_embed3d_minimal.json"
+        if os.path.exists(sample_file):
+            self.file_path_var.set(sample_file)
+            self.json_heatmap_file.set(sample_file)
+            self.log_message("Loaded sample IoT sensor EMB3D data")
+        else:
+            self.log_message("Sample sensor file not found")
 
     def validate_files(self):
         """Validate that input is provided for the selected workflow"""
@@ -680,18 +738,18 @@ class TaraDesktopApp:
                 )
                 return False
 
-        else:  # threat_model mode
-            # Check threat model file
-            if not self.threat_model_file.get():
+        else:  # json_heatmap mode
+            # Check JSON heatmap file
+            if not self.json_heatmap_file.get():
                 messagebox.showerror(
                     "Validation Error",
-                    "Please select a threat model file (.tm7/.tb7).")
+                    "Please select an EMB3D JSON heatmap file.")
                 return False
 
-            if not os.path.exists(self.threat_model_file.get()):
+            if not os.path.exists(self.json_heatmap_file.get()):
                 messagebox.showerror(
                     "Validation Error",
-                    "The selected threat model file does not exist.")
+                    "The selected JSON heatmap file does not exist.")
                 return False
 
         return True
