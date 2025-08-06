@@ -1,0 +1,125 @@
+{
+  "Hardware": {
+    "PID-11": { "label": "Device includes a microprocessor" },
+    "PID-12": {
+      "label": "Device includes Memory/Storage (external to CPU)",
+      "children": {
+        "PID-121": { "label": "Device includes buses for external memory/storage" },
+        "PID-122": { "label": "Device includes discrete chips/devices that have access to the same physical memory" },
+        "PID-123": { "label": "Device includes ROM, VRAM, or removable Storage" },
+        "PID-124": {
+          "label": "Device includes Random Access Memory (RAM) chips",
+          "children": {
+            "PID-1241": { "label": "Device includes DDR DRAM" }
+          }
+        }
+      }
+    },
+    "PID-13": { "label": "Device includes peripheral chips and integrated data buses" },
+    "PID-14": { "label": "Device includes external peripheral interconnects (e.g., USB, Serial)" },
+    "PID-15": { "label": "Device includes a hardware access port (e.g., UART, JTAG)" }
+  },
+  "System Software": {
+    "PID-21": { "label": "Device includes a bootloader" },
+    "PID-22": { "label": "Device includes a debugging capabilities" },
+    "PID-23": { "label": "Device includes OS/kernel" },
+    "PID-231": { "label": "Device includes an operating system that uses drivers/modules that can be loaded" },
+    "PID-232": {
+      "label": "Device includes separate users/processes with access to different OS data or functions",
+      "children": {
+        "PID-2321": { "label": "Device lacks an access enforcement/privilege mechanism" },
+        "PID-2322": {
+          "label": "Device deploys an access enforcement/privilege mechanism",
+          "children": {
+            "PID-23221": { "label": "Device includes and enforces OS user accounts" },
+            "PID-23222": { "label": "Device includes a memory management model, including protections of memory access (read-only, executable, writable)" }
+          }
+        }
+      }
+    },
+    "PID-24": {
+      "label": "Device includes virtualization and containers",
+      "children": {
+        "PID-241": { "label": "Device includes containers" },
+        "PID-242": { "label": "Device includes hypervisor" }
+      }
+    },
+    "PID-25": {
+      "label": "Device includes software/hardware root of trust",
+      "children": {
+        "PID-251": { "label": "Root of Trust is physically accessible or is not immutable" },
+        "PID-252": { "label": "Root of Trust is immutable" }
+      }
+    },
+    "PID-26": { "label": "Device lacks firmware/software update support" },
+    "PID-27": {
+      "label": "Device includes support for firmware/software updates",
+      "children": {
+        "PID-271": { "label": "Device has firmware or software that is not cryptographically checked for integrity validation" },
+        "PID-272": {
+          "label": "Device includes cryptographic firmware/software integrity protection mechanisms",
+          "children": {
+            "PID-2721": { "label": "Device includes a shared key for firmware integrity validation" },
+            "PID-2722": { "label": "Device includes digitally signed firmware (with private key)" }
+          }
+        },
+        "PID-273": { "label": "Device has unencrypted firmware updates" },
+        "PID-274": { "label": "Device includes user firmware/software version selection during updates" },
+        "PID-275": { "label": "Device includes remotely-initiated firmware/software updates" }
+      }
+    },
+    "PID-28": { "label": "Device stores logs of system events and information" }
+  },
+  "Application Software": {
+    "PID-31": { "label": "Application-level software is present and running on the device" },
+    "PID-311": { "label": "Device includes the usage of a web/HTTP applications" },
+    "PID-312": {
+      "label": "Device includes programming languages and libraries",
+      "children": {
+        "PID-3121": { "label": "Device includes support for object oriented programming languages (e.g., Java, Python, PHP, C++)" },
+        "PID-3122": { "label": "Device includes support for manual memory management programming languages (e.g., C, C++)" }
+      }
+    },
+    "PID-32": {
+      "label": "Device includes the ability to deploy custom or external programs",
+      "children": {
+        "PID-321": { "label": "Device includes ability to deploy custom programs from engineering software or IDE" },
+        "PID-322": { "label": "Device includes a program runtime environment for custom or external programs" },
+        "PID-323": {
+          "label": "Device includes support for program executable formats",
+          "children": {
+            "PID-3231": { "label": "Device includes ability to run custom/external programs as native binary without a confined/restricted environment" },
+            "PID-3232": { "label": "Device includes ability to run custom/external programs/processes through an execution sandboxed environment" }
+          }
+        },
+        "PID-324": { "label": "Device includes support for 'program uploads' to retrieve programs from the device from an engineering workstation" }
+      }
+    },
+    "PID-33": {
+      "label": "Device includes interactive applications, services, or user interfaces",
+      "children": {
+        "PID-331": { "label": "Device includes unauthenticated services" },
+        "PID-332": {
+          "label": "Device includes authenticated services",
+          "children": {
+            "PID-3321": { "label": "Device includes passwords to authenticate the users" },
+            "PID-3322": { "label": "Device includes cryptographic mechanism to authenticate users and sessions" }
+          }
+        }
+      }
+    },
+    "PID-34": { "label": "Device stores logs of application events and information" }
+  },
+  "Networking": {
+    "PID-41": { "label": "Device exposes remote network services" },
+    "PID-411": {
+      "label": "Device exposes remote services with the ability to send, receive, view or modify sensitive information or configurations",
+      "children": {
+        "PID-4111": { "label": "Device lacks protocol support for message authentication" },
+        "PID-4112": { "label": "Device lacks protocol support for message encryption" },
+        "PID-4113": { "label": "Device includes cryptographic functions for sensitive data, such as encryption or authentication" }
+      }
+    },
+    "PID-42": { "label": "Device includes procedure to forward or route network messages" }
+  }
+}

@@ -176,155 +176,153 @@
                 <div class="card-header">
                     <h5 class="mb-0">
                         <i data-feather="check-square" class="me-2"></i>
-                        MITRE EMB3D Device Properties Questionnaire
+                        MITRE EMB3D Device Property Questionnaire
                     </h5>
                 </div>
                 <div class="card-body">
-                    <p class="text-muted mb-4">Select all device properties that apply to your IoT/embedded device:</p>
+                    <p class="text-muted mb-4">Complete the questionnaire by selecting all device properties that apply. Parent properties will reveal relevant sub-properties when selected.</p>
                     
                     <!-- Hardware Properties -->
-                    <div class="mb-4">
-                        <h6 class="text-primary mb-3">Hardware Properties</h6>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" name="embed_hardware[]" value="HW.1" id="hw1">
-                                    <label class="form-check-label" for="hw1">
-                                        <small><strong>HW.1:</strong> Hardware Debug Features</small>
-                                    </label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" name="embed_hardware[]" value="HW.2" id="hw2">
-                                    <label class="form-check-label" for="hw2">
-                                        <small><strong>HW.2:</strong> Secure Boot Capabilities</small>
-                                    </label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" name="embed_hardware[]" value="HW.3" id="hw3">
-                                    <label class="form-check-label" for="hw3">
-                                        <small><strong>HW.3:</strong> Cryptographic Hardware</small>
-                                    </label>
+                    <div class="property-category mb-4">
+                        <h6 class="property-category-title text-primary mb-3">
+                            <i data-feather="cpu" class="me-2"></i>
+                            Hardware Properties
+                        </h6>
+                        <div class="property-items">
+                            <!-- PID-11 -->
+                            <div class="property-item mb-2">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-11" id="PID-11">
+                                    <label class="form-check-label" for="PID-11"><strong>PID-11:</strong> Device includes a microprocessor</label>
                                 </div>
                             </div>
-                            <div class="col-md-6">
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" name="embed_hardware[]" value="HW.4" id="hw4">
-                                    <label class="form-check-label" for="hw4">
-                                        <small><strong>HW.4:</strong> Tamper Detection</small>
-                                    </label>
+
+                            <!-- PID-12 -->
+                            <div class="property-item mb-2">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-12" id="PID-12" data-parent>
+                                    <label class="form-check-label" for="PID-12"><strong>PID-12:</strong> Device includes Memory/Storage (external to CPU)</label>
                                 </div>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" name="embed_hardware[]" value="HW.5" id="hw5">
-                                    <label class="form-check-label" for="hw5">
-                                        <small><strong>HW.5:</strong> Physical Interfaces</small>
-                                    </label>
+                                <div class="property-children ms-4 mt-2" id="children-PID-12" style="display: none;">
+                                    <div class="form-check mb-1">
+                                        <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-121" id="PID-121" data-child-of="PID-12">
+                                        <label class="form-check-label" for="PID-121"><strong>PID-121:</strong> Device includes buses for external memory/storage</label>
+                                    </div>
+                                    <div class="form-check mb-1">
+                                        <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-122" id="PID-122" data-child-of="PID-12">
+                                        <label class="form-check-label" for="PID-122"><strong>PID-122:</strong> Device includes discrete chips/devices that have access to the same physical memory</label>
+                                    </div>
+                                    <div class="form-check mb-1">
+                                        <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-123" id="PID-123" data-child-of="PID-12">
+                                        <label class="form-check-label" for="PID-123"><strong>PID-123:</strong> Device includes ROM, VRAM, or removable Storage</label>
+                                    </div>
+                                    <div class="form-check mb-1">
+                                        <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-124" id="PID-124" data-child-of="PID-12" data-parent>
+                                        <label class="form-check-label" for="PID-124"><strong>PID-124:</strong> Device includes Random Access Memory (RAM) chips</label>
+                                    </div>
+                                    <div class="property-children ms-4 mt-1" id="children-PID-124" style="display: none;">
+                                        <div class="form-check mb-1">
+                                            <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-1241" id="PID-1241" data-child-of="PID-124">
+                                            <label class="form-check-label" for="PID-1241"><strong>PID-1241:</strong> Device includes DDR DRAM</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- PID-13 -->
+                            <div class="property-item mb-2">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-13" id="PID-13">
+                                    <label class="form-check-label" for="PID-13"><strong>PID-13:</strong> Device includes peripheral chips and integrated data buses</label>
+                                </div>
+                            </div>
+
+                            <!-- PID-14 -->
+                            <div class="property-item mb-2">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-14" id="PID-14">
+                                    <label class="form-check-label" for="PID-14"><strong>PID-14:</strong> Device includes external peripheral interconnects (e.g., USB, Serial)</label>
+                                </div>
+                            </div>
+
+                            <!-- PID-15 -->
+                            <div class="property-item mb-2">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-15" id="PID-15">
+                                    <label class="form-check-label" for="PID-15"><strong>PID-15:</strong> Device includes a hardware access port (e.g., UART, JTAG)</label>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- System Software Properties -->
-                    <div class="mb-4">
-                        <h6 class="text-primary mb-3">System Software Properties</h6>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" name="embed_system_software[]" value="SW.1" id="sw1">
-                                    <label class="form-check-label" for="sw1">
-                                        <small><strong>SW.1:</strong> Operating System</small>
-                                    </label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" name="embed_system_software[]" value="SW.2" id="sw2">
-                                    <label class="form-check-label" for="sw2">
-                                        <small><strong>SW.2:</strong> Update Mechanisms</small>
-                                    </label>
+                    <div class="property-category mb-4">
+                        <h6 class="property-category-title text-primary mb-3">
+                            <i data-feather="settings" class="me-2"></i>
+                            System Software Properties
+                        </h6>
+                        <div class="property-items">
+                            <!-- PID-21 -->
+                            <div class="property-item mb-2">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-21" id="PID-21">
+                                    <label class="form-check-label" for="PID-21"><strong>PID-21:</strong> Device includes a bootloader</label>
                                 </div>
                             </div>
-                            <div class="col-md-6">
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" name="embed_system_software[]" value="SW.3" id="sw3">
-                                    <label class="form-check-label" for="sw3">
-                                        <small><strong>SW.3:</strong> Access Controls</small>
-                                    </label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" name="embed_system_software[]" value="SW.4" id="sw4">
-                                    <label class="form-check-label" for="sw4">
-                                        <small><strong>SW.4:</strong> Logging Capabilities</small>
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
-                    <!-- Application Software Properties -->
-                    <div class="mb-4">
-                        <h6 class="text-primary mb-3">Application Software Properties</h6>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" name="embed_application_software[]" value="APP.1" id="app1">
-                                    <label class="form-check-label" for="app1">
-                                        <small><strong>APP.1:</strong> Web Applications</small>
-                                    </label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" name="embed_application_software[]" value="APP.2" id="app2">
-                                    <label class="form-check-label" for="app2">
-                                        <small><strong>APP.2:</strong> Mobile Apps</small>
-                                    </label>
+                            <!-- PID-22 -->
+                            <div class="property-item mb-2">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-22" id="PID-22">
+                                    <label class="form-check-label" for="PID-22"><strong>PID-22:</strong> Device includes debugging capabilities</label>
                                 </div>
                             </div>
-                            <div class="col-md-6">
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" name="embed_application_software[]" value="APP.3" id="app3">
-                                    <label class="form-check-label" for="app3">
-                                        <small><strong>APP.3:</strong> API Interfaces</small>
-                                    </label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" name="embed_application_software[]" value="APP.4" id="app4">
-                                    <label class="form-check-label" for="app4">
-                                        <small><strong>APP.4:</strong> Third-party Components</small>
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
-                    <!-- Networking Properties -->
-                    <div class="mb-4">
-                        <h6 class="text-primary mb-3">Networking Properties</h6>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" name="embed_networking[]" value="NET.1" id="net1">
-                                    <label class="form-check-label" for="net1">
-                                        <small><strong>NET.1:</strong> Wireless Communication</small>
-                                    </label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" name="embed_networking[]" value="NET.2" id="net2">
-                                    <label class="form-check-label" for="net2">
-                                        <small><strong>NET.2:</strong> Network Services</small>
-                                    </label>
+                            <!-- PID-23 -->
+                            <div class="property-item mb-2">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-23" id="PID-23">
+                                    <label class="form-check-label" for="PID-23"><strong>PID-23:</strong> Device includes OS/kernel</label>
                                 </div>
                             </div>
-                            <div class="col-md-6">
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" name="embed_networking[]" value="NET.3" id="net3">
-                                    <label class="form-check-label" for="net3">
-                                        <small><strong>NET.3:</strong> Encryption Protocols</small>
-                                    </label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" name="embed_networking[]" value="NET.4" id="net4">
-                                    <label class="form-check-label" for="net4">
-                                        <small><strong>NET.4:</strong> Cloud Connectivity</small>
-                                    </label>
+
+                            <!-- PID-231 -->
+                            <div class="property-item mb-2">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-231" id="PID-231">
+                                    <label class="form-check-label" for="PID-231"><strong>PID-231:</strong> Device includes an operating system that uses drivers/modules that can be loaded</label>
                                 </div>
                             </div>
+
+                            <!-- PID-232 -->
+                            <div class="property-item mb-2">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-232" id="PID-232" data-parent>
+                                    <label class="form-check-label" for="PID-232"><strong>PID-232:</strong> Device includes separate users/processes with access to different OS data or functions</label>
+                                </div>
+                                <div class="property-children ms-4 mt-2" id="children-PID-232" style="display: none;">
+                                    <div class="form-check mb-1">
+                                        <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-2321" id="PID-2321" data-child-of="PID-232">
+                                        <label class="form-check-label" for="PID-2321"><strong>PID-2321:</strong> Device lacks an access enforcement/privilege mechanism</label>
+                                    </div>
+                                    <div class="form-check mb-1">
+                                        <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-2322" id="PID-2322" data-child-of="PID-232" data-parent>
+                                        <label class="form-check-label" for="PID-2322"><strong>PID-2322:</strong> Device deploys an access enforcement/privilege mechanism</label>
+                                    </div>
+                                    <div class="property-children ms-4 mt-1" id="children-PID-2322" style="display: none;">
+                                        <div class="form-check mb-1">
+                                            <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-23221" id="PID-23221" data-child-of="PID-2322">
+                                            <label class="form-check-label" for="PID-23221"><strong>PID-23221:</strong> Device includes and enforces OS user accounts</label>
+                                        </div>
+                                        <div class="form-check mb-1">
+                                            <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-23222" id="PID-23222" data-child-of="PID-2322">
+                                            <label class="form-check-label" for="PID-23222"><strong>PID-23222:</strong> Device includes a memory management model, including protections of memory access (read-only, executable, writable)</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Additional System Software Properties (continue with remaining PIDs) -->
                         </div>
                     </div>
 
@@ -405,52 +403,93 @@ document.addEventListener('DOMContentLoaded', function() {
     csvRadio.addEventListener('change', toggleSections);
     questionnaireRadio.addEventListener('change', toggleSections);
 
+    // Parent-child relationship handler
+    function handleParentChildRelationships() {
+        const parentCheckboxes = document.querySelectorAll('input[data-parent]');
+        
+        parentCheckboxes.forEach(parent => {
+            parent.addEventListener('change', function() {
+                const parentId = this.id;
+                const childrenContainer = document.getElementById(`children-${parentId}`);
+                const childCheckboxes = document.querySelectorAll(`input[data-child-of="${parentId}"]`);
+                
+                if (this.checked) {
+                    // Show children
+                    if (childrenContainer) {
+                        childrenContainer.style.display = 'block';
+                    }
+                } else {
+                    // Hide children and uncheck them
+                    if (childrenContainer) {
+                        childrenContainer.style.display = 'none';
+                    }
+                    childCheckboxes.forEach(child => {
+                        child.checked = false;
+                        // Also handle nested children
+                        const nestedChildrenContainer = document.getElementById(`children-${child.id}`);
+                        if (nestedChildrenContainer) {
+                            nestedChildrenContainer.style.display = 'none';
+                            const nestedChildren = document.querySelectorAll(`input[data-child-of="${child.id}"]`);
+                            nestedChildren.forEach(nestedChild => nestedChild.checked = false);
+                        }
+                    });
+                }
+            });
+        });
+    }
+
     // Demo data functionality
     document.getElementById('demoDataBtn').addEventListener('click', function() {
-        // Select some sample properties
-        document.getElementById('hw1').checked = true;
-        document.getElementById('hw3').checked = true;
-        document.getElementById('sw1').checked = true;
-        document.getElementById('sw2').checked = true;
-        document.getElementById('app1').checked = true;
-        document.getElementById('net1').checked = true;
-        document.getElementById('net3').checked = true;
+        // Select some sample properties with proper PID values
+        document.getElementById('PID-11').checked = true;
+        document.getElementById('PID-12').checked = true;
+        document.getElementById('PID-121').checked = true;
+        document.getElementById('PID-21').checked = true;
+        document.getElementById('PID-23').checked = true;
+        document.getElementById('PID-232').checked = true;
+        document.getElementById('PID-2322').checked = true;
+        
+        // Trigger parent-child logic for demo data
+        const event = new Event('change');
+        document.getElementById('PID-12').dispatchEvent(event);
+        document.getElementById('PID-232').dispatchEvent(event);
+        document.getElementById('PID-2322').dispatchEvent(event);
     });
 
     // Clear form functionality
     document.getElementById('clearFormBtn').addEventListener('click', function() {
         const checkboxes = document.querySelectorAll('#questionnaireSection input[type="checkbox"]');
-        checkboxes.forEach(cb => cb.checked = false);
+        checkboxes.forEach(cb => {
+            cb.checked = false;
+        });
+        // Hide all children containers
+        const childrenContainers = document.querySelectorAll('.property-children');
+        childrenContainers.forEach(container => {
+            container.style.display = 'none';
+        });
     });
 
     // Questionnaire submit
     document.getElementById('questionnaireSubmitBtn').addEventListener('click', function() {
         const form = document.getElementById('uploadForm');
         
-        // Collect selected properties
-        const properties = {
-            hardware: [],
-            system_software: [],
-            application_software: [],
-            networking: []
-        };
+        // Collect all selected PIDs
+        const selectedPIDs = [];
+        document.querySelectorAll('input[name="embed_properties[]"]:checked').forEach(cb => {
+            selectedPIDs.push(cb.value);
+        });
 
-        document.querySelectorAll('input[name="embed_hardware[]"]:checked').forEach(cb => {
-            properties.hardware.push(cb.value);
-        });
-        document.querySelectorAll('input[name="embed_system_software[]"]:checked').forEach(cb => {
-            properties.system_software.push(cb.value);
-        });
-        document.querySelectorAll('input[name="embed_application_software[]"]:checked').forEach(cb => {
-            properties.application_software.push(cb.value);
-        });
-        document.querySelectorAll('input[name="embed_networking[]"]:checked').forEach(cb => {
-            properties.networking.push(cb.value);
-        });
+        // Convert to the format expected by the backend
+        const properties = {
+            selected_pids: selectedPIDs
+        };
 
         document.getElementById('embed_properties').value = JSON.stringify(properties);
         form.submit();
     });
+
+    // Initialize parent-child relationships
+    handleParentChildRelationships();
 
     // File upload handling with drag-and-drop
     const fileInput = document.getElementById('embed3d_csv');
