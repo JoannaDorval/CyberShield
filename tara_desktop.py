@@ -46,9 +46,9 @@ class TaraDesktopApp:
         self.csv_heatmap_file = tk.StringVar()
         self.analysis_data = None
 
-        # Two-path workflow: json_heatmap OR questionnaire
+        # Two-path workflow: csv_heatmap OR questionnaire
         self.workflow_mode = tk.StringVar(
-            value="questionnaire")  # json_heatmap or questionnaire
+            value="questionnaire")  # csv_heatmap or questionnaire
         self.embed_properties = {
             'hardware': [],
             'system_software': [],
@@ -57,7 +57,7 @@ class TaraDesktopApp:
         }
 
         # Initialize EMB3D-focused processors only
-        self.json_parser = Embed3dJsonParser()
+        self.csv_parser = Embed3dCsvParser()
         self.mitre_integrator = MitreIntegrator()
         self.embed_integrator = MitreEmbedIntegrator()
         # PDF report generator removed - Excel reports only
@@ -416,16 +416,16 @@ class TaraDesktopApp:
                 self.embed_checkboxes[category][prop_id].set(False)
     
     def load_demo_questionnaire(self):
-        """Load demo questionnaire responses for testing"""
+        """Load demo questionnaire responses for testing - matches Flask demo"""
         # Clear all first
         self.clear_all_fields()
         
-        # Set some demo responses
+        # Set demo responses to match Flask demo exactly
         demo_selections = {
-            "Hardware Platform": ["HW.1", "HW.2"],
-            "Software Platform": ["SW.3", "SW.5"],
-            "Communication": ["C.1", "C.3"],
-            "Data": ["DAT.1", "DAT.3"]
+            "hardware": ["HW.1", "HW.3", "HW.5"],  # Hardware Debug, Crypto Hardware, Physical Interfaces
+            "system_software": ["SW.1", "SW.2", "SW.4"],  # OS, Updates, Logging
+            "application_software": ["APP.1", "APP.3"],  # Web Apps, API Interfaces
+            "networking": ["NET.1", "NET.2", "NET.3"]  # Wireless, Network Services, Encryption
         }
         
         for category, properties in demo_selections.items():
@@ -434,7 +434,8 @@ class TaraDesktopApp:
                     if prop_id in self.embed_checkboxes[category]:
                         self.embed_checkboxes[category][prop_id].set(True)
         
-        self.log_message("Demo questionnaire responses loaded")
+        self.log_message("Demo questionnaire responses loaded (matches web app demo)")
+        messagebox.showinfo("Demo Data", "Loaded sample IoT security camera configuration.\n\nThis matches the Flask web app demo with identical threat analysis results.")
 
     def create_progress_section(self, parent):
         """Create progress and status widgets"""
@@ -738,7 +739,7 @@ class TaraDesktopApp:
                 )
                 return False
 
-        else:  # json_heatmap mode
+        else:  # csv_heatmap mode
             # Check CSV heatmap file
             if not self.csv_heatmap_file.get():
                 messagebox.showerror(
@@ -787,8 +788,8 @@ class TaraDesktopApp:
                 # MITRE EMBED Questionnaire Mode
                 analysis_data = self._process_questionnaire_mode()
             else:
-                # EMB3D JSON Heatmap Mode
-                analysis_data = self._process_json_heatmap_mode()
+                # EMB3D CSV Heatmap Mode
+                analysis_data = self._process_csv_heatmap_mode()
 
             # Integrate with MITRE frameworks
             analysis_data = self._integrate_mitre_frameworks(analysis_data)
@@ -848,12 +849,12 @@ class TaraDesktopApp:
         )
         return analysis_data
 
-    def _process_json_heatmap_mode(self) -> Dict[str, Any]:
-        """Process EMB3D JSON heatmap file analysis"""
+    def _process_csv_heatmap_mode(self) -> Dict[str, Any]:
+        """Process EMB3D CSV heatmap file analysis"""
         try:
-            self.update_status("Processing EMB3D JSON heatmap file...")
+            self.update_status("Processing EMB3D CSV heatmap file...")
             self.log_message(
-                f"Processing JSON heatmap: {Path(self.json_heatmap_file.get()).name}"
+                f"Processing CSV heatmap: {Path(self.csv_heatmap_file.get()).name}"
             )
 
             analysis_data = {
@@ -861,8 +862,8 @@ class TaraDesktopApp:
                 'threats': [],
                 'mitigations': [],
                 'metadata': {
-                    'analysis_type': 'embed3d_json_heatmap',
-                    'input_file': Path(self.json_heatmap_file.get()).name,
+                    'analysis_type': 'embed3d_csv_heatmap',
+                    'input_file': Path(self.csv_heatmap_file.get()).name,
                     'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 }
             }

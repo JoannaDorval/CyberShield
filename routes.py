@@ -13,7 +13,7 @@ import logging
 
 # Allowed file extensions - EMB3D focused only
 ALLOWED_EXTENSIONS = {
-    'embed3d_json': {'json'}
+    'embed3d_csv': {'csv'}
 }
 
 def allowed_file(filename, file_type):
@@ -55,7 +55,7 @@ def upload_page():
 
 @app.route('/upload_files', methods=['POST'])
 def upload_files():
-    """Handle EMB3D JSON heatmap uploads and questionnaire processing"""
+    """Handle EMB3D CSV heatmap uploads and questionnaire processing"""
     session_id = session.get('session_id', str(uuid.uuid4()))
     session['session_id'] = session_id
     

@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Upload Files - TARA{% endblock %}
+{% block title %}EMB3D Analysis - TARA{% endblock %}
 
 {% block extra_head %}
 <style>
@@ -39,6 +39,14 @@
     .upload-progress {
         display: none;
     }
+    
+    .demo-section {
+        background: var(--bs-info-bg-subtle);
+        border: 1px solid var(--bs-info-border-subtle);
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
 </style>
 {% endblock %}
 
@@ -49,160 +57,166 @@
             <!-- Header -->
             <div class="text-center mb-5">
                 <h1 class="display-5 fw-bold mb-3">
-                    <i data-feather="upload" class="me-2"></i>
-                    Upload Analysis Files
+                    <i data-feather="cpu" class="me-2"></i>
+                    MITRE EMB3D Analysis
                 </h1>
                 <p class="lead text-muted">
-                    Upload your threat model, block diagram, and cross-mapping data to generate a comprehensive TARA report
+                    Upload EMB3D CSV heatmap or complete the questionnaire for IoT/embedded device security assessment
                 </p>
             </div>
 
-            <!-- Configuration Options -->
+            <!-- Demo Section -->
+            <div class="demo-section text-center">
+                <h5><i data-feather="play-circle" class="me-2"></i>Quick Demo</h5>
+                <p class="text-muted mb-3">Try the application instantly with sample data</p>
+                <a href="{{ url_for('demo') }}" class="btn btn-info me-2">
+                    <i data-feather="zap" class="me-1"></i>Instant Demo
+                </a>
+                <small class="text-muted d-block mt-2">Sample security camera EMB3D analysis with pre-filled data</small>
+            </div>
+
+            <!-- Two-Path Selection -->
             <div class="row mb-5">
-                <div class="col-md-6">
+                <div class="col-12">
                     <div class="card">
                         <div class="card-header">
                             <h5 class="mb-0">
                                 <i data-feather="settings" class="me-2"></i>
-                                Input Document Type
+                                Choose Input Method
                             </h5>
                         </div>
                         <div class="card-body">
-                            <div class="form-check mb-3">
-                                <input class="form-check-input" type="radio" name="input_type" id="input_threat_model" value="threat_model" checked>
-                                <label class="form-check-label" for="input_threat_model">
-                                    <strong>Threat Model Only</strong>
-                                    <br><small class="text-muted">Analyze threat model document only</small>
-                                </label>
-                            </div>
-                            <div class="form-check mb-3">
-                                <input class="form-check-input" type="radio" name="input_type" id="input_block_diagram" value="block_diagram">
-                                <label class="form-check-label" for="input_block_diagram">
-                                    <strong>Block Diagram Only</strong>
-                                    <br><small class="text-muted">Analyze system architecture diagram only</small>
-                                </label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="input_type" id="input_both" value="both">
-                                <label class="form-check-label" for="input_both">
-                                    <strong>Both Documents</strong>
-                                    <br><small class="text-muted">Comprehensive analysis with both inputs</small>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="mb-0">
-                                <i data-feather="target" class="me-2"></i>
-                                Cross-Reference Source
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="form-check mb-3">
-                                <input class="form-check-input" type="radio" name="cross_ref_source" id="ref_mitre_attack" value="mitre_attack" checked>
-                                <label class="form-check-label" for="ref_mitre_attack">
-                                    <strong>MITRE ATT&CK</strong>
-                                    <br><small class="text-muted">Map threats to ATT&CK techniques</small>
-                                </label>
-                            </div>
-                            <div class="form-check mb-3">
-                                <input class="form-check-input" type="radio" name="cross_ref_source" id="ref_mitre_embed" value="mitre_embed">
-                                <label class="form-check-label" for="ref_mitre_embed">
-                                    <strong>MITRE EMBED</strong>
-                                    <br><small class="text-muted">IoT/embedded device security assessment</small>
-                                </label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="cross_ref_source" id="ref_both" value="both">
-                                <label class="form-check-label" for="ref_both">
-                                    <strong>Both Frameworks</strong>
-                                    <br><small class="text-muted">Comprehensive MITRE ATT&CK and EMBED</small>
-                                </label>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input" type="radio" name="input_type" id="input_csv" value="csv_heatmap" checked>
+                                        <label class="form-check-label" for="input_csv">
+                                            <strong>Upload CSV Heatmap</strong>
+                                            <br><small class="text-muted">EMB3D CSV file exported from MITRE EMB3D website</small>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input" type="radio" name="input_type" id="input_questionnaire" value="questionnaire">
+                                        <label class="form-check-label" for="input_questionnaire">
+                                            <strong>Complete Questionnaire</strong>
+                                            <br><small class="text-muted">Answer EMB3D device property questions locally</small>
+                                        </label>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- MITRE EMBED Device Properties Form -->
-            <div id="embedPropertiesSection" class="card mb-5" style="display: none;">
+            <!-- CSV Upload Section -->
+            <div id="csvUploadSection" class="card mb-5">
                 <div class="card-header">
                     <h5 class="mb-0">
-                        <i data-feather="cpu" class="me-2"></i>
-                        MITRE EMBED Device Properties
+                        <i data-feather="upload" class="me-2"></i>
+                        EMB3D CSV Heatmap Upload
                     </h5>
                 </div>
                 <div class="card-body">
-                    <p class="text-muted mb-4">Select the properties that apply to your device/system:</p>
+                    <form id="uploadForm" action="{{ url_for('upload_files') }}" method="post" enctype="multipart/form-data">
+                        <input type="hidden" name="selected_input_type" id="selected_input_type" value="csv_heatmap">
+                        <input type="hidden" name="embed_properties" id="embed_properties" value="">
+                        
+                        <div class="upload-zone" id="csvUploadZone">
+                            <input type="file" name="embed3d_csv" id="embed3d_csv" class="file-input" accept=".csv" required>
+                            <div class="upload-content">
+                                <i data-feather="upload-cloud" class="mb-3 text-muted" style="width: 48px; height: 48px;"></i>
+                                <h6 class="mb-2">Drop CSV file here or click to browse</h6>
+                                <p class="text-muted small mb-0">CSV format from MITRE EMB3D website</p>
+                                <p class="text-muted small">Max size: 50MB</p>
+                            </div>
+                            <div class="file-info mt-2" style="display: none;">
+                                <i data-feather="file" class="me-1"></i>
+                                <span class="filename"></span>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-3">
+                            <small class="text-muted">
+                                <strong>Instructions:</strong> Download CSV heatmap from MITRE EMB3D website after completing device assessment
+                            </small>
+                        </div>
+                        
+                        <!-- Progress Bar -->
+                        <div class="upload-progress mt-4">
+                            <div class="d-flex align-items-center justify-content-center">
+                                <div class="spinner-border text-primary me-3" role="status">
+                                    <span class="visually-hidden">Processing...</span>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0">Processing EMB3D Analysis...</h6>
+                                    <small class="text-muted">Analyzing device properties and generating report</small>
+                                </div>
+                            </div>
+                            <div class="progress mt-3">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg px-5" id="submitBtn">
+                                <i data-feather="play" class="me-2"></i>
+                                Generate EMB3D Report
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Questionnaire Section -->
+            <div id="questionnaireSection" class="card mb-5" style="display: none;">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i data-feather="check-square" class="me-2"></i>
+                        MITRE EMB3D Device Properties Questionnaire
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-4">Select all device properties that apply to your IoT/embedded device:</p>
                     
                     <!-- Hardware Properties -->
                     <div class="mb-4">
-                        <h6 class="text-primary mb-3">Hardware</h6>
+                        <h6 class="text-primary mb-3">Hardware Properties</h6>
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" name="embed_hardware[]" value="PID-11" id="pid11">
-                                    <label class="form-check-label" for="pid11">
-                                        <small><strong>PID-11:</strong> Device includes a microprocessor</small>
+                                    <input class="form-check-input" type="checkbox" name="embed_hardware[]" value="HW.1" id="hw1">
+                                    <label class="form-check-label" for="hw1">
+                                        <small><strong>HW.1:</strong> Hardware Debug Features</small>
                                     </label>
                                 </div>
                                 <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" name="embed_hardware[]" value="PID-12" id="pid12">
-                                    <label class="form-check-label" for="pid12">
-                                        <small><strong>PID-12:</strong> Device includes Memory/Storage (external to CPU)</small>
+                                    <input class="form-check-input" type="checkbox" name="embed_hardware[]" value="HW.2" id="hw2">
+                                    <label class="form-check-label" for="hw2">
+                                        <small><strong>HW.2:</strong> Secure Boot Capabilities</small>
                                     </label>
                                 </div>
                                 <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" name="embed_hardware[]" value="PID-13" id="pid13">
-                                    <label class="form-check-label" for="pid13">
-                                        <small><strong>PID-13:</strong> Device includes firmware/BIOS</small>
-                                    </label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" name="embed_hardware[]" value="PID-14" id="pid14">
-                                    <label class="form-check-label" for="pid14">
-                                        <small><strong>PID-14:</strong> Device includes hardware security module (HSM)</small>
-                                    </label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" name="embed_hardware[]" value="PID-15" id="pid15">
-                                    <label class="form-check-label" for="pid15">
-                                        <small><strong>PID-15:</strong> Device includes cryptographic processor</small>
+                                    <input class="form-check-input" type="checkbox" name="embed_hardware[]" value="HW.3" id="hw3">
+                                    <label class="form-check-label" for="hw3">
+                                        <small><strong>HW.3:</strong> Cryptographic Hardware</small>
                                     </label>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" name="embed_hardware[]" value="PID-16" id="pid16">
-                                    <label class="form-check-label" for="pid16">
-                                        <small><strong>PID-16:</strong> Device includes hardware random number generator</small>
+                                    <input class="form-check-input" type="checkbox" name="embed_hardware[]" value="HW.4" id="hw4">
+                                    <label class="form-check-label" for="hw4">
+                                        <small><strong>HW.4:</strong> Tamper Detection</small>
                                     </label>
                                 </div>
                                 <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" name="embed_hardware[]" value="PID-17" id="pid17">
-                                    <label class="form-check-label" for="pid17">
-                                        <small><strong>PID-17:</strong> Device includes tamper detection/response mechanisms</small>
-                                    </label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" name="embed_hardware[]" value="PID-18" id="pid18">
-                                    <label class="form-check-label" for="pid18">
-                                        <small><strong>PID-18:</strong> Device includes secure boot capabilities</small>
-                                    </label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" name="embed_hardware[]" value="PID-19" id="pid19">
-                                    <label class="form-check-label" for="pid19">
-                                        <small><strong>PID-19:</strong> Device includes physical interfaces (USB, serial, etc.)</small>
-                                    </label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" name="embed_hardware[]" value="PID-110" id="pid110">
-                                    <label class="form-check-label" for="pid110">
-                                        <small><strong>PID-110:</strong> Device includes wireless communication hardware</small>
+                                    <input class="form-check-input" type="checkbox" name="embed_hardware[]" value="HW.5" id="hw5">
+                                    <label class="form-check-label" for="hw5">
+                                        <small><strong>HW.5:</strong> Physical Interfaces</small>
                                     </label>
                                 </div>
                             </div>
@@ -211,69 +225,33 @@
 
                     <!-- System Software Properties -->
                     <div class="mb-4">
-                        <h6 class="text-primary mb-3">System Software</h6>
+                        <h6 class="text-primary mb-3">System Software Properties</h6>
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" name="embed_system_software[]" value="PID-21" id="pid21">
-                                    <label class="form-check-label" for="pid21">
-                                        <small><strong>PID-21:</strong> Device includes a bootloader</small>
+                                    <input class="form-check-input" type="checkbox" name="embed_system_software[]" value="SW.1" id="sw1">
+                                    <label class="form-check-label" for="sw1">
+                                        <small><strong>SW.1:</strong> Operating System</small>
                                     </label>
                                 </div>
                                 <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" name="embed_system_software[]" value="PID-22" id="pid22">
-                                    <label class="form-check-label" for="pid22">
-                                        <small><strong>PID-22:</strong> Device includes debugging capabilities</small>
-                                    </label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" name="embed_system_software[]" value="PID-23" id="pid23">
-                                    <label class="form-check-label" for="pid23">
-                                        <small><strong>PID-23:</strong> Device includes operating system</small>
-                                    </label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" name="embed_system_software[]" value="PID-24" id="pid24">
-                                    <label class="form-check-label" for="pid24">
-                                        <small><strong>PID-24:</strong> Device includes device drivers</small>
-                                    </label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" name="embed_system_software[]" value="PID-25" id="pid25">
-                                    <label class="form-check-label" for="pid25">
-                                        <small><strong>PID-25:</strong> Device includes system services/daemons</small>
+                                    <input class="form-check-input" type="checkbox" name="embed_system_software[]" value="SW.2" id="sw2">
+                                    <label class="form-check-label" for="sw2">
+                                        <small><strong>SW.2:</strong> Update Mechanisms</small>
                                     </label>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" name="embed_system_software[]" value="PID-26" id="pid26">
-                                    <label class="form-check-label" for="pid26">
-                                        <small><strong>PID-26:</strong> Device includes configuration management</small>
+                                    <input class="form-check-input" type="checkbox" name="embed_system_software[]" value="SW.3" id="sw3">
+                                    <label class="form-check-label" for="sw3">
+                                        <small><strong>SW.3:</strong> Access Controls</small>
                                     </label>
                                 </div>
                                 <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" name="embed_system_software[]" value="PID-27" id="pid27">
-                                    <label class="form-check-label" for="pid27">
-                                        <small><strong>PID-27:</strong> Device includes logging and monitoring</small>
-                                    </label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" name="embed_system_software[]" value="PID-28" id="pid28">
-                                    <label class="form-check-label" for="pid28">
-                                        <small><strong>PID-28:</strong> Device includes update/patch mechanisms</small>
-                                    </label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" name="embed_system_software[]" value="PID-29" id="pid29">
-                                    <label class="form-check-label" for="pid29">
-                                        <small><strong>PID-29:</strong> Device includes access control mechanisms</small>
-                                    </label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" name="embed_system_software[]" value="PID-210" id="pid210">
-                                    <label class="form-check-label" for="pid210">
-                                        <small><strong>PID-210:</strong> Device includes cryptographic libraries</small>
+                                    <input class="form-check-input" type="checkbox" name="embed_system_software[]" value="SW.4" id="sw4">
+                                    <label class="form-check-label" for="sw4">
+                                        <small><strong>SW.4:</strong> Logging Capabilities</small>
                                     </label>
                                 </div>
                             </div>
@@ -282,69 +260,33 @@
 
                     <!-- Application Software Properties -->
                     <div class="mb-4">
-                        <h6 class="text-primary mb-3">Application Software</h6>
+                        <h6 class="text-primary mb-3">Application Software Properties</h6>
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" name="embed_application_software[]" value="PID-31" id="pid31">
-                                    <label class="form-check-label" for="pid31">
-                                        <small><strong>PID-31:</strong> Application-level software is present and running</small>
+                                    <input class="form-check-input" type="checkbox" name="embed_application_software[]" value="APP.1" id="app1">
+                                    <label class="form-check-label" for="app1">
+                                        <small><strong>APP.1:</strong> Web Applications</small>
                                     </label>
                                 </div>
                                 <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" name="embed_application_software[]" value="PID-311" id="pid311">
-                                    <label class="form-check-label" for="pid311">
-                                        <small><strong>PID-311:</strong> Device includes web/HTTP applications</small>
-                                    </label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" name="embed_application_software[]" value="PID-312" id="pid312">
-                                    <label class="form-check-label" for="pid312">
-                                        <small><strong>PID-312:</strong> Device includes mobile applications</small>
-                                    </label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" name="embed_application_software[]" value="PID-313" id="pid313">
-                                    <label class="form-check-label" for="pid313">
-                                        <small><strong>PID-313:</strong> Device includes third-party software components</small>
-                                    </label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" name="embed_application_software[]" value="PID-314" id="pid314">
-                                    <label class="form-check-label" for="pid314">
-                                        <small><strong>PID-314:</strong> Device includes custom/proprietary applications</small>
+                                    <input class="form-check-input" type="checkbox" name="embed_application_software[]" value="APP.2" id="app2">
+                                    <label class="form-check-label" for="app2">
+                                        <small><strong>APP.2:</strong> Mobile Apps</small>
                                     </label>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" name="embed_application_software[]" value="PID-315" id="pid315">
-                                    <label class="form-check-label" for="pid315">
-                                        <small><strong>PID-315:</strong> Device includes data processing applications</small>
+                                    <input class="form-check-input" type="checkbox" name="embed_application_software[]" value="APP.3" id="app3">
+                                    <label class="form-check-label" for="app3">
+                                        <small><strong>APP.3:</strong> API Interfaces</small>
                                     </label>
                                 </div>
                                 <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" name="embed_application_software[]" value="PID-316" id="pid316">
-                                    <label class="form-check-label" for="pid316">
-                                        <small><strong>PID-316:</strong> Device includes user interface applications</small>
-                                    </label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" name="embed_application_software[]" value="PID-317" id="pid317">
-                                    <label class="form-check-label" for="pid317">
-                                        <small><strong>PID-317:</strong> Device includes communication protocols</small>
-                                    </label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" name="embed_application_software[]" value="PID-318" id="pid318">
-                                    <label class="form-check-label" for="pid318">
-                                        <small><strong>PID-318:</strong> Device includes database management</small>
-                                    </label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" name="embed_application_software[]" value="PID-319" id="pid319">
-                                    <label class="form-check-label" for="pid319">
-                                        <small><strong>PID-319:</strong> Device includes API interfaces</small>
+                                    <input class="form-check-input" type="checkbox" name="embed_application_software[]" value="APP.4" id="app4">
+                                    <label class="form-check-label" for="app4">
+                                        <small><strong>APP.4:</strong> Third-party Components</small>
                                     </label>
                                 </div>
                             </div>
@@ -353,206 +295,53 @@
 
                     <!-- Networking Properties -->
                     <div class="mb-4">
-                        <h6 class="text-primary mb-3">Networking</h6>
+                        <h6 class="text-primary mb-3">Networking Properties</h6>
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" name="embed_networking[]" value="PID-41" id="pid41">
-                                    <label class="form-check-label" for="pid41">
-                                        <small><strong>PID-41:</strong> Device exposes remote network services</small>
+                                    <input class="form-check-input" type="checkbox" name="embed_networking[]" value="NET.1" id="net1">
+                                    <label class="form-check-label" for="net1">
+                                        <small><strong>NET.1:</strong> Wireless Communication</small>
                                     </label>
                                 </div>
                                 <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" name="embed_networking[]" value="PID-411" id="pid411">
-                                    <label class="form-check-label" for="pid411">
-                                        <small><strong>PID-411:</strong> Device exposes services with sensitive information access</small>
-                                    </label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" name="embed_networking[]" value="PID-412" id="pid412">
-                                    <label class="form-check-label" for="pid412">
-                                        <small><strong>PID-412:</strong> Device supports wireless networking</small>
-                                    </label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" name="embed_networking[]" value="PID-413" id="pid413">
-                                    <label class="form-check-label" for="pid413">
-                                        <small><strong>PID-413:</strong> Device supports wired networking (Ethernet)</small>
-                                    </label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" name="embed_networking[]" value="PID-414" id="pid414">
-                                    <label class="form-check-label" for="pid414">
-                                        <small><strong>PID-414:</strong> Device includes network security protocols</small>
+                                    <input class="form-check-input" type="checkbox" name="embed_networking[]" value="NET.2" id="net2">
+                                    <label class="form-check-label" for="net2">
+                                        <small><strong>NET.2:</strong> Network Services</small>
                                     </label>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" name="embed_networking[]" value="PID-415" id="pid415">
-                                    <label class="form-check-label" for="pid415">
-                                        <small><strong>PID-415:</strong> Device includes network authentication mechanisms</small>
+                                    <input class="form-check-input" type="checkbox" name="embed_networking[]" value="NET.3" id="net3">
+                                    <label class="form-check-label" for="net3">
+                                        <small><strong>NET.3:</strong> Encryption Protocols</small>
                                     </label>
                                 </div>
                                 <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" name="embed_networking[]" value="PID-416" id="pid416">
-                                    <label class="form-check-label" for="pid416">
-                                        <small><strong>PID-416:</strong> Device includes network monitoring capabilities</small>
-                                    </label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" name="embed_networking[]" value="PID-417" id="pid417">
-                                    <label class="form-check-label" for="pid417">
-                                        <small><strong>PID-417:</strong> Device includes firewall or filtering capabilities</small>
-                                    </label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" name="embed_networking[]" value="PID-418" id="pid418">
-                                    <label class="form-check-label" for="pid418">
-                                        <small><strong>PID-418:</strong> Device supports cloud connectivity</small>
-                                    </label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" name="embed_networking[]" value="PID-419" id="pid419">
-                                    <label class="form-check-label" for="pid419">
-                                        <small><strong>PID-419:</strong> Device supports peer-to-peer networking</small>
+                                    <input class="form-check-input" type="checkbox" name="embed_networking[]" value="NET.4" id="net4">
+                                    <label class="form-check-label" for="net4">
+                                        <small><strong>NET.4:</strong> Cloud Connectivity</small>
                                     </label>
                                 </div>
                             </div>
                         </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-4">
+                        <button type="button" class="btn btn-outline-secondary" id="clearFormBtn">
+                            <i data-feather="refresh-cw" class="me-1"></i>Clear All
+                        </button>
+                        <button type="button" class="btn btn-success" id="demoDataBtn">
+                            <i data-feather="zap" class="me-1"></i>Load Demo Data
+                        </button>
+                        <button type="button" class="btn btn-primary btn-lg px-4" id="questionnaireSubmitBtn">
+                            <i data-feather="play" class="me-2"></i>
+                            Generate Report
+                        </button>
                     </div>
                 </div>
             </div>
-
-            <!-- Upload Form -->
-            <form id="uploadForm" action="{{ url_for('upload_files') }}" method="post" enctype="multipart/form-data">
-                <!-- Hidden inputs for configuration -->
-                <input type="hidden" name="selected_input_type" id="selected_input_type" value="threat_model">
-                <input type="hidden" name="selected_cross_ref_source" id="selected_cross_ref_source" value="mitre_attack">
-                <input type="hidden" name="embed_properties" id="embed_properties" value="">
-                
-                <div class="row g-4 mb-4" id="uploadSections">
-                    <!-- Threat Model Upload -->
-                    <div class="col-md-4">
-                        <div class="card h-100">
-                            <div class="card-header">
-                                <h5 class="card-title mb-0">
-                                    <i data-feather="file-text" class="me-2"></i>
-                                    Threat Model
-                                </h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="upload-zone" id="threatModelZone">
-                                    <input type="file" name="threat_model" id="threatModel" class="file-input" accept=".json,.yaml,.yml" required>
-                                    <div class="upload-content">
-                                        <i data-feather="upload-cloud" class="mb-3 text-muted" style="width: 48px; height: 48px;"></i>
-                                        <h6 class="mb-2">Drop file here or click to browse</h6>
-                                        <p class="text-muted small mb-0">JSON or YAML format</p>
-                                        <p class="text-muted small">Max size: 50MB</p>
-                                    </div>
-                                    <div class="file-info mt-2" style="display: none;">
-                                        <i data-feather="file" class="me-1"></i>
-                                        <span class="filename"></span>
-                                    </div>
-                                </div>
-                                <div class="mt-3">
-                                    <small class="text-muted">
-                                        <strong>Required:</strong> File containing threats, assets, risks, and mitigations
-                                    </small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Block Diagram Upload -->
-                    <div class="col-md-4">
-                        <div class="card h-100">
-                            <div class="card-header">
-                                <h5 class="card-title mb-0">
-                                    <i data-feather="layers" class="me-2"></i>
-                                    Block Diagram
-                                </h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="upload-zone" id="blockDiagramZone">
-                                    <input type="file" name="block_diagram" id="blockDiagram" class="file-input" accept=".svg,.png,.jpg,.jpeg" required>
-                                    <div class="upload-content">
-                                        <i data-feather="upload-cloud" class="mb-3 text-muted" style="width: 48px; height: 48px;"></i>
-                                        <h6 class="mb-2">Drop file here or click to browse</h6>
-                                        <p class="text-muted small mb-0">SVG, PNG, or JPEG format</p>
-                                        <p class="text-muted small">Max size: 50MB</p>
-                                    </div>
-                                    <div class="file-info mt-2" style="display: none;">
-                                        <i data-feather="image" class="me-1"></i>
-                                        <span class="filename"></span>
-                                    </div>
-                                </div>
-                                <div class="mt-3">
-                                    <small class="text-muted">
-                                        <strong>Required:</strong> System architecture or network diagram
-                                    </small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Cross-mapping Data Upload -->
-                    <div class="col-md-4">
-                        <div class="card h-100">
-                            <div class="card-header">
-                                <h5 class="card-title mb-0">
-                                    <i data-feather="target" class="me-2"></i>
-                                    Cross-mapping Data
-                                </h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="upload-zone" id="crossmapZone">
-                                    <input type="file" name="crossmap" id="crossmap" class="file-input" accept=".json" required>
-                                    <div class="upload-content">
-                                        <i data-feather="upload-cloud" class="mb-3 text-muted" style="width: 48px; height: 48px;"></i>
-                                        <h6 class="mb-2">Drop file here or click to browse</h6>
-                                        <p class="text-muted small mb-0">JSON format</p>
-                                        <p class="text-muted small">Max size: 50MB</p>
-                                    </div>
-                                    <div class="file-info mt-2" style="display: none;">
-                                        <i data-feather="file" class="me-1"></i>
-                                        <span class="filename"></span>
-                                    </div>
-                                </div>
-                                <div class="mt-3">
-                                    <small class="text-muted">
-                                        <strong>Required:</strong> MITRE ATT&CK and ENGAGE mappings
-                                    </small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Progress Bar -->
-                <div class="upload-progress mb-4">
-                    <div class="d-flex align-items-center justify-content-center">
-                        <div class="spinner-border text-primary me-3" role="status">
-                            <span class="visually-hidden">Processing...</span>
-                        </div>
-                        <div>
-                            <h6 class="mb-0">Processing Analysis...</h6>
-                            <small class="text-muted">This may take a few moments</small>
-                        </div>
-                    </div>
-                    <div class="progress mt-3">
-                        <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
-                    </div>
-                </div>
-
-                <!-- Submit Button -->
-                <div class="text-center">
-                    <button type="submit" class="btn btn-primary btn-lg px-5" id="submitBtn">
-                        <i data-feather="play" class="me-2"></i>
-                        Generate TARA Report
-                    </button>
-                </div>
-            </form>
 
             <!-- Help Section -->
             <div class="row mt-5">
@@ -561,35 +350,26 @@
                         <div class="card-body">
                             <h5 class="card-title">
                                 <i data-feather="help-circle" class="me-2"></i>
-                                File Format Guidelines
+                                How to Use
                             </h5>
                             <div class="row">
-                                <div class="col-md-4">
-                                    <h6 class="text-primary">Threat Model</h6>
-                                    <ul class="small text-muted">
-                                        <li>JSON or YAML format</li>
-                                        <li>Contains threats, assets, risks</li>
-                                        <li>Include severity and impact ratings</li>
-                                        <li>Specify affected assets for each threat</li>
-                                    </ul>
+                                <div class="col-md-6">
+                                    <h6 class="text-primary">CSV Heatmap Method</h6>
+                                    <ol class="small text-muted">
+                                        <li>Visit the MITRE EMB3D website</li>
+                                        <li>Complete device assessment questionnaire</li>
+                                        <li>Export CSV heatmap file</li>
+                                        <li>Upload here for analysis</li>
+                                    </ol>
                                 </div>
-                                <div class="col-md-4">
-                                    <h6 class="text-primary">Block Diagram</h6>
-                                    <ul class="small text-muted">
-                                        <li>SVG format preferred</li>
-                                        <li>PNG/JPEG also supported</li>
-                                        <li>Shows system components</li>
-                                        <li>Includes data flow directions</li>
-                                    </ul>
-                                </div>
-                                <div class="col-md-4">
-                                    <h6 class="text-primary">Cross-mapping Data</h6>
-                                    <ul class="small text-muted">
-                                        <li>JSON format required</li>
-                                        <li>MITRE ATT&CK technique mappings</li>
-                                        <li>MITRE ENGAGE strategy mappings</li>
-                                        <li>Threat-to-technique relationships</li>
-                                    </ul>
+                                <div class="col-md-6">
+                                    <h6 class="text-primary">Questionnaire Method</h6>
+                                    <ol class="small text-muted">
+                                        <li>Select device properties that apply</li>
+                                        <li>Choose from hardware, software, and networking</li>
+                                        <li>Use "Demo Data" for sample selections</li>
+                                        <li>Generate comprehensive EMB3D report</li>
+                                    </ol>
                                 </div>
                             </div>
                         </div>
@@ -602,5 +382,108 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="{{ url_for('static', filename='js/upload.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const csvRadio = document.getElementById('input_csv');
+    const questionnaireRadio = document.getElementById('input_questionnaire');
+    const csvSection = document.getElementById('csvUploadSection');
+    const questionnaireSection = document.getElementById('questionnaireSection');
+    const selectedInputType = document.getElementById('selected_input_type');
+
+    function toggleSections() {
+        if (csvRadio.checked) {
+            csvSection.style.display = 'block';
+            questionnaireSection.style.display = 'none';
+            selectedInputType.value = 'csv_heatmap';
+        } else {
+            csvSection.style.display = 'none';
+            questionnaireSection.style.display = 'block';
+            selectedInputType.value = 'questionnaire';
+        }
+    }
+
+    csvRadio.addEventListener('change', toggleSections);
+    questionnaireRadio.addEventListener('change', toggleSections);
+
+    // Demo data functionality
+    document.getElementById('demoDataBtn').addEventListener('click', function() {
+        // Select some sample properties
+        document.getElementById('hw1').checked = true;
+        document.getElementById('hw3').checked = true;
+        document.getElementById('sw1').checked = true;
+        document.getElementById('sw2').checked = true;
+        document.getElementById('app1').checked = true;
+        document.getElementById('net1').checked = true;
+        document.getElementById('net3').checked = true;
+    });
+
+    // Clear form functionality
+    document.getElementById('clearFormBtn').addEventListener('click', function() {
+        const checkboxes = document.querySelectorAll('#questionnaireSection input[type="checkbox"]');
+        checkboxes.forEach(cb => cb.checked = false);
+    });
+
+    // Questionnaire submit
+    document.getElementById('questionnaireSubmitBtn').addEventListener('click', function() {
+        const form = document.getElementById('uploadForm');
+        
+        // Collect selected properties
+        const properties = {
+            hardware: [],
+            system_software: [],
+            application_software: [],
+            networking: []
+        };
+
+        document.querySelectorAll('input[name="embed_hardware[]"]:checked').forEach(cb => {
+            properties.hardware.push(cb.value);
+        });
+        document.querySelectorAll('input[name="embed_system_software[]"]:checked').forEach(cb => {
+            properties.system_software.push(cb.value);
+        });
+        document.querySelectorAll('input[name="embed_application_software[]"]:checked').forEach(cb => {
+            properties.application_software.push(cb.value);
+        });
+        document.querySelectorAll('input[name="embed_networking[]"]:checked').forEach(cb => {
+            properties.networking.push(cb.value);
+        });
+
+        document.getElementById('embed_properties').value = JSON.stringify(properties);
+        form.submit();
+    });
+
+    // File upload handling
+    const fileInput = document.getElementById('embed3d_csv');
+    const uploadZone = document.getElementById('csvUploadZone');
+    const fileInfo = uploadZone.querySelector('.file-info');
+    const filename = fileInfo.querySelector('.filename');
+
+    fileInput.addEventListener('change', function() {
+        if (this.files.length > 0) {
+            const file = this.files[0];
+            filename.textContent = file.name;
+            fileInfo.style.display = 'block';
+            uploadZone.classList.add('file-selected');
+        }
+    });
+
+    // Progress bar simulation
+    const form = document.getElementById('uploadForm');
+    const progress = document.querySelector('.upload-progress');
+    const progressBar = document.querySelector('.progress-bar');
+
+    form.addEventListener('submit', function() {
+        progress.style.display = 'block';
+        let width = 0;
+        const interval = setInterval(function() {
+            width += Math.random() * 15;
+            if (width >= 90) {
+                clearInterval(interval);
+                width = 90;
+            }
+            progressBar.style.width = width + '%';
+        }, 300);
+    });
+});
+</script>
 {% endblock %}
