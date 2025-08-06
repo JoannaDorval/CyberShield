@@ -281,48 +281,294 @@
                             <!-- PID-23 -->
                             <div class="property-item mb-2">
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-23" id="PID-23">
+                                    <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-23" id="PID-23" data-parent>
                                     <label class="form-check-label" for="PID-23"><strong>PID-23:</strong> Device includes OS/kernel</label>
                                 </div>
-                            </div>
-
-                            <!-- PID-231 -->
-                            <div class="property-item mb-2">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-231" id="PID-231">
-                                    <label class="form-check-label" for="PID-231"><strong>PID-231:</strong> Device includes an operating system that uses drivers/modules that can be loaded</label>
-                                </div>
-                            </div>
-
-                            <!-- PID-232 -->
-                            <div class="property-item mb-2">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-232" id="PID-232" data-parent>
-                                    <label class="form-check-label" for="PID-232"><strong>PID-232:</strong> Device includes separate users/processes with access to different OS data or functions</label>
-                                </div>
-                                <div class="property-children ms-4 mt-2" id="children-PID-232" style="display: none;">
+                                <div class="property-children ms-4 mt-2" id="children-PID-23" style="display: none;">
                                     <div class="form-check mb-1">
-                                        <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-2321" id="PID-2321" data-child-of="PID-232">
-                                        <label class="form-check-label" for="PID-2321"><strong>PID-2321:</strong> Device lacks an access enforcement/privilege mechanism</label>
+                                        <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-231" id="PID-231" data-child-of="PID-23">
+                                        <label class="form-check-label" for="PID-231"><strong>PID-231:</strong> Device includes an operating system that uses drivers/modules that can be loaded</label>
                                     </div>
                                     <div class="form-check mb-1">
-                                        <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-2322" id="PID-2322" data-child-of="PID-232" data-parent>
-                                        <label class="form-check-label" for="PID-2322"><strong>PID-2322:</strong> Device deploys an access enforcement/privilege mechanism</label>
+                                        <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-232" id="PID-232" data-child-of="PID-23" data-parent>
+                                        <label class="form-check-label" for="PID-232"><strong>PID-232:</strong> Device includes separate users/processes with access to different OS data or functions</label>
                                     </div>
-                                    <div class="property-children ms-4 mt-1" id="children-PID-2322" style="display: none;">
+                                    <div class="property-children ms-4 mt-1" id="children-PID-232" style="display: none;">
                                         <div class="form-check mb-1">
-                                            <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-23221" id="PID-23221" data-child-of="PID-2322">
-                                            <label class="form-check-label" for="PID-23221"><strong>PID-23221:</strong> Device includes and enforces OS user accounts</label>
+                                            <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-2321" id="PID-2321" data-child-of="PID-232">
+                                            <label class="form-check-label" for="PID-2321"><strong>PID-2321:</strong> Device lacks an access enforcement/privilege mechanism</label>
                                         </div>
                                         <div class="form-check mb-1">
-                                            <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-23222" id="PID-23222" data-child-of="PID-2322">
-                                            <label class="form-check-label" for="PID-23222"><strong>PID-23222:</strong> Device includes a memory management model, including protections of memory access (read-only, executable, writable)</label>
+                                            <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-2322" id="PID-2322" data-child-of="PID-232" data-parent>
+                                            <label class="form-check-label" for="PID-2322"><strong>PID-2322:</strong> Device deploys an access enforcement/privilege mechanism</label>
+                                        </div>
+                                        <div class="property-children ms-4 mt-1" id="children-PID-2322" style="display: none;">
+                                            <div class="form-check mb-1">
+                                                <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-23221" id="PID-23221" data-child-of="PID-2322">
+                                                <label class="form-check-label" for="PID-23221"><strong>PID-23221:</strong> Device includes and enforces OS user accounts</label>
+                                            </div>
+                                            <div class="form-check mb-1">
+                                                <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-23222" id="PID-23222" data-child-of="PID-2322">
+                                                <label class="form-check-label" for="PID-23222"><strong>PID-23222:</strong> Device includes a memory management model, including protections of memory access (read-only, executable, writable)</label>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Additional System Software Properties (continue with remaining PIDs) -->
+                            <!-- PID-24 -->
+                            <div class="property-item mb-2">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-24" id="PID-24" data-parent>
+                                    <label class="form-check-label" for="PID-24"><strong>PID-24:</strong> Device includes virtualization and containers</label>
+                                </div>
+                                <div class="property-children ms-4 mt-2" id="children-PID-24" style="display: none;">
+                                    <div class="form-check mb-1">
+                                        <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-241" id="PID-241" data-child-of="PID-24">
+                                        <label class="form-check-label" for="PID-241"><strong>PID-241:</strong> Device includes containers</label>
+                                    </div>
+                                    <div class="form-check mb-1">
+                                        <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-242" id="PID-242" data-child-of="PID-24">
+                                        <label class="form-check-label" for="PID-242"><strong>PID-242:</strong> Device includes hypervisor</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- PID-25 -->
+                            <div class="property-item mb-2">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-25" id="PID-25" data-parent>
+                                    <label class="form-check-label" for="PID-25"><strong>PID-25:</strong> Device includes software/hardware root of trust</label>
+                                </div>
+                                <div class="property-children ms-4 mt-2" id="children-PID-25" style="display: none;">
+                                    <div class="form-check mb-1">
+                                        <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-251" id="PID-251" data-child-of="PID-25">
+                                        <label class="form-check-label" for="PID-251"><strong>PID-251:</strong> Root of Trust is physically accessible or is not immutable</label>
+                                    </div>
+                                    <div class="form-check mb-1">
+                                        <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-252" id="PID-252" data-child-of="PID-25">
+                                        <label class="form-check-label" for="PID-252"><strong>PID-252:</strong> Root of Trust is immutable</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- PID-26 -->
+                            <div class="property-item mb-2">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-26" id="PID-26">
+                                    <label class="form-check-label" for="PID-26"><strong>PID-26:</strong> Device lacks firmware/software update support</label>
+                                </div>
+                            </div>
+
+                            <!-- PID-27 -->
+                            <div class="property-item mb-2">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-27" id="PID-27" data-parent>
+                                    <label class="form-check-label" for="PID-27"><strong>PID-27:</strong> Device includes support for firmware/software updates</label>
+                                </div>
+                                <div class="property-children ms-4 mt-2" id="children-PID-27" style="display: none;">
+                                    <div class="form-check mb-1">
+                                        <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-271" id="PID-271" data-child-of="PID-27">
+                                        <label class="form-check-label" for="PID-271"><strong>PID-271:</strong> Device has firmware or software that is not cryptographically checked for integrity validation</label>
+                                    </div>
+                                    <div class="form-check mb-1">
+                                        <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-272" id="PID-272" data-child-of="PID-27" data-parent>
+                                        <label class="form-check-label" for="PID-272"><strong>PID-272:</strong> Device includes cryptographic firmware/software integrity protection mechanisms</label>
+                                    </div>
+                                    <div class="property-children ms-4 mt-1" id="children-PID-272" style="display: none;">
+                                        <div class="form-check mb-1">
+                                            <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-2721" id="PID-2721" data-child-of="PID-272">
+                                            <label class="form-check-label" for="PID-2721"><strong>PID-2721:</strong> Device includes a shared key for firmware integrity validation</label>
+                                        </div>
+                                        <div class="form-check mb-1">
+                                            <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-2722" id="PID-2722" data-child-of="PID-272">
+                                            <label class="form-check-label" for="PID-2722"><strong>PID-2722:</strong> Device includes digitally signed firmware (with private key)</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-check mb-1">
+                                        <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-273" id="PID-273" data-child-of="PID-27">
+                                        <label class="form-check-label" for="PID-273"><strong>PID-273:</strong> Device has unencrypted firmware updates</label>
+                                    </div>
+                                    <div class="form-check mb-1">
+                                        <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-274" id="PID-274" data-child-of="PID-27">
+                                        <label class="form-check-label" for="PID-274"><strong>PID-274:</strong> Device includes user firmware/software version selection during updates</label>
+                                    </div>
+                                    <div class="form-check mb-1">
+                                        <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-275" id="PID-275" data-child-of="PID-27">
+                                        <label class="form-check-label" for="PID-275"><strong>PID-275:</strong> Device includes remotely-initiated firmware/software updates</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- PID-28 -->
+                            <div class="property-item mb-2">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-28" id="PID-28">
+                                    <label class="form-check-label" for="PID-28"><strong>PID-28:</strong> Device stores logs of system events and information</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Application Software Properties -->
+                    <div class="property-category mb-4">
+                        <h6 class="property-category-title text-primary mb-3">
+                            <i data-feather="layers" class="me-2"></i>
+                            Application Software Properties
+                        </h6>
+                        <div class="property-items">
+                            <!-- PID-31 -->
+                            <div class="property-item mb-2">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-31" id="PID-31">
+                                    <label class="form-check-label" for="PID-31"><strong>PID-31:</strong> Application-level software is present and running on the device</label>
+                                </div>
+                            </div>
+
+                            <!-- PID-311 -->
+                            <div class="property-item mb-2">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-311" id="PID-311">
+                                    <label class="form-check-label" for="PID-311"><strong>PID-311:</strong> Device includes the usage of a web/HTTP applications</label>
+                                </div>
+                            </div>
+
+                            <!-- PID-312 -->
+                            <div class="property-item mb-2">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-312" id="PID-312" data-parent>
+                                    <label class="form-check-label" for="PID-312"><strong>PID-312:</strong> Device includes programming languages and libraries</label>
+                                </div>
+                                <div class="property-children ms-4 mt-2" id="children-PID-312" style="display: none;">
+                                    <div class="form-check mb-1">
+                                        <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-3121" id="PID-3121" data-child-of="PID-312">
+                                        <label class="form-check-label" for="PID-3121"><strong>PID-3121:</strong> Device includes support for object oriented programming languages (e.g., Java, Python, PHP, C++)</label>
+                                    </div>
+                                    <div class="form-check mb-1">
+                                        <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-3122" id="PID-3122" data-child-of="PID-312">
+                                        <label class="form-check-label" for="PID-3122"><strong>PID-3122:</strong> Device includes support for manual memory management programming languages (e.g., C, C++)</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- PID-32 -->
+                            <div class="property-item mb-2">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-32" id="PID-32" data-parent>
+                                    <label class="form-check-label" for="PID-32"><strong>PID-32:</strong> Device includes the ability to deploy custom or external programs</label>
+                                </div>
+                                <div class="property-children ms-4 mt-2" id="children-PID-32" style="display: none;">
+                                    <div class="form-check mb-1">
+                                        <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-321" id="PID-321" data-child-of="PID-32">
+                                        <label class="form-check-label" for="PID-321"><strong>PID-321:</strong> Device includes ability to deploy custom programs from engineering software or IDE</label>
+                                    </div>
+                                    <div class="form-check mb-1">
+                                        <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-322" id="PID-322" data-child-of="PID-32">
+                                        <label class="form-check-label" for="PID-322"><strong>PID-322:</strong> Device includes a program runtime environment for custom or external programs</label>
+                                    </div>
+                                    <div class="form-check mb-1">
+                                        <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-323" id="PID-323" data-child-of="PID-32" data-parent>
+                                        <label class="form-check-label" for="PID-323"><strong>PID-323:</strong> Device includes support for program executable formats</label>
+                                    </div>
+                                    <div class="property-children ms-4 mt-1" id="children-PID-323" style="display: none;">
+                                        <div class="form-check mb-1">
+                                            <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-3231" id="PID-3231" data-child-of="PID-323">
+                                            <label class="form-check-label" for="PID-3231"><strong>PID-3231:</strong> Device includes ability to run custom/external programs as native binary without a confined/restricted environment</label>
+                                        </div>
+                                        <div class="form-check mb-1">
+                                            <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-3232" id="PID-3232" data-child-of="PID-323">
+                                            <label class="form-check-label" for="PID-3232"><strong>PID-3232:</strong> Device includes ability to run custom/external programs/processes through an execution sandboxed environment</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-check mb-1">
+                                        <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-324" id="PID-324" data-child-of="PID-32">
+                                        <label class="form-check-label" for="PID-324"><strong>PID-324:</strong> Device includes support for 'program uploads' to retrieve programs from the device from an engineering workstation</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- PID-33 -->
+                            <div class="property-item mb-2">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-33" id="PID-33" data-parent>
+                                    <label class="form-check-label" for="PID-33"><strong>PID-33:</strong> Device includes interactive applications, services, or user interfaces</label>
+                                </div>
+                                <div class="property-children ms-4 mt-2" id="children-PID-33" style="display: none;">
+                                    <div class="form-check mb-1">
+                                        <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-331" id="PID-331" data-child-of="PID-33">
+                                        <label class="form-check-label" for="PID-331"><strong>PID-331:</strong> Device includes unauthenticated services</label>
+                                    </div>
+                                    <div class="form-check mb-1">
+                                        <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-332" id="PID-332" data-child-of="PID-33" data-parent>
+                                        <label class="form-check-label" for="PID-332"><strong>PID-332:</strong> Device includes authenticated services</label>
+                                    </div>
+                                    <div class="property-children ms-4 mt-1" id="children-PID-332" style="display: none;">
+                                        <div class="form-check mb-1">
+                                            <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-3321" id="PID-3321" data-child-of="PID-332">
+                                            <label class="form-check-label" for="PID-3321"><strong>PID-3321:</strong> Device includes passwords to authenticate the users</label>
+                                        </div>
+                                        <div class="form-check mb-1">
+                                            <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-3322" id="PID-3322" data-child-of="PID-332">
+                                            <label class="form-check-label" for="PID-3322"><strong>PID-3322:</strong> Device includes cryptographic mechanism to authenticate users and sessions</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- PID-34 -->
+                            <div class="property-item mb-2">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-34" id="PID-34">
+                                    <label class="form-check-label" for="PID-34"><strong>PID-34:</strong> Device stores logs of application events and information</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Networking Properties -->
+                    <div class="property-category mb-4">
+                        <h6 class="property-category-title text-primary mb-3">
+                            <i data-feather="wifi" class="me-2"></i>
+                            Networking Properties
+                        </h6>
+                        <div class="property-items">
+                            <!-- PID-41 -->
+                            <div class="property-item mb-2">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-41" id="PID-41">
+                                    <label class="form-check-label" for="PID-41"><strong>PID-41:</strong> Device exposes remote network services</label>
+                                </div>
+                            </div>
+
+                            <!-- PID-411 -->
+                            <div class="property-item mb-2">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-411" id="PID-411" data-parent>
+                                    <label class="form-check-label" for="PID-411"><strong>PID-411:</strong> Device exposes remote services with the ability to send, receive, view or modify sensitive information or configurations</label>
+                                </div>
+                                <div class="property-children ms-4 mt-2" id="children-PID-411" style="display: none;">
+                                    <div class="form-check mb-1">
+                                        <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-4111" id="PID-4111" data-child-of="PID-411">
+                                        <label class="form-check-label" for="PID-4111"><strong>PID-4111:</strong> Device lacks protocol support for message authentication</label>
+                                    </div>
+                                    <div class="form-check mb-1">
+                                        <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-4112" id="PID-4112" data-child-of="PID-411">
+                                        <label class="form-check-label" for="PID-4112"><strong>PID-4112:</strong> Device lacks protocol support for message encryption</label>
+                                    </div>
+                                    <div class="form-check mb-1">
+                                        <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-4113" id="PID-4113" data-child-of="PID-411">
+                                        <label class="form-check-label" for="PID-4113"><strong>PID-4113:</strong> Device includes cryptographic functions for sensitive data, such as encryption or authentication</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- PID-42 -->
+                            <div class="property-item mb-2">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="embed_properties[]" value="PID-42" id="PID-42">
+                                    <label class="form-check-label" for="PID-42"><strong>PID-42:</strong> Device includes procedure to forward or route network messages</label>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -452,6 +698,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Trigger parent-child logic for demo data
         const event = new Event('change');
         document.getElementById('PID-12').dispatchEvent(event);
+        document.getElementById('PID-23').dispatchEvent(event);
         document.getElementById('PID-232').dispatchEvent(event);
         document.getElementById('PID-2322').dispatchEvent(event);
     });

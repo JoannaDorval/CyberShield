@@ -35,17 +35,21 @@ class MitreEmbedIntegrator:
         "System Software": {
             "PID-21": { "label": "Device includes a bootloader" },
             "PID-22": { "label": "Device includes a debugging capabilities" },
-            "PID-23": { "label": "Device includes OS/kernel" },
-            "PID-231": { "label": "Device includes an operating system that uses drivers/modules that can be loaded" },
-            "PID-232": {
-                "label": "Device includes separate users/processes with access to different OS data or functions",
+            "PID-23": {
+                "label": "Device includes OS/kernel",
                 "children": {
-                    "PID-2321": { "label": "Device lacks an access enforcement/privilege mechanism" },
-                    "PID-2322": {
-                        "label": "Device deploys an access enforcement/privilege mechanism",
+                    "PID-231": { "label": "Device includes an operating system that uses drivers/modules that can be loaded" },
+                    "PID-232": {
+                        "label": "Device includes separate users/processes with access to different OS data or functions",
                         "children": {
-                            "PID-23221": { "label": "Device includes and enforces OS user accounts" },
-                            "PID-23222": { "label": "Device includes a memory management model, including protections of memory access (read-only, executable, writable)" }
+                            "PID-2321": { "label": "Device lacks an access enforcement/privilege mechanism" },
+                            "PID-2322": {
+                                "label": "Device deploys an access enforcement/privilege mechanism",
+                                "children": {
+                                    "PID-23221": { "label": "Device includes and enforces OS user accounts" },
+                                    "PID-23222": { "label": "Device includes a memory management model, including protections of memory access (read-only, executable, writable)" }
+                                }
+                            }
                         }
                     }
                 }
