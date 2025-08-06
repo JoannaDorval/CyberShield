@@ -492,16 +492,34 @@ document.addEventListener('DOMContentLoaded', function() {
         uploadZone.classList.remove('dragover');
         
         const files = e.dataTransfer.files;
+        console.log('Files dropped:', files.length, files);
+        
         if (files.length > 0) {
             const file = files[0];
-            if (file.name.toLowerCase().endsWith('.csv')) {
-                // Use DataTransfer to properly set files
-                const dataTransfer = new DataTransfer();
-                dataTransfer.items.add(file);
-                fileInput.files = dataTransfer.files;
+            console.log('File name:', file.name, 'Type:', file.type, 'Size:', file.size);
+            
+            // Check if it's a CSV file (by extension or MIME type)
+            const isCSV = file.name.toLowerCase().endsWith('.csv') || 
+                         file.type === 'text/csv' || 
+                         file.type === 'application/csv';
+            
+            if (isCSV) {
+                console.log('Valid CSV file detected');
+                // Try modern DataTransfer approach
+                try {
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(file);
+                    fileInput.files = dataTransfer.files;
+                    console.log('File transferred to input:', fileInput.files.length);
+                } catch (error) {
+                    console.error('DataTransfer failed:', error);
+                    // Fallback: store file reference for form submission
+                    fileInput.droppedFile = file;
+                }
                 handleFileSelection(file);
             } else {
-                alert('Please select a CSV file');
+                console.log('Invalid file type:', file.name, file.type);
+                alert('Please select a CSV file. File type detected: ' + (file.type || 'unknown'));
             }
         }
     });
@@ -526,7 +544,56 @@ document.addEventListener('DOMContentLoaded', function() {
     const progress = document.querySelector('.upload-progress');
     const progressBar = document.querySelector('.progress-bar');
 
-    form.addEventListener('submit', function() {
+    form.addEventListener('submit', function(e) {
+        console.log('Form submit triggered');
+        console.log('File input files:', fileInput.files.length);
+        
+        // If no files selected via normal input but we have a dropped file
+        if (fileInput.files.length === 0 && fileInput.droppedFile) {
+            console.log('Using dropped file for submission');
+            // Create FormData manually to include dropped file
+            e.preventDefault();
+            
+            const formData = new FormData();
+            formData.append('embed3d_csv', fileInput.droppedFile);
+            formData.append('selected_input_type', 'csv_heatmap');
+            formData.append('embed_properties', '');
+            
+            progress.style.display = 'block';
+            let width = 0;
+            const interval = setInterval(function() {
+                width += Math.random() * 15;
+                if (width >= 90) {
+                    clearInterval(interval);
+                    width = 90;
+                }
+                progressBar.style.width = width + '%';
+            }, 300);
+            
+            // Submit via fetch
+            fetch(form.action, {
+                method: 'POST',
+                body: formData
+            }).then(response => {
+                if (response.redirected) {
+                    window.location.href = response.url;
+                } else {
+                    return response.text();
+                }
+            }).then(html => {
+                if (html) {
+                    document.body.innerHTML = html;
+                }
+            }).catch(error => {
+                console.error('Upload error:', error);
+                alert('Upload failed. Please try again.');
+                progress.style.display = 'none';
+            });
+            
+            return false;
+        }
+        
+        // Normal form submission
         progress.style.display = 'block';
         let width = 0;
         const interval = setInterval(function() {
