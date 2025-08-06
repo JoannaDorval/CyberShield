@@ -9,16 +9,20 @@
                 <i data-feather="shield" class="hero-icon text-primary"></i>
             </div>
             <h1 class="display-4 fw-bold mb-3">TARA</h1>
-            <p class="lead mb-4">Threat Assessment and Remediation Analysis</p>
+            <p class="lead mb-4">IoT/Embedded Device Security Assessment</p>
             <p class="fs-5 text-muted mb-4">
-                Advanced cybersecurity threat analysis platform that processes threat models, 
-                system architectures, and cross-mapping data to generate comprehensive TARA documents 
-                with MITRE ATT&CK framework integration.
+                Advanced cybersecurity platform for IoT and embedded device security assessment using 
+                MITRE EMB3D framework. Upload CSV heatmaps or complete device questionnaires to generate 
+                comprehensive security analysis with professional Excel reports.
             </p>
             <div class="d-grid gap-2 d-md-flex justify-content-md-center">
-                <a href="{{ url_for('upload_page') }}" class="btn btn-primary btn-lg px-4">
+                <a href="{{ url_for('upload_page') }}" class="btn btn-primary btn-lg px-4 me-3">
                     <i data-feather="upload" class="me-2"></i>
-                    Start New Analysis
+                    Start EMB3D Analysis
+                </a>
+                <a href="{{ url_for('demo') }}" class="btn btn-outline-primary btn-lg px-4">
+                    <i data-feather="zap" class="me-2"></i>
+                    Try Demo
                 </a>
             </div>
         </div>
@@ -30,12 +34,12 @@
             <div class="card h-100 border-0 shadow-sm">
                 <div class="card-body text-center p-4">
                     <div class="mb-3">
-                        <i data-feather="file-text" class="feature-icon text-info"></i>
+                        <i data-feather="cpu" class="feature-icon text-info"></i>
                     </div>
-                    <h5 class="card-title">Threat Model Processing</h5>
+                    <h5 class="card-title">EMB3D CSV Processing</h5>
                     <p class="card-text text-muted">
-                        Parse and analyze JSON/YAML threat models to extract threats, assets, 
-                        risks, and mitigations with comprehensive data normalization.
+                        Import CSV heatmap files directly from MITRE EMB3D website assessment 
+                        tool for comprehensive IoT device security analysis.
                     </p>
                 </div>
             </div>
@@ -45,12 +49,12 @@
             <div class="card h-100 border-0 shadow-sm">
                 <div class="card-body text-center p-4">
                     <div class="mb-3">
-                        <i data-feather="layers" class="feature-icon text-success"></i>
+                        <i data-feather="check-square" class="feature-icon text-success"></i>
                     </div>
-                    <h5 class="card-title">Architecture Analysis</h5>
+                    <h5 class="card-title">Device Questionnaire</h5>
                     <p class="card-text text-muted">
-                        Analyze system block diagrams to identify components, data flows, 
-                        and security boundaries from SVG and image formats.
+                        Complete comprehensive device property questionnaire covering 
+                        hardware, software, networking, and application components.
                     </p>
                 </div>
             </div>
@@ -60,12 +64,12 @@
             <div class="card h-100 border-0 shadow-sm">
                 <div class="card-body text-center p-4">
                     <div class="mb-3">
-                        <i data-feather="target" class="feature-icon text-warning"></i>
+                        <i data-feather="file-text" class="feature-icon text-warning"></i>
                     </div>
-                    <h5 class="card-title">MITRE Integration</h5>
+                    <h5 class="card-title">Professional Reports</h5>
                     <p class="card-text text-muted">
-                        Map threats to MITRE ATT&CK techniques and generate defense strategies 
-                        using MITRE ENGAGE framework integration.
+                        Generate detailed Excel reports with MITRE EMB3D analysis, 
+                        threat vectors, security controls, and actionable recommendations.
                     </p>
                 </div>
             </div>
@@ -75,34 +79,34 @@
     <!-- Process Flow -->
     <div class="row justify-content-center mb-5">
         <div class="col-lg-10">
-            <h2 class="text-center mb-4">Analysis Process</h2>
+            <h2 class="text-center mb-4">EMB3D Analysis Process</h2>
             <div class="row g-3">
                 <div class="col-md-3">
                     <div class="process-step text-center">
                         <div class="process-number">1</div>
-                        <h6 class="mt-2">Upload Files</h6>
-                        <small class="text-muted">Threat model, block diagram, cross-mapping data</small>
+                        <h6 class="mt-2">Choose Input</h6>
+                        <small class="text-muted">CSV heatmap upload or device questionnaire</small>
                     </div>
                 </div>
                 <div class="col-md-3">
                     <div class="process-step text-center">
                         <div class="process-number">2</div>
-                        <h6 class="mt-2">Parse & Analyze</h6>
-                        <small class="text-muted">Extract threats, risks, and system components</small>
+                        <h6 class="mt-2">Device Assessment</h6>
+                        <small class="text-muted">Analyze IoT/embedded device properties and vulnerabilities</small>
                     </div>
                 </div>
                 <div class="col-md-3">
                     <div class="process-step text-center">
                         <div class="process-number">3</div>
-                        <h6 class="mt-2">MITRE Mapping</h6>
-                        <small class="text-muted">Map to ATT&CK techniques and tactics</small>
+                        <h6 class="mt-2">EMB3D Mapping</h6>
+                        <small class="text-muted">Map device properties to security controls and threats</small>
                     </div>
                 </div>
                 <div class="col-md-3">
                     <div class="process-step text-center">
                         <div class="process-number">4</div>
-                        <h6 class="mt-2">Generate Report</h6>
-                        <small class="text-muted">Comprehensive TARA document with recommendations</small>
+                        <h6 class="mt-2">Excel Report</h6>
+                        <small class="text-muted">Professional security assessment with recommendations</small>
                     </div>
                 </div>
             </div>
@@ -118,9 +122,10 @@
                     <div>
                         <h6 class="alert-heading mb-1">Security Notice</h6>
                         <p class="mb-0">
-                            This application is designed for internal cybersecurity analysis. All uploaded files 
-                            are processed securely and temporarily stored. Reports contain sensitive security 
-                            information and should be handled according to your organization's data classification policies.
+                            This application is designed for IoT and embedded device security assessment. 
+                            CSV files are processed securely and temporarily stored. Generated reports contain 
+                            sensitive device security information and should be handled according to your organization's 
+                            data classification policies.
                         </p>
                     </div>
                 </div>
