@@ -355,15 +355,16 @@ class TaraDesktopApp:
         # Initially hidden
         self.embed_frame.grid_remove()
 
-        # Get device properties from MITRE EMBED integrator
+        # Get hierarchical device properties from MITRE EMBED integrator
         device_props = self.embed_integrator.get_device_properties_form()
 
-        # Create tabs for each category
+        # Create tabs for each category with hierarchical structure
         self.embed_checkboxes = {}
+        self.parent_child_map = {}  # Track parent-child relationships
+        
         for category, properties in device_props.items():
             tab_frame = ttk.Frame(self.embed_notebook)
-            self.embed_notebook.add(tab_frame,
-                                    text=category.replace('_', ' ').title())
+            self.embed_notebook.add(tab_frame, text=category)
 
             # Create scrollable frame
             canvas = tk.Canvas(tab_frame, height=200)
@@ -385,17 +386,80 @@ class TaraDesktopApp:
             tab_frame.columnconfigure(0, weight=1)
             tab_frame.rowconfigure(0, weight=1)
 
-            # Add checkboxes for properties
-            self.embed_checkboxes[category] = {}
-            row = 0
-            for prop_id, description in properties.items():
+            # Add hierarchical checkboxes for properties
+            category_key = category.lower().replace(" ", "_")
+            self.embed_checkboxes[category_key] = {}
+            self.parent_child_map[category_key] = {}
+            
+            row = self._create_hierarchical_checkboxes(scrollable_frame, properties, category_key, 0, 0)
+
+    def _create_hierarchical_checkboxes(self, parent_frame, properties, category_key, row, indent_level):
+        """Create hierarchical checkboxes with parent-child relationships"""
+        for pid, prop_data in properties.items():
+            if isinstance(prop_data, dict) and "label" in prop_data:
+                # Create checkbox for this property
                 var = tk.BooleanVar()
-                checkbox = ttk.Checkbutton(scrollable_frame,
-                                           text=f"{prop_id}: {description}",
-                                           variable=var)
-                checkbox.grid(row=row, column=0, sticky="w", pady=2, padx=5)
-                self.embed_checkboxes[category][prop_id] = var
+                
+                # Create frame for indentation
+                prop_frame = ttk.Frame(parent_frame)
+                prop_frame.grid(row=row, column=0, sticky="ew", pady=1)
+                prop_frame.columnconfigure(1, weight=1)
+                
+                # Add indentation
+                if indent_level > 0:
+                    indent_label = ttk.Label(prop_frame, text="  " * indent_level)
+                    indent_label.grid(row=0, column=0, sticky="w")
+                
+                # Create checkbox
+                checkbox = ttk.Checkbutton(prop_frame,
+                                         text=f"{pid}: {prop_data['label']}",
+                                         variable=var)
+                checkbox.grid(row=0, column=1, sticky="w", padx=(5 if indent_level == 0 else 0, 5))
+                
+                self.embed_checkboxes[category_key][pid] = var
+                
+                # Set up parent-child relationship tracking
+                has_children = "children" in prop_data
+                if has_children:
+                    self.parent_child_map[category_key][pid] = {
+                        'var': var,
+                        'children': list(prop_data["children"].keys()),
+                        'checkbox': checkbox
+                    }
+                    
+                    # Add change handler for parent checkbox
+                    var.trace('w', lambda *args, p=pid, c=category_key: self._handle_parent_change(p, c))
+                
                 row += 1
+                
+                # Add children if they exist
+                if has_children:
+                    row = self._create_hierarchical_checkboxes(
+                        parent_frame, prop_data["children"], category_key, row, indent_level + 1
+                    )
+                    
+        return row
+
+    def _handle_parent_change(self, parent_pid, category_key):
+        """Handle parent checkbox change to show/hide and check/uncheck children"""
+        if parent_pid in self.parent_child_map[category_key]:
+            parent_var = self.parent_child_map[category_key][parent_pid]['var']
+            children_pids = self.parent_child_map[category_key][parent_pid]['children']
+            
+            if not parent_var.get():
+                # Parent unchecked - uncheck all children and nested children
+                self._uncheck_children_recursive(children_pids, category_key)
+    
+    def _uncheck_children_recursive(self, children_pids, category_key):
+        """Recursively uncheck children and their nested children"""
+        for child_pid in children_pids:
+            if child_pid in self.embed_checkboxes[category_key]:
+                self.embed_checkboxes[category_key][child_pid].set(False)
+                
+                # Check if this child has its own children
+                if child_pid in self.parent_child_map[category_key]:
+                    nested_children = self.parent_child_map[category_key][child_pid]['children']
+                    self._uncheck_children_recursive(nested_children, category_key)
 
     def on_workflow_change(self):
         """Handle workflow mode change for two-path toggle"""
@@ -416,16 +480,16 @@ class TaraDesktopApp:
                 self.embed_checkboxes[category][prop_id].set(False)
     
     def load_demo_questionnaire(self):
-        """Load demo questionnaire responses for testing - matches Flask demo"""
+        """Load demo questionnaire responses for testing - matches Flask demo with hierarchical PIDs"""
         # Clear all first
         self.clear_all_fields()
         
-        # Set demo responses to match Flask demo exactly
+        # Set demo responses with proper PID hierarchy to match Flask demo exactly
         demo_selections = {
-            "hardware": ["HW.1", "HW.3", "HW.5"],  # Hardware Debug, Crypto Hardware, Physical Interfaces
-            "system_software": ["SW.1", "SW.2", "SW.4"],  # OS, Updates, Logging
-            "application_software": ["APP.1", "APP.3"],  # Web Apps, API Interfaces
-            "networking": ["NET.1", "NET.2", "NET.3"]  # Wireless, Network Services, Encryption
+            "hardware": ["PID-11", "PID-12", "PID-121"],  # Microprocessor, Memory/Storage, External memory buses
+            "system_software": ["PID-21", "PID-23", "PID-232", "PID-2322"],  # Bootloader, OS, User processes, Access enforcement
+            "application_software": ["PID-31", "PID-311"],  # Application software, Web/HTTP applications
+            "networking": ["PID-41", "PID-411", "PID-4113"]  # Remote services, Sensitive data access, Crypto functions
         }
         
         for category, properties in demo_selections.items():
@@ -434,8 +498,8 @@ class TaraDesktopApp:
                     if prop_id in self.embed_checkboxes[category]:
                         self.embed_checkboxes[category][prop_id].set(True)
         
-        self.log_message("Demo questionnaire responses loaded (matches web app demo)")
-        messagebox.showinfo("Demo Data", "Loaded sample IoT security camera configuration.\n\nThis matches the Flask web app demo with identical threat analysis results.")
+        self.log_message("Demo questionnaire responses loaded with hierarchical PIDs (matches web app demo)")
+        messagebox.showinfo("Demo Data", "Loaded sample IoT device configuration with hierarchical MITRE EMB3D properties.\n\nThis demonstrates parent-child relationships and matches the Flask web app demo.")
 
     def create_progress_section(self, parent):
         """Create progress and status widgets"""
