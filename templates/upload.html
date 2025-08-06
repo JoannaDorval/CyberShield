@@ -519,7 +519,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 handleFileSelection(file);
             } else {
                 console.log('Invalid file type:', file.name, file.type);
-                alert('Please select a CSV file. File type detected: ' + (file.type || 'unknown'));
+                alert('This application requires CSV files only.\n\nYou uploaded: ' + file.name + '\nFile type: ' + (file.type || 'unknown') + '\n\nPlease:\n• Export CSV from MITRE EMB3D website, or\n• Convert Excel to CSV format, or\n• Use the questionnaire option below');
             }
         }
     });
