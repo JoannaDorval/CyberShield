@@ -38,6 +38,9 @@ class TaraDesktopApp:
 
         # Configure window to handle scrolling
         self.root.minsize(800, 600)
+        
+        # Enable focus for mouse wheel events
+        self.root.focus_set()
 
         # Set up logging
         self.setup_logging()
@@ -123,6 +126,16 @@ class TaraDesktopApp:
         # Create window in canvas
         self.canvas_window = self.main_canvas.create_window(
             (0, 0), window=self.scrollable_frame, anchor="nw")
+        
+        # Add global mouse wheel support for main canvas
+        def bind_main_mousewheel(widget):
+            widget.bind("<MouseWheel>", self._on_mousewheel)
+            widget.bind("<Button-4>", self._on_mousewheel_linux)
+            widget.bind("<Button-5>", self._on_mousewheel_linux)
+        
+        bind_main_mousewheel(self.main_canvas)
+        bind_main_mousewheel(self.scrollable_frame)
+        bind_main_mousewheel(self.root)
 
         # Configure canvas scrolling
         self.main_canvas.configure(yscrollcommand=self.scrollbar.set)
@@ -380,9 +393,13 @@ class TaraDesktopApp:
             canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
             canvas.configure(yscrollcommand=scrollbar.set)
 
-            # Add mouse wheel scrolling support
+            # Add mouse wheel scrolling support - enhanced approach
             def _on_mousewheel_tab(event):
-                canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+                try:
+                    canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+                except:
+                    # Fallback for different systems
+                    canvas.yview_scroll(-1 if event.delta > 0 else 1, "units")
             
             def _on_mousewheel_tab_linux(event):
                 if event.num == 4:
@@ -390,13 +407,23 @@ class TaraDesktopApp:
                 elif event.num == 5:
                     canvas.yview_scroll(1, "units")
             
-            # Bind mouse wheel events to canvas and scrollable frame
-            canvas.bind("<MouseWheel>", _on_mousewheel_tab)  # Windows/macOS
-            canvas.bind("<Button-4>", _on_mousewheel_tab_linux)  # Linux
-            canvas.bind("<Button-5>", _on_mousewheel_tab_linux)  # Linux
-            scrollable_frame.bind("<MouseWheel>", _on_mousewheel_tab)  # Windows/macOS
-            scrollable_frame.bind("<Button-4>", _on_mousewheel_tab_linux)  # Linux
-            scrollable_frame.bind("<Button-5>", _on_mousewheel_tab_linux)  # Linux
+            # Bind mouse wheel events more comprehensively
+            def bind_mousewheel(widget):
+                widget.bind("<MouseWheel>", _on_mousewheel_tab)  # Windows/macOS
+                widget.bind("<Button-4>", _on_mousewheel_tab_linux)  # Linux
+                widget.bind("<Button-5>", _on_mousewheel_tab_linux)  # Linux
+            
+            # Bind to canvas, scrollable frame, and tab frame
+            bind_mousewheel(canvas)
+            bind_mousewheel(scrollable_frame)
+            bind_mousewheel(tab_frame)
+            
+            # Also bind to the notebook for broader mouse wheel coverage
+            bind_mousewheel(self.embed_notebook)
+            
+            # Store canvas reference for later dynamic binding
+            self._tab_canvases = getattr(self, '_tab_canvases', [])
+            self._tab_canvases.append((canvas, _on_mousewheel_tab, _on_mousewheel_tab_linux))
 
             canvas.grid(row=0, column=0, sticky="nsew")
             scrollbar.grid(row=0, column=1, sticky="ns")
@@ -423,9 +450,9 @@ class TaraDesktopApp:
                 prop_frame.grid(row=row, column=0, sticky="ew", pady=1)
                 prop_frame.columnconfigure(1, weight=1)
                 
-                # Add indentation
+                # Add indentation (increased spacing for better visual hierarchy)
                 if indent_level > 0:
-                    indent_label = ttk.Label(prop_frame, text="  " * indent_level)
+                    indent_label = ttk.Label(prop_frame, text="    " * indent_level)  # 4 spaces per level
                     indent_label.grid(row=0, column=0, sticky="w")
                 
                 # Create checkbox
