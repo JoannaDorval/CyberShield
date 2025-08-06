@@ -845,7 +845,7 @@ class EnhancedTaraExcelGenerator:
 
         # Apply outer borders only to rows 25 for columns E (no internal lines)
         # Top border for row 5
-        ws['E5'].boarder = Border(top=Side(style='thin', color='000000'))
+        ws['E5'].border = Border(top=Side(style='thin', color='000000'))
       
         # Bottom border for row 25
         ws['E25'].border = Border(bottom=Side(style='thin', color='000000'))
