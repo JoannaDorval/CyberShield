@@ -80,8 +80,9 @@ def upload_files():
             file = request.files['embed3d_csv']
             if file.filename != '' and allowed_file(file.filename, 'embed3d_csv'):
                 files['embed3d_csv'] = file
+                app.logger.info(f"CSV file uploaded: {file.filename}")
             elif file.filename != '':
-                flash('Invalid file type for EMB3D CSV heatmap', 'error')
+                flash('Please upload a valid CSV file from MITRE EMB3D website', 'error')
                 return redirect(url_for('upload_page'))
         
         # Create analysis record for EMB3D

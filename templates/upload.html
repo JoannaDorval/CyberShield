@@ -124,8 +124,8 @@
                         <input type="hidden" name="selected_input_type" id="selected_input_type" value="csv_heatmap">
                         <input type="hidden" name="embed_properties" id="embed_properties" value="">
                         
-                        <div class="upload-zone" id="csvUploadZone">
-                            <input type="file" name="embed3d_csv" id="embed3d_csv" class="file-input" accept=".csv" required>
+                        <div class="upload-zone" id="csvUploadZone" style="cursor: pointer; position: relative;">
+                            <input type="file" name="embed3d_csv" id="embed3d_csv" class="file-input" accept=".csv" style="position: absolute; width: 100%; height: 100%; opacity: 0; cursor: pointer;">
                             <div class="upload-content">
                                 <i data-feather="upload-cloud" class="mb-3 text-muted" style="width: 48px; height: 48px;"></i>
                                 <h6 class="mb-2">Drop CSV file here or click to browse</h6>
@@ -452,20 +452,62 @@ document.addEventListener('DOMContentLoaded', function() {
         form.submit();
     });
 
-    // File upload handling
+    // File upload handling with drag-and-drop
     const fileInput = document.getElementById('embed3d_csv');
     const uploadZone = document.getElementById('csvUploadZone');
     const fileInfo = uploadZone.querySelector('.file-info');
     const filename = fileInfo.querySelector('.filename');
 
+    // File input change handler
     fileInput.addEventListener('change', function() {
         if (this.files.length > 0) {
             const file = this.files[0];
-            filename.textContent = file.name;
-            fileInfo.style.display = 'block';
-            uploadZone.classList.add('file-selected');
+            handleFileSelection(file);
         }
     });
+
+    // Drag and drop handlers
+    uploadZone.addEventListener('click', function() {
+        fileInput.click();
+    });
+
+    uploadZone.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        uploadZone.classList.add('dragover');
+    });
+
+    uploadZone.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        uploadZone.classList.remove('dragover');
+    });
+
+    uploadZone.addEventListener('drop', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        uploadZone.classList.remove('dragover');
+        
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            const file = files[0];
+            if (file.name.toLowerCase().endsWith('.csv')) {
+                fileInput.files = files;
+                handleFileSelection(file);
+            } else {
+                alert('Please select a CSV file');
+            }
+        }
+    });
+
+    function handleFileSelection(file) {
+        filename.textContent = file.name;
+        fileInfo.style.display = 'block';
+        uploadZone.classList.add('file-selected');
+        
+        // Remove required attribute from CSV input since file is selected
+        fileInput.removeAttribute('required');
+    }
 
     // Progress bar simulation
     const form = document.getElementById('uploadForm');
