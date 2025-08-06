@@ -115,8 +115,11 @@ def upload_files():
                 
                 # Extract device properties and generate assessment
                 embed_integrator = MitreEmbedIntegrator()
-                selected_properties = csv_data.get('selected_properties', {})
-                embed_assessment = embed_integrator.assess_device_properties(selected_properties)
+                device_properties = csv_data.get('device_properties', {})
+                embed_assessment = embed_integrator.assess_device_properties(device_properties)
+                
+                app.logger.info(f"CSV processed: {len(device_properties)} property categories found")
+                app.logger.info(f"Device properties: {device_properties}")
                 
                 # Generate threat and asset data
                 threat_data['threats'] = embed_assessment.get('threat_vectors', [])
@@ -129,6 +132,9 @@ def upload_files():
             # Always use MITRE EMBED for EMB3D-focused analysis
             if embed_assessment:
                 recommendations.extend(embed_assessment.get('recommended_controls', []))
+            elif 'embed3d_csv' in saved_files:
+                # If CSV was uploaded but assessment failed, log it
+                app.logger.error("CSV file was uploaded but embed_assessment is None")
             
             # Optional MITRE ATT&CK mapping for additional context
             if threat_data.get('threats'):

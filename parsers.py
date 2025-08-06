@@ -57,32 +57,43 @@ class Embed3dCsvParser:
         
         normalized['selected_properties'] = selected_properties
         
-        # Extract assessment data if present
-        if 'assessment' in data:
-            normalized['assessment_data'] = data['assessment']
-        elif 'analysis' in data:
-            normalized['assessment_data'] = data['analysis']
+        # For CSV heatmaps, convert to simplified property structure for MitreEmbedIntegrator
+        normalized['device_properties'] = self._convert_to_device_properties(selected_properties)
         
-        # Extract threat information
-        if 'threats' in data:
-            normalized['threat_vectors'] = self._extract_threats(data['threats'])
-        elif 'threat_vectors' in data:
-            normalized['threat_vectors'] = self._extract_threats(data['threat_vectors'])
-        
-        # Extract controls/mitigations
-        if 'controls' in data:
-            normalized['recommended_controls'] = self._extract_controls(data['controls'])
-        elif 'mitigations' in data:
-            normalized['recommended_controls'] = self._extract_controls(data['mitigations'])
-        elif 'recommended_controls' in data:
-            normalized['recommended_controls'] = self._extract_controls(data['recommended_controls'])
-        
-        # Extract metadata
-        if 'metadata' in data:
-            normalized['metadata'].update(data['metadata'])
+        # Add basic assessment data from CSV
+        normalized['assessment_data'] = {
+            'total_properties': len(rows),
+            'selected_properties_count': sum(len(props) for props in selected_properties.values()),
+            'categories': list(selected_properties.keys())
+        }
         
         self.logger.info(f"Parsed EMB3D CSV with {len(normalized['selected_properties'])} property categories")
         return normalized
+    
+    def _convert_to_device_properties(self, selected_properties: Dict[str, Any]) -> Dict[str, List[str]]:
+        """Convert CSV property structure to device properties format expected by MitreEmbedIntegrator"""
+        device_properties = {
+            'hardware': [],
+            'system_software': [],
+            'application_software': [],
+            'networking': []
+        }
+        
+        # Map CSV categories to device property categories
+        category_mapping = {
+            'Hardware Platform': 'hardware',
+            'Software Platform': 'system_software', 
+            'Data': 'system_software',
+            'Communication': 'networking',
+            'Lifecycle': 'hardware'
+        }
+        
+        for csv_category, properties in selected_properties.items():
+            target_category = category_mapping.get(csv_category, 'hardware')
+            for prop_id, prop_name in properties.items():
+                device_properties[target_category].append(prop_id)
+        
+        return device_properties
     
     def _extract_device_properties(self, properties_data: Dict[str, Any]) -> Dict[str, List[str]]:
         """Extract device properties organized by category"""
