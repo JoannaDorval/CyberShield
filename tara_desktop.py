@@ -380,6 +380,24 @@ class TaraDesktopApp:
             canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
             canvas.configure(yscrollcommand=scrollbar.set)
 
+            # Add mouse wheel scrolling support
+            def _on_mousewheel_tab(event):
+                canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+            
+            def _on_mousewheel_tab_linux(event):
+                if event.num == 4:
+                    canvas.yview_scroll(-1, "units")
+                elif event.num == 5:
+                    canvas.yview_scroll(1, "units")
+            
+            # Bind mouse wheel events to canvas and scrollable frame
+            canvas.bind("<MouseWheel>", _on_mousewheel_tab)  # Windows/macOS
+            canvas.bind("<Button-4>", _on_mousewheel_tab_linux)  # Linux
+            canvas.bind("<Button-5>", _on_mousewheel_tab_linux)  # Linux
+            scrollable_frame.bind("<MouseWheel>", _on_mousewheel_tab)  # Windows/macOS
+            scrollable_frame.bind("<Button-4>", _on_mousewheel_tab_linux)  # Linux
+            scrollable_frame.bind("<Button-5>", _on_mousewheel_tab_linux)  # Linux
+
             canvas.grid(row=0, column=0, sticky="nsew")
             scrollbar.grid(row=0, column=1, sticky="ns")
 
@@ -394,7 +412,7 @@ class TaraDesktopApp:
             row = self._create_hierarchical_checkboxes(scrollable_frame, properties, category_key, 0, 0)
 
     def _create_hierarchical_checkboxes(self, parent_frame, properties, category_key, row, indent_level):
-        """Create hierarchical checkboxes with parent-child relationships"""
+        """Create hierarchical checkboxes with parent-child relationships and responsive visibility"""
         for pid, prop_data in properties.items():
             if isinstance(prop_data, dict) and "label" in prop_data:
                 # Create checkbox for this property
@@ -420,23 +438,33 @@ class TaraDesktopApp:
                 
                 # Set up parent-child relationship tracking
                 has_children = "children" in prop_data
+                children_frames = []
+                
                 if has_children:
+                    # Create children container frame (initially hidden)
+                    children_container = ttk.Frame(parent_frame)
+                    children_container.grid(row=row + 1, column=0, sticky="ew", pady=1)
+                    children_container.grid_remove()  # Hide initially
+                    
+                    # Create children checkboxes in the container
+                    child_row = self._create_hierarchical_checkboxes(
+                        children_container, prop_data["children"], category_key, 0, indent_level + 1
+                    )
+                    
+                    # Store parent-child relationship with container reference
                     self.parent_child_map[category_key][pid] = {
                         'var': var,
                         'children': list(prop_data["children"].keys()),
-                        'checkbox': checkbox
+                        'checkbox': checkbox,
+                        'children_container': children_container
                     }
                     
                     # Add change handler for parent checkbox
                     var.trace('w', lambda *args, p=pid, c=category_key: self._handle_parent_change(p, c))
+                    
+                    row += 1  # Account for the children container
                 
                 row += 1
-                
-                # Add children if they exist
-                if has_children:
-                    row = self._create_hierarchical_checkboxes(
-                        parent_frame, prop_data["children"], category_key, row, indent_level + 1
-                    )
                     
         return row
 
@@ -445,9 +473,14 @@ class TaraDesktopApp:
         if parent_pid in self.parent_child_map[category_key]:
             parent_var = self.parent_child_map[category_key][parent_pid]['var']
             children_pids = self.parent_child_map[category_key][parent_pid]['children']
+            children_container = self.parent_child_map[category_key][parent_pid]['children_container']
             
-            if not parent_var.get():
-                # Parent unchecked - uncheck all children and nested children
+            if parent_var.get():
+                # Parent checked - show children
+                children_container.grid()
+            else:
+                # Parent unchecked - hide children and uncheck all children and nested children
+                children_container.grid_remove()
                 self._uncheck_children_recursive(children_pids, category_key)
     
     def _uncheck_children_recursive(self, children_pids, category_key):
@@ -456,10 +489,19 @@ class TaraDesktopApp:
             if child_pid in self.embed_checkboxes[category_key]:
                 self.embed_checkboxes[category_key][child_pid].set(False)
                 
-                # Check if this child has its own children
+                # Check if this child has its own children and hide them too
                 if child_pid in self.parent_child_map[category_key]:
                     nested_children = self.parent_child_map[category_key][child_pid]['children']
+                    nested_container = self.parent_child_map[category_key][child_pid]['children_container']
+                    nested_container.grid_remove()  # Hide nested children
                     self._uncheck_children_recursive(nested_children, category_key)
+
+    def _trigger_parent_visibility(self):
+        """Trigger visibility updates for all checked parents to show their children"""
+        for category_key in self.parent_child_map:
+            for parent_pid in self.parent_child_map[category_key]:
+                if self.embed_checkboxes[category_key][parent_pid].get():
+                    self._handle_parent_change(parent_pid, category_key)
 
     def on_workflow_change(self):
         """Handle workflow mode change for two-path toggle"""
@@ -497,6 +539,9 @@ class TaraDesktopApp:
                 for prop_id in properties:
                     if prop_id in self.embed_checkboxes[category]:
                         self.embed_checkboxes[category][prop_id].set(True)
+        
+        # Trigger parent-child visibility for demo data
+        self._trigger_parent_visibility()
         
         self.log_message("Demo questionnaire responses loaded with hierarchical PIDs (matches web app demo)")
         messagebox.showinfo("Demo Data", "Loaded sample IoT device configuration with hierarchical MITRE EMB3D properties.\n\nThis demonstrates parent-child relationships and matches the Flask web app demo.")
