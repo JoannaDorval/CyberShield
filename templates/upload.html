@@ -125,7 +125,7 @@
                         <input type="hidden" name="embed_properties" id="embed_properties" value="">
                         
                         <div class="upload-zone" id="csvUploadZone" style="cursor: pointer; position: relative;">
-                            <input type="file" name="embed3d_csv" id="embed3d_csv" class="file-input" accept=".csv" style="position: absolute; width: 100%; height: 100%; opacity: 0; cursor: pointer;">
+                            <input type="file" name="embed3d_csv" id="embed3d_csv" class="file-input" accept=".csv" style="position: absolute; width: 100%; height: 100%; opacity: 0; cursor: pointer; z-index: 1;">
                             <div class="upload-content">
                                 <i data-feather="upload-cloud" class="mb-3 text-muted" style="width: 48px; height: 48px;"></i>
                                 <h6 class="mb-2">Drop CSV file here or click to browse</h6>
@@ -467,8 +467,11 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Drag and drop handlers
-    uploadZone.addEventListener('click', function() {
-        fileInput.click();
+    uploadZone.addEventListener('click', function(e) {
+        // Only trigger file input if clicking on the zone, not the hidden input
+        if (e.target === uploadZone || uploadZone.contains(e.target)) {
+            fileInput.click();
+        }
     });
 
     uploadZone.addEventListener('dragover', function(e) {
@@ -492,7 +495,10 @@ document.addEventListener('DOMContentLoaded', function() {
         if (files.length > 0) {
             const file = files[0];
             if (file.name.toLowerCase().endsWith('.csv')) {
-                fileInput.files = files;
+                // Use DataTransfer to properly set files
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                fileInput.files = dataTransfer.files;
                 handleFileSelection(file);
             } else {
                 alert('Please select a CSV file');
@@ -505,8 +511,14 @@ document.addEventListener('DOMContentLoaded', function() {
         fileInfo.style.display = 'block';
         uploadZone.classList.add('file-selected');
         
+        // Hide the upload prompt and show file info
+        uploadZone.querySelector('.upload-content h6').textContent = 'File ready for upload';
+        uploadZone.querySelector('.upload-content').style.opacity = '0.7';
+        
         // Remove required attribute from CSV input since file is selected
         fileInput.removeAttribute('required');
+        
+        console.log('File selected:', file.name, 'Size:', file.size);
     }
 
     // Progress bar simulation
